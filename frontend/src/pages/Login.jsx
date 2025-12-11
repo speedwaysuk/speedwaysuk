@@ -59,7 +59,7 @@ const Login = () => {
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
                 {/* Header */}
                 <div className="pt-8 text-center flex flex-col items-center justify-center gap-3">
-                    <img src={darkLogo} alt="logo" className='h-10' />
+                    <img src={darkLogo} alt="logo" className='h-12' />
                     <p className="text-black text-lg">Let's sign you in</p>
                 </div>
 
@@ -132,7 +132,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Signing in...' : 'Sign In'}
                         </button>
@@ -144,7 +144,7 @@ const Login = () => {
                             <div className="w-full border-t border-gray-300" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-secondary">New to PlaneVault?</span>
+                            <span className="px-2 bg-white text-secondary">New to Speed Ways UK?</span>
                         </div>
                     </div>
 
@@ -162,7 +162,7 @@ const Login = () => {
                 {/* Footer */}
                 <div className="bg-white px-4 pb-4 text-center">
                     <p className="text-xs text-secondary">
-                        © {new Date().getFullYear()} PlaneVault. All rights reserved.
+                        © {new Date().getFullYear()} Speed Ways UK. All rights reserved.
                     </p>
                 </div>
             </div>

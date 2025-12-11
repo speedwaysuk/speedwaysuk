@@ -36,7 +36,7 @@ const FAQs = ({ faqs }) => {
                             </p>
                         </div>
                     ))}
-                    <Link to="/contact" className="flex items-center justify-self-start gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer mt-5"><MessageCircleQuestion size={20} /> Contact Us</Link>
+                    <Link to="/contact" className="flex items-center justify-self-start gap-2 bg-[#edcd1f] text-black px-5 py-2 rounded-md cursor-pointer mt-5"><MessageCircleQuestion size={20} /> Contact Us</Link>
                 </div>
             </div>
         </>

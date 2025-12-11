@@ -199,19 +199,34 @@ function AuctionCard({ auction }) {
                 {/* Auction Info Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     {/* Current Bid */}
-                    <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="text-xs text-gray-600 mb-1">{auction.status === 'sold' ? 'Final Bid' : 'Current Bid'}</div>
+                    {/* <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <div className="text-xs text-gray-600 mb-1">{auction.status === 'sold' ? 'Final Bid' : auction.bidCount > 0 ? 'Current Bid' : 'Starting Bid'}</div>
                         <div className="font-bold text-lg text-green-600">
                             ${(auction.currentPrice || auction.startPrice).toLocaleString()}
+                        </div>
+                    </div> */}
+
+                    <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <div className="text-xs text-gray-600 mb-1">{auction.status === 'sold' ? 'Final Offer' : 'Starting Offer'}</div>
+                        <div className="font-bold text-lg text-green-600">
+                            £{(auction.currentPrice || auction.startPrice).toLocaleString()}
                         </div>
                     </div>
 
                     {/* Bid Count */}
-                    <div className="text-center p-2 bg-gray-50 rounded-lg">
+                    {/* <div className="text-center p-2 bg-gray-50 rounded-lg">
                         <div className="text-xs text-gray-600 mb-1">Bids</div>
                         <div className="font-bold text-lg text-primary flex items-center justify-center gap-1">
                             <Users size={16} />
                             {auction.bidCount || 0}
+                        </div>
+                    </div> */}
+
+                    <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <div className="text-xs text-gray-600 mb-1">Offers</div>
+                        <div className="font-bold text-lg text-primary flex items-center justify-center gap-1">
+                            <Users size={16} />
+                            {auction?.offers?.filter(o => o.status === 'pending').length || 0}
                         </div>
                     </div>
                 </div>
@@ -231,10 +246,24 @@ function AuctionCard({ auction }) {
                 )} */}
 
                 {/* Bid Increment */}
-                <div className="text-xs text-gray-500 text-center flex items-center justify-around">
+                {/* <div className="text-xs text-gray-500 text-center flex items-center justify-around">
                     <div>
                         Bid increment: ${auction.bidIncrement?.toLocaleString()}
                     </div>
+                    {auction.watchlistCount > 0 && (
+                        <div className="text-xs text-gray-500 text-center">
+                            {auction.watchlistCount} user{auction.watchlistCount !== 1 ? 's' : ''} watching
+                        </div>)}
+                </div> */}
+
+                <div className="text-xs text-gray-500 text-center flex items-center justify-around">
+                    {
+                        auction.auctionType === 'buy_now' && (
+                            <div>
+                                Buy Now: £{auction?.buyNowPrice?.toLocaleString()}
+                            </div>
+                        )
+                    }
                     {auction.watchlistCount > 0 && (
                         <div className="text-xs text-gray-500 text-center">
                             {auction.watchlistCount} user{auction.watchlistCount !== 1 ? 's' : ''} watching
@@ -251,12 +280,12 @@ function AuctionCard({ auction }) {
                         navigate(`/auction/${auction._id}`);
                     }}
                     className={`flex-1 py-3 px-4 cursor-pointer text-white rounded-lg flex gap-2 items-center justify-center transition-all ${isAuctionActive
-                        ? 'bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg'
-                        : 'bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg'
+                        ? 'bg-[#edcd1f] hover:bg-[#edcd1f]/90 shadow-md hover:shadow-lg'
+                        : 'bg-[#edcd1f] hover:bg-[#edcd1f]/90 shadow-md hover:shadow-lg'
                         }`}
                 >
-                    <Gavel size={18} />
-                    <span className="font-medium">
+                    <Gavel size={18} className="text-black" />
+                    <span className="font-medium text-black">
                         {!isAuctionActive ? 'View Auction' : 'Place Bid'}
                     </span>
                 </button>

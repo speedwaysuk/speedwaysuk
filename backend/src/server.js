@@ -14,6 +14,9 @@ import AdminRouter from "./routes/admin.route.js";
 import commissionRouter from "./routes/commission.routes.js";
 import bidPaymentRouter from "./routes/bidPayment.route.js";
 import contactQueryRouter from "./routes/contactQuery.route.js";
+import offerRouter from "./routes/offer.route.js";
+import buyNowRouter from "./routes/buyNow.route.js";
+import categoryRouter from "./routes/category.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +64,9 @@ app.use('/api/v1/admin', AdminRouter);
 app.use('/api/v1/admin/commissions', commissionRouter);
 app.use('/api/v1/bid-payments', bidPaymentRouter);
 app.use('/api/v1/contact', contactQueryRouter);
+app.use('/api/v1/offers', offerRouter);
+app.use('/api/v1/buy-now', buyNowRouter);
+app.use('/api/v1/admin/categories', categoryRouter);
 
 // 404 handler - SIMPLIFIED VERSION
 app.use((req, res, next) => {

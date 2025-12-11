@@ -116,7 +116,7 @@ const Commissions = () => {
                                                 <div>
                                                     <p className="text-sm text-gray-500">{category}</p>
                                                     <h3 className="text-2xl font-bold mt-1">
-                                                        $ {commissionAmount}
+                                                        £ {commissionAmount}
                                                     </h3>
                                                     <p className="text-xs text-gray-400 mt-1">Current commission rate</p>
                                                 </div>
@@ -135,7 +135,7 @@ const Commissions = () => {
                                                     onChange={(e) => handleCommissionChange(category, e.target.value)}
                                                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-right"
                                                 />
-                                                <span className="text-gray-500">$</span>
+                                                <span className="text-gray-500">£</span>
                                             </div>
 
                                             {commissionData?.updatedAt && (

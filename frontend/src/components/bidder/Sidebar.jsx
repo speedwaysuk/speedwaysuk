@@ -9,7 +9,8 @@ import {
     X,
     Menu,
     Bookmark,
-    CreditCard
+    CreditCard,
+    Hand
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { logo } from "../../assets";
@@ -20,9 +21,10 @@ const navigation = [
     { name: 'Dashboard', path: '/bidder/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Active Auctions', path: '/bidder/auctions/active', icon: <Gavel size={20} /> },
     { name: 'Watchlist', path: '/bidder/watchlist', icon: <Bookmark size={20} /> },
-    { name: 'My Bids', path: '/bidder/bids', icon: <TrendingUp size={20} /> },
+    { name: 'My Offers', path: '/bidder/offers', icon: <Hand size={20} /> },
+    // { name: 'My Bids', path: '/bidder/bids', icon: <TrendingUp size={20} /> },
     { name: 'Won Auctions', path: '/bidder/auctions/won', icon: <Award size={20} /> },
-    { name: 'Billing', path: '/bidder/billing', icon: <CreditCard size={20} /> },
+    // { name: 'Billing', path: '/bidder/billing', icon: <CreditCard size={20} /> },
     // { name: 'Notifications', path: '/bidder/notifications', icon: <Bell size={20} /> },
     { name: 'Profile', path: '/bidder/profile', icon: <User size={20} /> },
 ];
@@ -68,7 +70,7 @@ function Sidebar() {
             {/* Mobile menu button */}
             <button
                 onClick={toggleSidebar}
-                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-black text-white`}
+                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-[#1e2d3b] text-white`}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -76,21 +78,21 @@ function Sidebar() {
             {/* Overlay for mobile */}
             {isOpen && isMobile && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    className="fixed inset-0 bg-[#1e2d3b] bg-opacity-50 z-40"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white h-screen md:h-auto md:min-h-screen overflow-y-auto p-4 flex flex-col z-50
+                fixed md:relative w-64 bg-gradient-to-b from-[#1e2d3b] to-[#1e2d3b] text-white h-screen md:h-auto md:min-h-screen overflow-y-auto p-4 flex flex-col z-50
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 {/* Logo/Brand */}
                 <div className="px-4 mb-8 flex items-center justify-between pb-2">
                     <Link to={'/'}>
-                        <img src={logo} className="h-10" alt="logo" />
+                        <img src={logo} className="h-12 md:h-14" alt="logo" />
                     </Link>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -110,8 +112,8 @@ function Sidebar() {
                                     onClick={() => isMobile && setIsOpen(false)}
                                     className={({ isActive }) =>
                                         `flex items-center p-3 rounded-lg transition-all duration-200 ${isActive
-                                            ? 'bg-white text-black shadow-lg'
-                                            : 'text-white hover:bg-white hover:text-black'
+                                            ? 'bg-[#edcd1f] text-black shadow-lg'
+                                            : 'text-white hover:bg-[#edcd1f] hover:text-black'
                                         }`
                                     }
                                 >

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AdminContainer, AdminHeader, AdminSidebar, LoadingSpinner } from "../../components";
-import { Search, Filter, Gavel, DollarSign, Clock, Eye, Edit, Shield, TrendingUp, User, Award, MoreVertical, Trash2, AlertTriangle, CheckCircle, Star, Crown } from "lucide-react";
+import { AdminContainer, AdminHeader, AdminSidebar, LoadingSpinner, PaymentStatusDropdown } from "../../components";
+import { Search, Filter, Gavel, DollarSign, Clock, Eye, Edit, Shield, TrendingUp, User, Award, MoreVertical, Trash2, AlertTriangle, CheckCircle, Star, Crown, Plus, FileText, PoundSterling } from "lucide-react";
 import { about } from "../../assets";
 import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosInstance";
@@ -83,14 +83,22 @@ function AllAuctions() {
 
     const approveAuction = async (auctionId) => {
         try {
-            const { data } = await axiosInstance.patch(`/api/v1/admin/auctions/${auctionId}/approve`);
-            if (data.success) {
-                toast.success(data.message);
+            // Use toast.promise to show loading state
+            const response = await toast.promise(
+                axiosInstance.patch(`/api/v1/admin/auctions/${auctionId}/approve`),
+                {
+                    loading: 'Approving auction...',
+                    success: 'Auction approved successfully!',
+                    error: 'Failed to approve auction'
+                }
+            );
+
+            if (response.data.success) {
                 fetchAuctions(); // Refresh the list
             }
         } catch (err) {
             console.error('Approve auction error:', err);
-            toast.error(err.response?.data?.message || "Failed to approve auction");
+            // Error is already shown by toast.promise
         }
     };
 
@@ -169,6 +177,48 @@ function AllAuctions() {
         }
     };
 
+    const handleUpdatePaymentStatus = async (auctionId, formData) => {
+        try {
+            // Create FormData for file upload
+            const formDataToSend = new FormData();
+            formDataToSend.append('paymentStatus', formData.paymentStatus);
+
+            if (formData.paymentMethod) {
+                formDataToSend.append('paymentMethod', formData.paymentMethod);
+            }
+
+            if (formData.transactionId) {
+                formDataToSend.append('transactionId', formData.transactionId);
+            }
+
+            if (formData.notes) {
+                formDataToSend.append('notes', formData.notes);
+            }
+
+            if (formData.invoiceFile) {
+                formDataToSend.append('invoice', formData.invoiceFile);
+            }
+
+            const { data } = await axiosInstance.put(
+                `/api/v1/admin/${auctionId}/payment-status`,
+                formDataToSend,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+
+            if (data.success) {
+                toast.success('Payment status updated successfully');
+                // Refresh your auctions data
+                fetchAuctions();
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update payment status');
+        }
+    };
+
     useEffect(() => {
         fetchAuctions();
     }, []);
@@ -192,7 +242,7 @@ function AllAuctions() {
     };
 
     const handleEditAuction = (auction) => {
-        if(auction.status === 'sold'){
+        if (auction.status === 'sold') {
             return toast.error(`Sold auction can't be edited`)
         }
         navigate(`/admin/auctions/edit/${auction._id}`);
@@ -220,18 +270,22 @@ function AllAuctions() {
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                 Reserve
             </span>
-        ) : (
+        ) : auctionType === 'reserve' ? (
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 Standard
+            </span>
+        ) : (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                Buy Now
             </span>
         );
     };
 
     const formatCurrency = (amount) => {
-        if (!amount) return '$0';
+        if (!amount) return '£0';
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'GBP',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(amount);
@@ -288,10 +342,17 @@ function AllAuctions() {
                                 <h2 className="text-3xl md:text-4xl font-bold my-5">Auction Management</h2>
                                 <p className="text-gray-600">Manage and monitor all platform auctions</p>
                             </div>
-                            <div className="mt-4 md:mt-0">
-                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <div className="mt-4 md:mt-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                                     {pagination.totalAuctions} auctions found
-                                </span>
+                                </div>
+                                <Link
+                                    to="/admin/auctions/create"
+                                    className="bg-[#edcd1f] text-black hover:bg-[#edcd1f]/90 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+                                >
+                                    <Plus size={18} />
+                                    Create Auction
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -372,10 +433,11 @@ function AllAuctions() {
                                     <thead className="bg-gray-50">
                                         <tr>
                                             <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auction</th>
-                                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
-                                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Bid</th>
+                                            {/* <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th> */}
+                                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Bid/Offer</th>
                                             {/* <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bids/Watchers</th> */}
                                             <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                                             <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
@@ -412,7 +474,7 @@ function AllAuctions() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 px-6">
+                                                {/* <td className="py-4 px-6">
                                                     <div className="flex items-center gap-2">
                                                         <User size={14} className="text-gray-400" />
                                                         <div>
@@ -424,15 +486,77 @@ function AllAuctions() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </td>
+                                                </td> */}
+
                                                 <td className="py-4 px-6">
-                                                    <div className="text-lg font-bold text-green-600">
-                                                        {formatCurrency(auction.currentPrice)}
+                                                    <div className="text-lg text-green-600">
+                                                        {(() => {
+                                                            const startPrice = formatCurrency(auction.startPrice);
+
+                                                            if (auction.auctionType === 'buy_now') {
+                                                                if (auction.status === 'sold') {
+                                                                    return formatCurrency(auction.finalPrice);
+                                                                }
+
+                                                                if (auction.allowOffers) {
+                                                                    // If offers are allowed
+                                                                    if (auction.offers?.length > 0) {
+                                                                        const pendingOffers = auction.offers.filter(o => o.status === 'pending');
+                                                                        if (pendingOffers.length > 0) {
+                                                                            const highestOffer = Math.max(...pendingOffers.map(o => o.amount));
+                                                                            return formatCurrency(highestOffer);
+                                                                        } else {
+                                                                            // Has offers but none are pending
+                                                                            return 'No Offers';
+                                                                        }
+                                                                    } else {
+                                                                        // Allows offers but no offers made yet
+                                                                        return 'No Offers';
+                                                                    }
+                                                                }
+                                                                // Buy Now auction: show buy now price if exists, otherwise start price
+                                                                return '--';
+                                                            }
+
+                                                            if (auction.auctionType === 'standard' || auction.auctionType === 'reserve') {
+                                                                // Standard/Reserve auction
+                                                                if (auction.bids?.length > 0) {
+                                                                    return formatCurrency(auction.currentPrice);
+                                                                }
+
+                                                                // No bids, check for offers
+                                                                if (auction.allowOffers) {
+                                                                    // If offers are allowed
+                                                                    if (auction.offers?.length > 0) {
+                                                                        const pendingOffers = auction.offers.filter(o => o.status === 'pending');
+                                                                        if (pendingOffers.length > 0) {
+                                                                            const highestOffer = Math.max(...pendingOffers.map(o => o.amount));
+                                                                            return formatCurrency(highestOffer);
+                                                                        } else {
+                                                                            // Has offers but none are pending
+                                                                            return 'No Offers';
+                                                                        }
+                                                                    } else {
+                                                                        // Allows offers but no offers made yet
+                                                                        return 'No Offers';
+                                                                    }
+                                                                }
+
+                                                                // Standard/Reserve without offers allowed and no bids
+                                                                return 'No Bids';
+                                                            }
+
+                                                            // For any other auction type, show start price
+                                                            return startPrice;
+                                                        })()}
                                                     </div>
                                                     <div className="text-xs text-gray-500">
                                                         Start: {formatCurrency(auction.startPrice)}
                                                         {auction.reservePrice && (
                                                             <div>Reserve: {formatCurrency(auction.reservePrice)}</div>
+                                                        )}
+                                                        {auction.buyNowPrice && (
+                                                            <div>Buy Now: {formatCurrency(auction.buyNowPrice)}</div>
                                                         )}
                                                     </div>
                                                 </td>
@@ -463,6 +587,15 @@ function AllAuctions() {
                                                         )}
                                                     </div>
                                                 </td>
+
+                                                <td className="py-4 px-6">
+                                                    <PaymentStatusDropdown
+                                                        auction={auction}
+                                                        onStatusUpdate={handleUpdatePaymentStatus}
+                                                        disabled={auction.status !== 'sold' && auction.status !== 'sold_buy_now'}
+                                                    />
+                                                </td>
+
                                                 <td className="py-4 px-6">
                                                     <div className="flex items-center gap-1">
                                                         <button
@@ -497,6 +630,20 @@ function AllAuctions() {
 
                                                             {activeDropdown === auction._id && (
                                                                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10 py-1">
+
+                                                                    {auction?.invoice?.url && (
+                                                                        <Link
+                                                                            to={auction.invoice.url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-blue-600 hover:bg-green-50 transition-colors"
+                                                                            title="View Invoice"
+                                                                        >
+                                                                            <FileText size={16} />
+                                                                            <span>View Invoice</span>
+                                                                        </Link>
+                                                                    )}
+
                                                                     {/* Status Management */}
 
                                                                     {auction.status === "draft" && (
@@ -660,11 +807,11 @@ function AllAuctions() {
                                             <div className="flex items-center gap-2 mb-2">
                                                 <h4 className="text-xl font-bold text-gray-900">{selectedAuction.title}</h4>
                                                 {/* {selectedAuction.featured && (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs rounded-full">
-                                                        <Star size={12} />
-                                                        Featured
-                                                    </span>
-                                                )} */}
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs rounded-full">
+                                    <Star size={12} />
+                                    Featured
+                                </span>
+                            )} */}
                                             </div>
                                             <div className="flex flex-wrap gap-2 mb-2">
                                                 {getStatusBadge(selectedAuction.status, selectedAuction.endDate)}
@@ -672,6 +819,16 @@ function AllAuctions() {
                                                 <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                     {selectedAuction.category}
                                                 </span>
+                                                {selectedAuction.auctionType === 'buy_now' && selectedAuction.buyNowPrice && (
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        Buy Now Available
+                                                    </span>
+                                                )}
+                                                {selectedAuction.allowOffers && (
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                        Offers Allowed
+                                                    </span>
+                                                )}
                                                 {/* {getConditionBadge(selectedAuction.specifications)} */}
                                             </div>
                                             <div className="text-gray-600 prose">
@@ -683,47 +840,139 @@ function AllAuctions() {
                                     {/* Auction Information */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div className="space-y-4">
-                                            <h5 className="font-semibold text-gray-900">Auction Information</h5>
+                                            <h5 className="font-semibold text-gray-900">Pricing & Offers</h5>
                                             <div className="space-y-3">
+                                                {/* Current Bid/Price Display */}
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-500">Current Bid</span>
-                                                    <span className="font-bold text-green-600">{formatCurrency(selectedAuction.currentPrice)}</span>
+                                                    <span className="text-gray-500">
+                                                        {selectedAuction.auctionType === 'buy_now' && selectedAuction.buyNowPrice
+                                                            ? 'Buy Now Price'
+                                                            : selectedAuction.status === 'active'
+                                                                ? 'Current Price'
+                                                                : 'Winning Bid'}
+                                                    </span>
+                                                    <span className="font-bold text-green-600">
+                                                        {(() => {
+                                                            // Buy Now auction
+                                                            if (selectedAuction.auctionType === 'buy_now') {
+                                                                return selectedAuction.buyNowPrice
+                                                                    ? formatCurrency(selectedAuction.buyNowPrice)
+                                                                    : formatCurrency(selectedAuction.startPrice);
+                                                            }
+
+                                                            // Standard/Reserve with bids
+                                                            if (selectedAuction.bids?.length > 0) {
+                                                                return formatCurrency(selectedAuction.currentPrice);
+                                                            }
+
+                                                            // Standard/Reserve with offers
+                                                            if (selectedAuction.allowOffers && selectedAuction.offers?.length > 0) {
+                                                                const pendingOffers = selectedAuction.offers.filter(o => o.status === 'pending');
+                                                                return pendingOffers.length > 0
+                                                                    ? formatCurrency(Math.max(...pendingOffers.map(o => o.amount)))
+                                                                    : 'No Offers';
+                                                            }
+
+                                                            // No activity
+                                                            return 'No Bids';
+                                                        })()}
+                                                    </span>
                                                 </div>
+
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-500">Starting Bid</span>
+                                                    <span className="text-gray-500">Starting Price</span>
                                                     <span className="font-medium">{formatCurrency(selectedAuction.startPrice)}</span>
                                                 </div>
-                                                {selectedAuction.reservePrice && (
+
+                                                {/* Buy Now Price (for buy_now auctions) */}
+                                                {/* {selectedAuction.auctionType === 'buy_now' && selectedAuction.buyNowPrice && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Buy Now Price</span>
+                                                        <span className="font-bold text-blue-600">{formatCurrency(selectedAuction.buyNowPrice)}</span>
+                                                    </div>
+                                                )} */}
+
+                                                {/* Reserve Price (for reserve auctions) */}
+                                                {selectedAuction.auctionType === 'reserve' && selectedAuction.reservePrice && (
                                                     <div className="flex justify-between">
                                                         <span className="text-gray-500">Reserve Price</span>
                                                         <span className="font-medium">{formatCurrency(selectedAuction.reservePrice)}</span>
                                                     </div>
                                                 )}
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-500">Bid Increment</span>
-                                                    <span className="font-medium">{formatCurrency(selectedAuction.bidIncrement)}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-500">Total Bids</span>
-                                                    <span className="font-medium">{selectedAuction.bidCount}</span>
-                                                </div>
+
+                                                {/* Bid Increment (only for standard/reserve) */}
+                                                {(selectedAuction.auctionType === 'standard' || selectedAuction.auctionType === 'reserve') && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Bid Increment</span>
+                                                        <span className="font-medium">{formatCurrency(selectedAuction.bidIncrement)}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Bid Count (only for standard/reserve) */}
+                                                {(selectedAuction.auctionType === 'standard' || selectedAuction.auctionType === 'reserve') && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Total Bids</span>
+                                                        <span className="font-medium">{selectedAuction.bidCount}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Offer Count (if offers allowed) */}
+                                                {selectedAuction.allowOffers && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Total Offers</span>
+                                                        <span className="font-medium">{selectedAuction.offers?.length || 0}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Active Offers Count */}
+                                                {selectedAuction.allowOffers && selectedAuction.offers?.length > 0 && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Active Offers</span>
+                                                        <span className="font-medium">
+                                                            {selectedAuction.offers.filter(o => o.status === 'pending').length}
+                                                        </span>
+                                                    </div>
+                                                )}
+
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Watchers</span>
                                                     <span className="font-medium">{selectedAuction.watchlistCount}</span>
                                                 </div>
+
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Views</span>
                                                     <span className="font-medium">{selectedAuction.views}</span>
                                                 </div>
+
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Location</span>
                                                     <span className="font-medium">{selectedAuction.location}</span>
                                                 </div>
+
+                                                {
+                                                    selectedAuction.status === 'sold' && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Payment Status</span>
+                                                            <span className="font-medium capitalize">{selectedAuction?.paymentStatus}</span>
+                                                        </div>
+                                                    )
+                                                }
+
+                                                {
+                                                    selectedAuction.status === 'sold' && selectedAuction?.invoice && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Invoice</span>
+                                                            <span className="font-medium capitalize">
+                                                                <Link className="text-blue-600 underline" target="_blank" to={selectedAuction?.invoice?.url}>View</Link>
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                }
                                             </div>
                                         </div>
 
                                         <div className="space-y-4">
-                                            <h5 className="font-semibold text-gray-900">Timeline & Seller</h5>
+                                            <h5 className="font-semibold text-gray-900">Timeline & Participants</h5>
                                             <div className="space-y-3">
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Start Date</span>
@@ -739,6 +988,8 @@ function AllAuctions() {
                                                         <span className="font-medium text-amber-600">{formatTimeRemaining(selectedAuction.endDate)}</span>
                                                     </div>
                                                 )}
+
+                                                {/* Seller Info */}
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Seller</span>
                                                     <span className="font-medium">{selectedAuction.seller?.username}</span>
@@ -751,16 +1002,42 @@ function AllAuctions() {
                                                     <span className="text-gray-500">Seller Phone</span>
                                                     <span className="font-medium text-blue-600">{selectedAuction.seller?.phone}</span>
                                                 </div>
+
+                                                {/* Winner Info */}
                                                 {selectedAuction.winner && (
                                                     <div className="flex justify-between">
-                                                        <span className="text-gray-500">Winner</span>
+                                                        <span className="text-gray-500">
+                                                            {selectedAuction.status === 'sold_buy_now' ? 'Buyer' : 'Winner'}
+                                                        </span>
                                                         <span className="font-medium text-green-600">{selectedAuction.winner?.username}</span>
                                                     </div>
                                                 )}
+
+                                                {/* Final Price */}
                                                 {selectedAuction.finalPrice && (
                                                     <div className="flex justify-between">
                                                         <span className="text-gray-500">Final Price</span>
                                                         <span className="font-bold text-green-600">{formatCurrency(selectedAuction.finalPrice)}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* How it ended */}
+                                                {selectedAuction.status === 'sold_buy_now' && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Sale Type</span>
+                                                        <span className="font-medium text-blue-600">Buy Now Purchase</span>
+                                                    </div>
+                                                )}
+                                                {selectedAuction.status === 'sold' && selectedAuction.auctionType === 'reserve' && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Reserve Status</span>
+                                                        <span className="font-medium text-green-600">Reserve Met ✓</span>
+                                                    </div>
+                                                )}
+                                                {selectedAuction.status === 'reserve_not_met' && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-500">Reserve Status</span>
+                                                        <span className="font-medium text-red-600">Reserve Not Met</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -800,6 +1077,16 @@ function AllAuctions() {
                                         >
                                             View Auction Page
                                         </Link>
+                                        {/* Additional action for offers if applicable */}
+                                        {selectedAuction.allowOffers && selectedAuction.offers?.length > 0 && (
+                                            <Link
+                                                to={`/admin/offers`}
+                                                className="flex-1 bg-[#1e2d3b]/90 text-white py-2 px-4 rounded-lg hover:bg-[#1e2d3b] transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <PoundSterling size={18} />
+                                                View Offers ({selectedAuction.offers.filter(o => o.status === 'pending').length})
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </div>

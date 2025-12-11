@@ -17,10 +17,14 @@ import {
     MapPin,
     Gavel,
     Youtube,
-    Plane,
+    Car,
     Cog,
     Trophy,
-    Move // Add this icon
+    Move,
+    Fuel,
+    Gauge,
+    Calendar,
+    User
 } from "lucide-react";
 import { RTE, SellerContainer, SellerHeader, SellerSidebar } from '../../components';
 import toast from 'react-hot-toast';
@@ -95,22 +99,21 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
     );
 };
 
-// Logbook Gallery Component
-const LogbookGallery = ({ logbooks, moveLogbook, removeLogbook, onImageClick }) => {
+// Service History Gallery Component
+const ServiceHistoryGallery = ({ serviceRecords, moveServiceRecord, removeServiceRecord }) => {
     return (
         <div className="mt-4">
             <p className="text-sm text-secondary mb-3">
-                Drag and drop to reorder logbook images.
+                Drag and drop to reorder service history images.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {logbooks.map((logbook, index) => (
+                {serviceRecords.map((record, index) => (
                     <DraggablePhoto
-                        key={`logbook-${index}`}
-                        photo={logbook}
+                        key={`record-${index}`}
+                        photo={record}
                         index={index}
-                        movePhoto={moveLogbook}
-                        removePhoto={removeLogbook}
-                        onImageClick={onImageClick}
+                        movePhoto={moveServiceRecord}
+                        removePhoto={removeServiceRecord}
                     />
                 ))}
             </div>
@@ -151,43 +154,23 @@ const UploadProgressModal = ({ isOpen, fileCount }) => {
 };
 
 const categoryFields = {
-    'Aircraft': [
-        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
-        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
+    // Same fields for ALL categories
+    'ALL': [
+        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Porsche, Toyota, Tesla' },
+        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 911, Camry, Model S' },
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
-        { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
-        { name: 'totalTime', label: 'Total Time', type: 'number', required: true, min: 0 },
-        { name: 'engineTimeSMOH', label: 'Engine Time SMOH', type: 'number', required: false, min: 0 },
-        { name: 'lastAnnualDate', label: 'Last Annual Inspection Date', type: 'date', required: false },
-        { name: 'usefulLoad', label: 'Useful Load (lbs)', type: 'number', required: false, min: 0 },
-        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
-        { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
-        { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
-        { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
-        { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
-        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] },
-
-        // Conditional fields based on engine type
-        { name: 'propellerTime', label: 'Propeller Total Time', type: 'number', required: false, min: 0, condition: { engineType: 'Piston' } },
-        { name: 'propellerModel', label: 'Propeller Model', type: 'text', required: false, placeholder: 'e.g., McCauley 1A170', condition: { engineType: 'Piston' } },
-        { name: 'engineTotalCycles', label: 'Engine Total Cycles', type: 'number', required: false, min: 0, condition: { engineType: 'Jet' } },
-        { name: 'tbo', label: 'Time Between Overhaul (TBO)', type: 'number', required: false, min: 0, condition: { engineType: 'Turboprop' } },
-    ],
-    'Engines & Parts': [
-        { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
-        { name: 'partNumber', label: 'Part Number', type: 'text', required: true, placeholder: 'Manufacturer part number' },
-        { name: 'manufacturer', label: 'Manufacturer', type: 'text', required: true, placeholder: 'e.g., Lycoming, Garmin, Honeywell' },
-        { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed'] },
-        { name: 'hoursSinceNew', label: 'Hours Since New/Overhaul', type: 'number', required: false, min: 0 },
-        { name: 'serialNumber', label: 'Serial Number', type: 'text', required: false },
-    ],
-    'Memorabilia': [
-        { name: 'itemType', label: 'Item Type', type: 'select', required: true, options: ['Uniform', 'Document', 'Model', 'Photograph', 'Instrument', 'Other'] },
-        { name: 'era', label: 'Historical Era', type: 'select', required: true, options: ['WWI', 'WWII', 'Cold War', 'Modern', 'Vintage'] },
-        { name: 'authenticity', label: 'Authenticity', type: 'select', required: true, options: ['Certified', 'Documented', 'Unknown'] },
-        { name: 'year', label: 'Year', type: 'number', required: false, min: 1800, max: 2025 },
-        { name: 'dimensions', label: 'Dimensions', type: 'text', required: false, placeholder: 'e.g., 24x36 inches' },
-        { name: 'material', label: 'Material', type: 'text', required: false, placeholder: 'e.g., Brass, Wood, Fabric' }
+        { name: 'vin', label: 'VIN', type: 'text', required: false, placeholder: '17-character Vehicle Identification Number' },
+        { name: 'mileage', label: 'Mileage', type: 'number', required: false, min: 0, placeholder: 'e.g., 15000' },
+        { name: 'engine', label: 'Engine', type: 'text', required: false, placeholder: 'e.g., 3.8L Flat-6, 2.0L Turbo, Electric' },
+        { name: 'horsepower', label: 'Horsepower', type: 'number', required: false, min: 0, placeholder: 'e.g., 300' },
+        { name: 'transmission', label: 'Transmission', type: 'select', required: false, options: ['Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
+        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: false, options: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'] },
+        { name: 'color', label: 'Exterior Color', type: 'text', required: false, placeholder: 'e.g., Red, Blue, Black' },
+        { name: 'interiorColor', label: 'Interior Color', type: 'text', required: false, placeholder: 'e.g., Black Leather, Beige Cloth' },
+        { name: 'condition', label: 'Condition', type: 'select', required: false, options: ['Excellent', 'Good', 'Fair', 'Project', 'Modified'] },
+        { name: 'owners', label: 'Number of Previous Owners', type: 'number', required: false, min: 1 },
+        { name: 'accidentHistory', label: 'Accident History', type: 'select', required: false, options: ['Clean', 'Minor', 'Major', 'Salvage'] },
+        { name: 'seating', label: 'Seating Capacity', type: 'number', required: false, min: 2, max: 9 },
     ]
 };
 
@@ -197,7 +180,7 @@ const CreateAuction = () => {
     const [uploadedDocuments, setUploadedDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const [uploadedLogbooks, setUploadedLogbooks] = useState([]);
+    const [uploadedServiceRecords, setUploadedServiceRecords] = useState([]);
     const {
         register,
         handleSubmit,
@@ -211,10 +194,15 @@ const CreateAuction = () => {
         control,
         formState: { errors }
     } = useForm({
-        mode: 'onChange'
+        mode: 'onChange',
+        defaultValues: {
+            auctionType: 'buy_now' // Add this
+        }
     });
 
     const auctionType = watch('auctionType');
+    const startDate = watch('startDate');
+    const endDate = watch('endDate');
     const selectedCategory = watch('category');
 
     // Move photo function for drag and drop
@@ -225,60 +213,60 @@ const CreateAuction = () => {
         setUploadedPhotos(updatedPhotos);
     };
 
-    // Move logbook function for drag and drop
-    const moveLogbook = (fromIndex, toIndex) => {
-        const updatedLogbooks = [...uploadedLogbooks];
-        const [movedLogbook] = updatedLogbooks.splice(fromIndex, 1);
-        updatedLogbooks.splice(toIndex, 0, movedLogbook);
-        setUploadedLogbooks(updatedLogbooks);
+    // Move service record function for drag and drop
+    const moveServiceRecord = (fromIndex, toIndex) => {
+        const updatedRecords = [...uploadedServiceRecords];
+        const [movedRecord] = updatedRecords.splice(fromIndex, 1);
+        updatedRecords.splice(toIndex, 0, movedRecord);
+        setUploadedServiceRecords(updatedRecords);
     };
 
     // Get category-specific fields
     const getCategoryFields = () => {
-        return categoryFields[selectedCategory] || [];
+        return categoryFields['ALL'] || [];
     };
 
     const categories = [
-        'Aircraft',
-        'Engines & Parts',
-        'Memorabilia'
+        'Sports',
+        'Convertible',
+        'Electric',
+        'Hatchback',
+        'Sedan',
+        'SUV',
+        'Classic',
+        'Luxury',
+        'Muscle',
+        'Off-Road',
+        'Truck',
+        'Van',
     ];
 
     const categoryIcons = {
-        'Aircraft': Plane,
-        'Engines & Parts': Cog,
-        'Memorabilia': Trophy
+        'Sports': Trophy,
+        'Convertible': Car,
+        'Electric': Cog,
+        'Hatchback': Car,
+        'Sedan': Car,
+        'SUV': Car,
+        'Classic': Calendar
     };
 
-    // Render category-specific fields (keep your existing implementation)
+    // Render category-specific fields
     const renderCategoryFields = () => {
         const fields = getCategoryFields();
-
-        // Filter fields based on conditions (engine type for aircraft)
-        const filteredFields = fields.filter(field => {
-            if (!field.condition) return true;
-
-            // For aircraft fields with engine type conditions
-            if (field.condition.engineType) {
-                const engineTypeValue = watch('specifications.engineType');
-                return engineTypeValue === field.condition.engineType;
-            }
-
-            return true;
-        });
 
         return (
             <div className="mb-6">
                 <label className="text-sm font-medium text-secondary mb-4 flex items-center">
                     {(() => {
-                        const IconComponent = categoryIcons[selectedCategory] || FileText;
+                        const IconComponent = Car;
                         return <IconComponent size={20} className="mr-2" />;
                     })()}
-                    {selectedCategory} Specifications *
+                    Vehicle Specifications *
                 </label>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredFields.map((field) => (
+                    {fields.map((field) => (
                         <div key={field.name} className="space-y-2">
                             <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
                                 {field.label} {field.required && <span className="text-red-500">*</span>}
@@ -303,17 +291,8 @@ const CreateAuction = () => {
                                         required: field.required ? `${field.label} is required` : false
                                     })}
                                     id={field.name}
-                                    rows={3}
+                                    rows={1}
                                     placeholder={field.placeholder}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                />
-                            ) : field.type === 'date' ? (
-                                <input
-                                    {...register(`specifications.${field.name}`, {
-                                        required: field.required ? `${field.label} is required` : false
-                                    })}
-                                    id={field.name}
-                                    type="date"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                 />
                             ) : (
@@ -348,17 +327,15 @@ const CreateAuction = () => {
 
         if (step === 1) {
             // Trigger validation for all fields
-            const fieldsToValidate = ['title', 'category', 'description'];
+            const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
 
-            // Add category-specific fields to validation
-            if (selectedCategory) {
-                const categoryFields = getCategoryFields();
-                categoryFields.forEach(field => {
-                    if (field.required) {
-                        fieldsToValidate.push(`specifications.${field.name}`);
-                    }
-                });
-            }
+            // Add ALL specification fields to validation
+            const allSpecFields = getCategoryFields();
+            allSpecFields.forEach(field => {
+                if (field.required) {
+                    fieldsToValidate.push(`specifications.${field.name}`);
+                }
+            });
 
             const overallValidationPassed = await trigger(fieldsToValidate);
 
@@ -380,10 +357,21 @@ const CreateAuction = () => {
         }
 
         if (step === 2) {
-            // Check pricing fields
-            const fieldsToValidate = ['startPrice', 'bidIncrement', 'auctionType'];
-            if (watch('auctionType') === 'reserve') {
+            // Check pricing fields based on auction type
+            const fieldsToValidate = ['auctionType'];
+
+            if (auctionType === 'standard' || auctionType === 'reserve') {
+                fieldsToValidate.push('startPrice', 'bidIncrement');
+            }
+
+            if (auctionType === 'reserve') {
                 fieldsToValidate.push('reservePrice');
+            }
+
+            if (auctionType === 'buy_now') {
+                fieldsToValidate.push('buyNowPrice');
+                // For buy now auctions, startPrice is also required
+                fieldsToValidate.push('startPrice');
             }
 
             const overallValidationPassed = await trigger(fieldsToValidate);
@@ -417,13 +405,13 @@ const CreateAuction = () => {
         setUploadedDocuments([...uploadedDocuments, ...files]);
     };
 
-    const handleLogbookUpload = (e) => {
+    const handleServiceRecordUpload = (e) => {
         const files = Array.from(e.target.files);
-        setUploadedLogbooks([...uploadedLogbooks, ...files]);
+        setUploadedServiceRecords([...uploadedServiceRecords, ...files]);
     };
 
-    const removeLogbook = (index) => {
-        setUploadedLogbooks(uploadedLogbooks.filter((_, i) => i !== index));
+    const removeServiceRecord = (index) => {
+        setUploadedServiceRecords(uploadedServiceRecords.filter((_, i) => i !== index));
     };
 
     const removePhoto = (index) => {
@@ -458,14 +446,26 @@ const CreateAuction = () => {
             formData.append('description', auctionData.description);
             formData.append('location', auctionData.location || '');
             formData.append('videoLink', auctionData.video || '');
-            formData.append('startPrice', auctionData.startPrice);
-            formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
-            formData.append('avionics', auctionData.avionics || '');
+            formData.append('allowOffers', auctionData.allowOffers || false);
+            formData.append('features', auctionData.features || '');
+            formData.append('startDate', new Date(auctionData.startDate).toISOString());
+            formData.append('endDate', new Date(auctionData.endDate).toISOString());
 
             // Append specifications as JSON
             if (auctionData.specifications) {
                 formData.append('specifications', JSON.stringify(auctionData.specifications));
+            }
+
+            // Append start price and bid increment for standard/reserve auctions
+            if (auctionData.auctionType === 'standard' || auctionData.auctionType === 'reserve') {
+                formData.append('startPrice', auctionData.startPrice);
+                formData.append('bidIncrement', auctionData.bidIncrement);
+            }
+
+            // Append start price for buy now auctions (as it's required in your model)
+            if (auctionData.auctionType === 'buy_now' && auctionData.startPrice) {
+                formData.append('startPrice', auctionData.startPrice);
             }
 
             // Append reserve price if applicable
@@ -473,19 +473,24 @@ const CreateAuction = () => {
                 formData.append('reservePrice', auctionData.reservePrice);
             }
 
+            // Append buy now price if applicable
+            if (auctionData.auctionType === 'buy_now' && auctionData.buyNowPrice) {
+                formData.append('buyNowPrice', auctionData.buyNowPrice);
+            }
+
             // Append photos as files (in the order they appear in the array)
             uploadedPhotos.forEach((photo, index) => {
-                formData.append('photos', photo); // This should be the actual File object
+                formData.append('photos', photo);
             });
 
             // Append documents as files
             uploadedDocuments.forEach((doc, index) => {
-                formData.append('documents', doc); // This should be the actual File object
+                formData.append('documents', doc);
             });
 
-            // Append logbook images as files
-            uploadedLogbooks.forEach((logbook, index) => {
-                formData.append('logbooks', logbook);
+            // Append service record images as files
+            uploadedServiceRecords.forEach((record, index) => {
+                formData.append('serviceRecords', record);
             });
 
             const { data } = await axiosInstance.post(
@@ -529,13 +534,13 @@ const CreateAuction = () => {
 
                     <SellerContainer>
                         <div className="pt-16 md:py-7">
-                            <h1 className="text-3xl md:text-4xl font-bold mb-5">Create Auction</h1>
-                            <p className="text-secondary mb-8">List your item for bidding on our platform</p>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-5">Create Car Auction</h1>
+                            <p className="text-secondary mb-8">List your vehicle for bidding on our platform</p>
 
                             {/* Progress Steps */}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between mb-4">
-                                    {['Auction Info', 'Pricing & Bidding', 'Review & Submit'].map((label, index) => (
+                                    {['Vehicle Info', 'Pricing & Bidding', 'Review & Submit'].map((label, index) => (
                                         <div key={index} className="flex flex-col items-center">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step > index + 1 ? 'bg-green-500 text-white' :
                                                 step === index + 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
@@ -555,23 +560,23 @@ const CreateAuction = () => {
                             </div>
 
                             <form onSubmit={handleSubmit(createAuctionHandler)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                                {/* Step 1: Auction Information */}
+                                {/* Step 1: Vehicle Information */}
                                 {step === 1 && (
                                     <div>
                                         <h2 className="text-xl font-semibold mb-6 flex items-center">
-                                            <FileText size={20} className="mr-2" />
-                                            Auction Details
+                                            <Car size={20} className="mr-2" />
+                                            Vehicle Details
                                         </h2>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                             <div>
-                                                <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1">Item Name *</label>
+                                                <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1">Vehicle Name *</label>
                                                 <input
-                                                    {...register('title', { required: 'Item name is required' })}
+                                                    {...register('title', { required: 'Vehicle name is required' })}
                                                     id="title"
                                                     type="text"
                                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                    placeholder="e.g., 2017 VANS RV-6A"
+                                                    placeholder="e.g., 2020 Porsche 911 Carrera S"
                                                 />
                                                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
                                             </div>
@@ -595,21 +600,19 @@ const CreateAuction = () => {
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
 
-                                        {/* Avionics details */}
-                                        {/* Avionics Section - Only for Aircraft */}
-                                        {selectedCategory === 'Aircraft' && (
-                                            <div className="mb-6">
-                                                <label className="block text-sm font-medium text-secondary mb-1">
-                                                    Avionics & Equipment
-                                                </label>
-                                                <RTE
-                                                    name="avionics"
-                                                    control={control}
-                                                    label="Avionics:"
-                                                    defaultValue={getValues('avionics') || ''}
-                                                />
-                                            </div>
-                                        )}
+                                        {/* Features & Options */}
+                                        {/* <div className="mb-6">
+                                            <label className="block text-sm font-medium text-secondary mb-1">
+                                                Features & Options
+                                            </label>
+                                            <RTE
+                                                name="features"
+                                                control={control}
+                                                label="Features:"
+                                                defaultValue={getValues('features') || ''}
+                                                placeholder="List all features, options, and special equipment..."
+                                            />
+                                        </div> */}
 
                                         <div className="mb-6">
                                             <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
@@ -618,6 +621,7 @@ const CreateAuction = () => {
                                                 control={control}
                                                 label="Description:"
                                                 defaultValue={getValues('description') || ''}
+                                                placeholder="Describe the vehicle's history, condition, and any notable details..."
                                             />
                                             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
                                         </div>
@@ -632,7 +636,7 @@ const CreateAuction = () => {
                                                         id="location"
                                                         type="text"
                                                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="e.g., Dallas, Texas"
+                                                        placeholder="e.g., Los Angeles, California"
                                                     />
                                                 </div>
                                             </div>
@@ -651,10 +655,49 @@ const CreateAuction = () => {
                                                         id="video"
                                                         type="url"
                                                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="YouTube video URL"
+                                                        placeholder="YouTube video URL (walkaround, test drive)"
                                                     />
                                                 </div>
                                                 {errors.video && <p className="text-red-500 text-sm mt-1">{errors.video.message}</p>}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <label htmlFor="startDate" className="block text-sm font-medium text-secondary mb-1">Start Date & Time *</label>
+                                                <div className="relative">
+                                                    <Clock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                                    <input
+                                                        {...register('startDate', { required: 'Start date is required' })}
+                                                        id="startDate"
+                                                        type="datetime-local"
+                                                        className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                    />
+                                                </div>
+                                                {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="endDate" className="block text-sm font-medium text-secondary mb-1">End Date & Time *</label>
+                                                <div className="relative">
+                                                    <Clock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                                    <input
+                                                        {...register('endDate', {
+                                                            required: 'End date is required',
+                                                            validate: {
+                                                                afterStartDate: value => {
+                                                                    const start = new Date(watch('startDate'));
+                                                                    const end = new Date(value);
+                                                                    return end > start || 'End date must be after start date';
+                                                                }
+                                                            }
+                                                        })}
+                                                        id="endDate"
+                                                        type="datetime-local"
+                                                        className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                    />
+                                                </div>
+                                                {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
                                             </div>
                                         </div>
 
@@ -672,7 +715,7 @@ const CreateAuction = () => {
                                                 <label htmlFor="photo-upload" className="cursor-pointer">
                                                     <Image size={40} className="mx-auto text-gray-400 mb-2" />
                                                     <p className="text-gray-600">Browse photo(s) to upload</p>
-                                                    <p className="text-sm text-secondary">Recommended: at least 40 high-quality photos</p>
+                                                    <p className="text-sm text-secondary">Recommended: exterior, interior, engine, undercarriage, wheels</p>
                                                 </label>
                                             </div>
                                             {errors.photos && <p className="text-red-500 text-sm mt-1">{errors.photos.message}</p>}
@@ -699,7 +742,7 @@ const CreateAuction = () => {
                                                 <label htmlFor="document-upload" className="cursor-pointer">
                                                     <File size={40} className="mx-auto text-gray-400 mb-2" />
                                                     <p className="text-gray-600">Browse document(s) to upload</p>
-                                                    <p className="text-sm text-secondary">logbooks, maintenance records, ownership docs, etc.</p>
+                                                    <p className="text-sm text-secondary">Title, registration, maintenance records, ownership docs, etc.</p>
                                                 </label>
                                             </div>
 
@@ -722,56 +765,30 @@ const CreateAuction = () => {
                                         </div>
 
                                         <div className="mb-6">
-                                            <label htmlFor="logbook-upload" className="block text-sm font-medium text-secondary mb-1">
-                                                Logbook Images {selectedCategory === 'Aircraft' && '*'}
+                                            <label htmlFor="service-upload" className="block text-sm font-medium text-secondary mb-1">
+                                                Service History Images *
                                             </label>
                                             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                                                 <input
                                                     type="file"
                                                     multiple
                                                     accept="image/*"
-                                                    onChange={handleLogbookUpload}
+                                                    onChange={handleServiceRecordUpload}
                                                     className="hidden"
-                                                    id="logbook-upload"
+                                                    id="service-upload"
                                                 />
-                                                <label htmlFor="logbook-upload" className="cursor-pointer">
+                                                <label htmlFor="service-upload" className="cursor-pointer">
                                                     <FileText size={40} className="mx-auto text-gray-400 mb-2" />
-                                                    <p className="text-gray-600">Browse logbook image(s) to upload</p>
-                                                    <p className="text-sm text-secondary">Maintenance records, logbook pages, etc.</p>
+                                                    <p className="text-gray-600">Browse service record image(s) to upload</p>
+                                                    <p className="text-sm text-secondary">Service invoices, maintenance records, repair receipts, etc.</p>
                                                 </label>
                                             </div>
 
-                                            {/* {uploadedLogbooks.length > 0 && (
-                                                <div className="mt-4">
-                                                    <p className="text-sm text-secondary mb-3">Logbook Images ({uploadedLogbooks.length})</p>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                                        {uploadedLogbooks.map((logbook, index) => (
-                                                            <div key={index} className="relative group">
-                                                                <img
-                                                                    src={URL.createObjectURL(logbook)}
-                                                                    alt={`Logbook ${index + 1}`}
-                                                                    className="w-full h-32 object-cover rounded-lg cursor-pointer"
-                                                                    onClick={() => openLightbox(index, 'logbooks')}
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeLogbook(index)}
-                                                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                                                                >
-                                                                    <X size={14} />
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )} */}
-
-                                            {uploadedLogbooks.length > 0 && (
-                                                <LogbookGallery
-                                                    logbooks={uploadedLogbooks}
-                                                    moveLogbook={moveLogbook}
-                                                    removeLogbook={removeLogbook}
-                                                    onImageClick={(index) => openLightbox(index, 'logbooks')}
+                                            {uploadedServiceRecords.length > 0 && (
+                                                <ServiceHistoryGallery
+                                                    serviceRecords={uploadedServiceRecords}
+                                                    moveServiceRecord={moveServiceRecord}
+                                                    removeServiceRecord={removeServiceRecord}
                                                 />
                                             )}
                                         </div>
@@ -785,6 +802,28 @@ const CreateAuction = () => {
                                             <DollarSign size={20} className="mr-2" />
                                             Pricing & Bidding
                                         </h2>
+
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {[
+                                                    // { value: 'standard', label: 'Standard Auction' },
+                                                    // { value: 'reserve', label: 'Reserve Price Auction' },
+                                                    { value: 'buy_now', label: 'Buy Now Auction' },
+                                                ].map((type) => (
+                                                    <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            {...register('auctionType', { required: 'Auction type is required' })}
+                                                            value={type.value}
+                                                            className="mr-3"
+                                                        />
+                                                        <span>{type.label}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.auctionType && <p className="text-red-500 text-sm mt-1">{errors.auctionType.message}</p>}
+                                        </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                             <div>
@@ -807,47 +846,63 @@ const CreateAuction = () => {
                                                 {errors.startPrice && <p className="text-red-500 text-sm mt-1">{errors.startPrice.message}</p>}
                                             </div>
 
-                                            <div>
-                                                <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-                                                    <input
-                                                        {...register('bidIncrement', {
-                                                            required: 'Bid increment is required',
-                                                            min: { value: 0, message: 'Increment must be positive' }
-                                                        })}
-                                                        id="bidIncrement"
-                                                        type="number"
-                                                        step="0.01"
-                                                        min="0"
-                                                        className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="0.00"
-                                                    />
+                                            {(auctionType === 'standard' || auctionType === 'reserve') && (
+                                                <div>
+                                                    <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+                                                        <input
+                                                            {...register('bidIncrement', {
+                                                                required: 'Bid increment is required',
+                                                                min: { value: 0, message: 'Increment must be positive' }
+                                                            })}
+                                                            id="bidIncrement"
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                            placeholder="0.00"
+                                                        />
+                                                    </div>
+                                                    {errors.bidIncrement && <p className="text-red-500 text-sm mt-1">{errors.bidIncrement.message}</p>}
                                                 </div>
-                                                {errors.bidIncrement && <p className="text-red-500 text-sm mt-1">{errors.bidIncrement.message}</p>}
-                                            </div>
+                                            )}
                                         </div>
 
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {[
-                                                    { value: 'standard', label: 'Standard Auction' },
-                                                    { value: 'reserve', label: 'Reserve Price Auction' },
-                                                ].map((type) => (
-                                                    <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                                                        <input
-                                                            type="radio"
-                                                            {...register('auctionType', { required: 'Auction type is required' })}
-                                                            value={type.value}
-                                                            className="mr-3"
-                                                        />
-                                                        <span>{type.label}</span>
+                                        {/* Buy Now Price (for buy_now auction type) */}
+                                        {auctionType === 'buy_now' && (
+                                            <>
+                                                <div className="mb-4">
+                                                    <label htmlFor="buyNowPrice" className="block text-sm font-medium text-secondary mb-1">
+                                                        Buy Now Price *
                                                     </label>
-                                                ))}
-                                            </div>
-                                            {errors.auctionType && <p className="text-red-500 text-sm mt-1">{errors.auctionType.message}</p>}
-                                        </div>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+                                                        <input
+                                                            {...register('buyNowPrice', {
+                                                                required: auctionType === 'buy_now' ? 'Buy Now price is required' : false,
+                                                                min: { value: 0, message: 'Price must be positive' },
+                                                                validate: value => {
+                                                                    const startPrice = parseFloat(watch('startPrice') || 0);
+                                                                    const buyNowPrice = parseFloat(value);
+                                                                    return buyNowPrice >= startPrice || 'Buy Now price must be greater than or equal to start price';
+                                                                }
+                                                            })}
+                                                            id="buyNowPrice"
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                            placeholder="0.00"
+                                                        />
+                                                    </div>
+                                                    {errors.buyNowPrice && <p className="text-red-500 text-sm mt-1">{errors.buyNowPrice.message}</p>}
+                                                    <p className="text-sm text-secondary mt-1">
+                                                        Buyers can purchase immediately at this price, ending the auction
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
 
                                         {auctionType === 'reserve' && (
                                             <div className="mb-6">
@@ -873,9 +928,31 @@ const CreateAuction = () => {
                                                     />
                                                 </div>
                                                 {errors.reservePrice && <p className="text-red-500 text-sm mt-1">{errors.reservePrice.message}</p>}
-                                                <p className="text-sm text-secondary mt-1">Item will not sell if bids don't reach this price</p>
+                                                <p className="text-sm text-secondary mt-1">Vehicle will not sell if bids don't reach this price</p>
                                             </div>
                                         )}
+
+                                        {/* Allow Offers Toggle */}
+                                        <div className="mb-6">
+                                            <label className="flex items-center cursor-pointer">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        {...register('allowOffers')}
+                                                        id="allowOffers"
+                                                        className="sr-only"
+                                                    />
+                                                    <div className={`block w-14 h-8 rounded-full ${watch('allowOffers') ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${watch('allowOffers') ? 'transform translate-x-6' : ''}`}></div>
+                                                </div>
+                                                <div className="ml-3">
+                                                    <span className="font-medium text-secondary">Allow Offers</span>
+                                                    <p className="text-sm text-secondary mt-1">
+                                                        Enable buyers to make purchase offers during the auction
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
                                 )}
 
@@ -891,13 +968,13 @@ const CreateAuction = () => {
                                             <h3 className="font-medium text-lg mb-4 border-b pb-2">Auction Summary</h3>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {/* Item Details */}
+                                                {/* Vehicle Details */}
                                                 <div className="space-y-4">
                                                     <div className="bg-white p-4 rounded-lg shadow-sm">
-                                                        <h4 className="font-medium mb-3">Item Details</h4>
+                                                        <h4 className="font-medium mb-3">Vehicle Details</h4>
                                                         <div className="space-y-2">
                                                             <div>
-                                                                <p className="text-xs text-secondary">Item Name</p>
+                                                                <p className="text-xs text-secondary">Vehicle Name</p>
                                                                 <p className="font-medium">{watch('title') || 'Not provided'}</p>
                                                             </div>
                                                             <div>
@@ -927,27 +1004,6 @@ const CreateAuction = () => {
                                                             </div>
                                                         </div>
                                                     )}
-
-                                                    {/* Pricing */}
-                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                                                        <h4 className="font-medium mb-3">Pricing</h4>
-                                                        <div className="space-y-2">
-                                                            <div>
-                                                                <p className="text-xs text-secondary">Start Price</p>
-                                                                <p className="font-medium">${watch('startPrice') || '0.00'}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-xs text-secondary">Bid Increment</p>
-                                                                <p className="font-medium">${watch('bidIncrement') || '0.00'}</p>
-                                                            </div>
-                                                            {watch('auctionType') === 'reserve' && (
-                                                                <div>
-                                                                    <p className="text-xs text-secondary">Reserve Price</p>
-                                                                    <p className="font-medium text-green-600">${watch('reservePrice') || '0.00'}</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
                                                 </div>
 
                                                 {/* Auction Details */}
@@ -960,6 +1016,25 @@ const CreateAuction = () => {
                                                                 <p className="font-medium">
                                                                     {watch('auctionType') === 'standard' && 'Standard Auction'}
                                                                     {watch('auctionType') === 'reserve' && 'Reserve Price Auction'}
+                                                                    {watch('auctionType') === 'buy_now' && 'Buy Now Auction'}
+                                                                </p>
+                                                            </div>
+                                                            {watch('allowOffers') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Allow Offers</p>
+                                                                    <p className="font-medium text-green-600">Yes</p>
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <p className="text-xs text-secondary">Start Date</p>
+                                                                <p className="font-medium">
+                                                                    {watch('startDate') ? new Date(watch('startDate')).toLocaleString() : 'Not provided'}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-xs text-secondary">End Date</p>
+                                                                <p className="font-medium">
+                                                                    {watch('endDate') ? new Date(watch('endDate')).toLocaleString() : 'Not provided'}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -982,9 +1057,9 @@ const CreateAuction = () => {
                                                                 </span>
                                                             </div>
                                                             <div className="flex justify-between items-center">
-                                                                <p className="text-xs text-secondary">Logbook Images</p>
+                                                                <p className="text-xs text-secondary">Service Records</p>
                                                                 <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
-                                                                    {uploadedLogbooks.length} uploaded
+                                                                    {uploadedServiceRecords.length} uploaded
                                                                 </span>
                                                             </div>
                                                             {watch('video') && (
@@ -997,17 +1072,51 @@ const CreateAuction = () => {
                                                             )}
                                                         </div>
                                                     </div>
+
+                                                    {/* Pricing */}
+                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                        <h4 className="font-medium mb-3">Pricing</h4>
+                                                        <div className="space-y-2">
+                                                            {(watch('auctionType') === 'standard' || watch('auctionType') === 'reserve' || watch('auctionType') === 'buy_now') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Start Price</p>
+                                                                    <p className="font-medium">${watch('startPrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {(watch('auctionType') === 'standard' || watch('auctionType') === 'reserve') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Bid Increment</p>
+                                                                    <p className="font-medium">${watch('bidIncrement') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {watch('auctionType') === 'reserve' && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Reserve Price</p>
+                                                                    <p className="font-medium text-green-600">${watch('reservePrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {watch('auctionType') === 'buy_now' && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Buy Now Price</p>
+                                                                    <p className="font-medium text-blue-600">${watch('buyNowPrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {watch('avionics') && (
+                                            {/* {watch('features') && (
                                                 <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
-                                                    <h4 className="font-medium text-black mb-3">Avionics & Equipment</h4>
+                                                    <h4 className="font-medium text-black mb-3">Features & Options</h4>
                                                     <div className="prose prose-lg max-w-none border rounded-lg p-4 bg-gray-50">
-                                                        {parse(watch('avionics'))}
+                                                        {parse(watch('features'))}
                                                     </div>
                                                 </div>
-                                            )}
+                                            )} */}
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
@@ -1031,7 +1140,7 @@ const CreateAuction = () => {
                                                     className="mt-1 mr-2"
                                                 />
                                                 <span className="text-sm font-medium text-secondary">
-                                                    I agree to the terms and conditions and confirm that I have the right to sell this item
+                                                    I agree to the terms and conditions and confirm that I have the right to sell this vehicle
                                                 </span>
                                             </label>
                                             {errors.termsAgreed && <p className="text-red-500 text-sm mt-1">{errors.termsAgreed.message}</p>}
@@ -1058,7 +1167,7 @@ const CreateAuction = () => {
                                         <button
                                             type="button"
                                             onClick={(e) => {
-                                                e.preventDefault(); // Prevent default form submission
+                                                e.preventDefault();
                                                 nextStep();
                                             }}
                                             className="flex items-center px-6 py-2 bg-black text-white rounded-lg hover:bg-black/90 transition-colors"

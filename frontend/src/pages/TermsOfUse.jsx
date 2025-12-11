@@ -8,127 +8,124 @@ const TermsOfUse = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Terms of Use</h1>
 
-                <p className="mb-2">Effective Date: October 6, 2025</p>
-                <p className="mb-4">Last Updated: October 6, 2025</p>
+                <p className="mb-2">Effective Date: December 11, 2025</p>
+                <p className="mb-4">Last Updated: December 11, 2025</p>
+
                 <p className="mb-4">
-                    Welcome to Plane Vault ("we," "our," "us"). These Terms of Use ("Terms") govern your access to and
-                    use of the Plane Vault website, services, listings, and auction-style listings (collectively, the "Services").
-                    By accessing or using the Services, you agree to be bound by these Terms. If you do not agree, you
-                    must not use the Services.
+                    Welcome to Speed Ways UK ("we," "our," "us"). These Terms of Use ("Terms") govern your access to and
+                    use of the Speed Ways UK website, listings, and automotive marketplace services (collectively, the "Services").
+                    By using our Services, you agree to these Terms. If you do not agree, you must not use the platform.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">1. Eligibility</h2>
                 <ul className="mb-4">
                     <li>- You must be at least 18 years old and legally able to enter into binding contracts.</li>
-                    <li>- By using Plane Vault, you represent that you meet all eligibility requirements.</li>
+                    <li>- By using Speed Ways UK, you confirm that you meet all eligibility requirements.</li>
                 </ul>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">2. Platform Nature of Services</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">2. Nature of Our Services</h2>
                 <div className="mb-4">
-                    <p>- Plane Vault is an online marketplace that connects sellers and buyers of aircraft and aviation-related assets.</p>
-                    <p>- We are not a party to any transaction between users. All purchases, sales, and agreements are solely between the buyer and seller.</p>
-                    <p>- Plane Vault does not endorse, guarantee, or verify any listing, buyer, or seller.</p>
-                    <p className="mt-2 font-semibold">Important:</p>
-                    <p>
-                        Plane Vault is not an auctioneer and does not conduct auctions as defined under Florida law. We provide a technology platform
-                        where sellers can post listings that may include bidding features or auction-style formats. All transactions are solely between buyers and sellers.
-                    </p>
+                    <p>- Speed Ways UK is an online marketplace specialising in the buying and selling of vehicles.</p>
+                    <p>- At present, all vehicles listed on the platform are listed directly by Speed Ways UK.</p>
+                    <p>- There are no auctions or bidding features; users may purchase through “Buy Now” or submit a price via “Make an Offer”.</p>
+                    <p>- We are responsible for the accuracy of our own listings but do not make guarantees beyond the information provided.</p>
                 </div>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">3. User Accounts</h2>
                 <ul className="mb-4">
-                    <li>- To participate in bidding-style listings, you must create an account and provide accurate, complete information.</li>
-                    <li>- You are responsible for maintaining the confidentiality of your login credentials.</li>
-                    <li>- You are responsible for all activity under your account.</li>
+                    <li>- To purchase a vehicle or submit an offer, you may be required to create an account.</li>
+                    <li>- You must provide accurate and complete information.</li>
+                    <li>- You are responsible for maintaining the confidentiality of your login information.</li>
+                    <li>- You are responsible for all activities performed under your account.</li>
                 </ul>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">4. Bidding Rules</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">4. Buying a Vehicle</h2>
                 <ul className="mb-4">
-                    <li>- Bids placed on a listing are binding offers to purchase.</li>
-                    <li>- Sellers are responsible for ensuring that their listings are accurate, complete, and lawful.</li>
-                    <li>- Buyers are responsible for conducting their own due diligence before placing a bid.</li>
-                    <li>- Plane Vault may, at its discretion, cancel, remove, or reject any listing or bid.</li>
+                    <li>- When using “Buy Now,” you are entering into a legally binding agreement to purchase.</li>
+                    <li>- When submitting an offer, you acknowledge that acceptance by Speed Ways UK forms a binding agreement.</li>
+                    <li>- All vehicles are sold “as described,” based on the detailed information and disclosures provided on the listing page.</li>
+                    <li>- You are responsible for reviewing all photos, inspection details, and descriptions before purchasing.</li>
                 </ul>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">5. Fees & Payments</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">5. Payments</h2>
                 <ul className="mb-4">
-                    <li>- Use of certain features may require payment of fees (listing fees, buyer’s premium, etc.).</li>
-                    <li>- Fees will be disclosed prior to use and are non-refundable unless otherwise stated.</li>
-                    <li>- Payment processing may be handled by third-party providers; by using our Services, you agree to their terms as well.</li>
+                    <li>- Payments are conducted via secure bank transfer only.</li>
+                    <li>- You must submit payment within the timeframe provided at checkout or by our support team.</li>
+                    <li>- All payment instructions will be issued directly by Speed Ways UK.</li>
+                    <li>- Failure to complete payment may result in cancellation of the order.</li>
                 </ul>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">6. Listings, Content, and Intellectual Property</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">6. Listings, Content & Intellectual Property</h2>
                 <div className="mb-4">
-                    <p>- Plane Vault does not verify the accuracy of any listing, description, or representation made by users.</p>
-                    <p>- All aircraft and items are sold "as is, where is."</p>
-                    <p>- Plane Vault makes no guarantees regarding airworthiness, condition, title, or legality of any listed aircraft.</p>
-                    <p>- Users retain rights to their content but grant Plane Vault a license to display and use it on the platform.</p>
-                    <p>- If you believe content on Plane Vault infringes your intellectual property rights, you may submit a takedown request under our DMCA procedure.</p>
+                    <p>- All images, descriptions, and media on Speed Ways UK are owned by Speed Ways UK unless stated otherwise.</p>
+                    <p>- You may not copy, reproduce, or distribute our content without permission.</p>
+                    <p>- We strive to provide accurate descriptions but recommend buyers inspect vehicles prior to purchase when possible.</p>
                 </div>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">7. FAA-Related Disclosures</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">7. Vehicle Condition & Inspections</h2>
                 <div className="mb-4">
-                    <p>- Sellers must provide FAA Registration, Airworthiness Certificate (as applicable), and maintenance records/logbooks.</p>
-                    <p>- Buyers acknowledge aircraft must be re-registered with the FAA and are responsible for all FAA filings.</p>
-                    <p>- Plane Vault does not verify airworthiness and is not responsible for FAA compliance; buyers must conduct their own conformity checks.</p>
+                    <p>- Vehicles are sold based on the honest and detailed descriptions provided by Speed Ways UK.</p>
+                    <p>- Buyers are encouraged to arrange a viewing or third-party inspection before completing purchase.</p>
+                    <p>- We make no guarantee beyond what is documented in the listing page.</p>
                 </div>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">8. Prohibited Conduct</h2>
-                <p className="mb-4">
-                    You agree not to:
-                </p>
+                <p className="mb-4">You agree not to engage in:</p>
                 <ul className="mb-4">
-                    <li>- Use the Services for unlawful purposes.</li>
-                    <li>- Misrepresent yourself, your aircraft, or your ability to complete a transaction.</li>
-                    <li>- Manipulate listings, bids, or pricing.</li>
-                    <li>- Upload harmful, infringing, or fraudulent content.</li>
+                    <li>- Fraudulent activity or attempts to bypass payment processes.</li>
+                    <li>- Misrepresentation or submission of false information.</li>
+                    <li>- Attempting to disrupt, damage, or interfere with the platform.</li>
+                    <li>- Copying, scraping, or duplicating content without permission.</li>
                 </ul>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">9. Limitation of Liability</h2>
                 <div className="mb-4">
-                    <p>- Plane Vault is not responsible for any damages, losses, or disputes arising from transactions between buyers and sellers.</p>
-                    <p>- To the fullest extent permitted by law, Plane Vault disclaims all liability for any indirect, incidental, or consequential damages.</p>
-                    <p>- Your sole remedy is to stop using the Services.</p>
+                    <p>- Speed Ways UK is not liable for indirect or consequential damages arising from use of the Services.</p>
+                    <p>- Vehicle purchases are final and must be carefully reviewed before committing.</p>
+                    <p>- To the maximum extent permitted by UK law, your sole remedy is discontinuing use of the Services.</p>
                 </div>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">10. Indemnification</h2>
                 <p className="mb-4">
-                    You agree to indemnify and hold harmless Plane Vault, its owners, officers, employees, and affiliates
-                    from any claims, damages, or expenses arising from your use of the Services or violation of these Terms.
+                    You agree to indemnify and defend Speed Ways UK, its employees, owners, and affiliates from any claims or
+                    damages arising from misuse of the platform or violation of these Terms.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">11. Termination</h2>
                 <ul className="mb-4">
-                    <li>- We reserve the right to suspend or terminate your account at any time, without notice, if you violate these Terms.</li>
-                    <li>- Upon termination, you must cease all use of the Services.</li>
+                    <li>- We may suspend or terminate your access at any time if you violate these Terms.</li>
+                    <li>- Upon termination, you must stop using the Services immediately.</li>
                 </ul>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">12. Governing Law & Disputes</h2>
                 <div className="mb-4">
-                    <p>- These Terms are governed by the laws of the State of Florida, without regard to its conflict of law provisions.</p>
-                    <p>- Any disputes shall be resolved through binding arbitration under Florida law, except claims that may be brought in small claims court.</p>
-                    <p>- By using Plane Vault, you waive your right to a jury trial.</p>
+                    <p>- These Terms are governed by the laws of the United Kingdom.</p>
+                    <p>- Any disputes shall be resolved in UK courts or through arbitration where applicable.</p>
+                    <p>- You waive any right to bring collective or class actions against Speed Ways UK.</p>
                 </div>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">13. Amendments</h2>
                 <p className="mb-4">
-                    Plane Vault may update these Terms at any time. Changes will be communicated through our website
-                    or by email. Continued use after notice constitutes acceptance. If you do not agree, you must stop
-                    using the Services.
+                    Speed Ways UK may update these Terms at any time. Updated terms will be posted with a revised date.
+                    Continued use after updates indicates acceptance of the new Terms.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">14. Survival</h2>
                 <p className="mb-4">
-                    Sections regarding Limitation of Liability, Indemnification, Governing Law, Disputes, and Survival shall
-                    remain in effect even after account termination.
+                    Sections including Limitation of Liability, Indemnification, Governing Law, and Survival
+                    remain in effect even after termination of your account.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">15. Contact Us</h2>
                 <p className="mb-4">
-                    Plane Vault <br />
+                    Speed Ways UK <br />
                     {otherData.address} <br />
-                    <Link className="text-blue-600 underline" to={`mailto:${otherData.email}`}>{otherData.email}</Link> <br />
-                    <Link className="text-blue-600 underline" to={`tel:${otherData.phone}`}>{otherData.phone}</Link>
+                    <Link className="text-blue-600 underline" to="mailto:info@speedwaysuk.com">
+                        info@speedwaysuk.com
+                    </Link> <br />
+                    <Link className="text-blue-600 underline" to="tel:9428747458">
+                        (942) 874-7458
+                    </Link>
                 </p>
             </Container>
         </section>

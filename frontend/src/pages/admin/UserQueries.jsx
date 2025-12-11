@@ -219,9 +219,18 @@ function UserQueries() {
             const { data } = await axiosInstance.delete(`/api/v1/contact/admin/queries/${queryId}`);
 
             if (data.success) {
-                setAllQueries(prev => prev.filter(query => query.id !== queryId));
+                // Try filtering by both _id and id to be safe
+                setAllQueries(prev => prev.filter(query =>
+                    query._id !== queryId && query.id !== queryId
+                ));
 
-                if (selectedQuery && selectedQuery.id === queryId) {
+                // Also update filteredQueries since you're filtering both states
+                setFilteredQueries(prev => prev.filter(query =>
+                    query._id !== queryId && query.id !== queryId
+                ));
+
+                if (selectedQuery &&
+                    (selectedQuery._id === queryId || selectedQuery.id === queryId)) {
                     setSelectedQuery(null);
                 }
 

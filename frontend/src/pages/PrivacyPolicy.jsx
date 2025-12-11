@@ -8,89 +8,96 @@ const PrivacyPolicy = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Privacy Policy</h1>
 
-                <p className="mb-2">Effective Date: October 6, 2025</p>
-                <p className="mb-4">Last Updated: October 6, 2025</p>
+                <p className="mb-2">Effective Date: December 10, 2025</p>
+                <p className="mb-4">Last Updated: December 10, 2025</p>
+
                 <p className="mb-4">
-                    Plane Vault ("we," "our," "us") values your privacy. This Privacy Policy explains how we collect,
-                    use, disclose, and safeguard your information when you use our website and services (the "Services").
-                    By using Plane Vault, you consent to the practices described below.
+                    Speed Ways UK ("we," "our," "us") respects your privacy. This Privacy Policy explains how we collect,
+                    use, and protect your information when you use our website and automotive marketplace services 
+                    (the "Services"). By using Speed Ways UK, you agree to the practices outlined below.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">1. Information We Collect</h2>
                 <ul className="mb-4">
-                    <li>- Personal information you provide: name, email, phone, billing/shipping address, payment info (processed via secure third parties).</li>
-                    <li>- Account registration details: username, password, security verification.</li>
-                    <li>- Automatic data: IP address, browser type, device details, cookies, and usage metrics.</li>
-                    <li>- Transaction data: bids, purchases, listings, and related communications.</li>
+                    <li>- Personal information such as your name, email, phone number, and address.</li>
+                    <li>- Account details including login credentials and verification information.</li>
+                    <li>- Automatically collected data such as IP address, browser type, device details, and cookies.</li>
+                    <li>- Purchase and transaction details for Buy Now or Make an Offer activity.</li>
                 </ul>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">2. How We Use Information</h2>
                 <ul className="mb-4">
-                    <li>- Provide and operate the Services.</li>
-                    <li>- Facilitate listings, payments, and account management.</li>
-                    <li>- Verify identity and prevent fraud or misuse.</li>
-                    <li>- Enforce compliance with our Terms of Use.</li>
-                    <li>- Communicate updates, notifications, and promotions (with opt-out options).</li>
-                    <li>- Improve site functionality and user experience.</li>
+                    <li>- To operate and improve the Speed Ways UK platform.</li>
+                    <li>- To manage user accounts and authenticate identity.</li>
+                    <li>- To process purchases, offers, and communication between buyer and platform.</li>
+                    <li>- To prevent fraud, enhance security, and ensure compliance with our policies.</li>
+                    <li>- To send service updates, alerts, and promotional content (with opt-out available).</li>
+                    <li>- To analyse performance and improve user experience.</li>
                 </ul>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">3. Sharing of Information</h2>
                 <ul className="mb-4">
-                    <li>- With third-party service providers (payment processors, hosting, escrow services).</li>
-                    <li>- With buyers/sellers to facilitate transactions.</li>
-                    <li>- As required by law, regulation, or legal process.</li>
-                    <li>- During business transfers (merger, acquisition, or sale).</li>
+                    <li>- With trusted third-party service providers (payment processors, hosting partners, analytics).</li>
+                    <li>- With buyers only when necessary to complete a confirmed purchase.</li>
+                    <li>- When required by law or legal process.</li>
+                    <li>- During business transitions such as mergers or acquisitions.</li>
                 </ul>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">4. Data Security</h2>
                 <p className="mb-4">
-                    We use commercially reasonable measures to secure your information. However, no system is completely
-                    secure, and you acknowledge the risks inherent in transmitting data online.
+                    We use industry-standard security measures to protect your data. However, no system is fully secure,
+                    and you acknowledge the risks of transmitting information over the internet.
                 </p>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">5. Retention</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">5. Data Retention</h2>
                 <p className="mb-4">
-                    We retain data as long as necessary for operations, legal, or compliance obligations.
+                    We retain personal data as long as necessary to comply with legal obligations and support
+                    platform functionality.
                 </p>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">6. Cookies & Tracking</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">6. Cookies & Tracking Technologies</h2>
                 <p className="mb-4">
-                    We use cookies and similar technologies for authentication, performance, and analytics. You may disable
-                    cookies in your browser but some features may not function.
+                    We use cookies for authentication, analytics, and improving site performance. You may disable cookies,
+                    but some features may not work correctly.
                 </p>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">7. User Rights</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">7. Your Rights</h2>
                 <p className="mb-4">
-                    Depending on jurisdiction, you may have rights to access, correct, delete, or restrict processing of
-                    your personal data. Contact us to exercise these rights.
+                    You may request access, correction, deletion, or restriction of your personal information in accordance
+                    with applicable data protection laws. Contact us to exercise these rights.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">8. Children’s Privacy</h2>
                 <p className="mb-4">
-                    We do not knowingly collect information from individuals under 18. If discovered, such data will be
-                    deleted.
+                    Our Services are not intended for individuals under 18. We do not knowingly collect information from minors.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">9. International Users</h2>
                 <p className="mb-4">
-                    By using Plane Vault outside the U.S., you consent to your information being processed in the U.S.
+                    If you access Speed Ways UK from outside the United Kingdom, you consent to your data being processed
+                    in the UK, where our systems are located.
                 </p>
 
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">10. Amendments</h2>
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">10. Changes to This Policy</h2>
                 <p className="mb-4">
-                    We may revise this Privacy Policy at any time. Updates will be posted with a new “Last Updated” date.
-                    Continued use constitutes acceptance.
+                    We may update this Privacy Policy at any time. A new “Last Updated” date will be posted on this page.
                 </p>
 
                 <h2 className="text-2xl text-black font-semibold mt-6 mb-4">11. Governing Law</h2>
-                <p className="mb-4">This Privacy Policy is governed by Florida law.</p>
-
-                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">12. Contact</h2>
                 <p className="mb-4">
-                    Plane Vault <br />
+                    This Privacy Policy is governed by UK law.
+                </p>
+
+                <h2 className="text-2xl text-black font-semibold mt-6 mb-4">12. Contact Us</h2>
+                <p className="mb-4">
+                    Speed Ways UK <br />
                     {otherData.address} <br />
-                    <Link className="text-blue-600 underline" to={`mailto:${otherData.email}`}>{otherData.email}</Link> <br />
-                    <Link className="text-blue-600 underline" to={`tel:${otherData.phone}`}>(347) 745-6985</Link> <br />
+                    <Link className="text-blue-600 underline" to="mailto:info@speedwaysuk.com">
+                        info@speedwaysuk.com
+                    </Link> <br />
+                    <Link className="text-blue-600 underline" to="tel:9428747458">
+                        (942) 874-7458
+                    </Link> <br />
                 </p>
             </Container>
         </section>

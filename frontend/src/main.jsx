@@ -40,6 +40,7 @@ const BidderDashboard = lazy(() => import('./pages/bidder/Dashboard'));
 const Watchlist = lazy(() => import('./pages/bidder/Watchlist'));
 const ActiveAuctions = lazy(() => import('./pages/bidder/ActiveAuctions'));
 const MyBids = lazy(() => import('./pages/bidder/MyBids'));
+const MyOffers = lazy(() => import('./pages/bidder/MyOffers'));
 const WonAuctions = lazy(() => import('./pages/bidder/WonAuctions'));
 const BidderProfile = lazy(() => import('./pages/bidder/Profile'));
 const BidderNotifications = lazy(() => import('./pages/bidder/Notifications'));
@@ -50,6 +51,7 @@ const AdminLayout = lazy(() => import('./pages/admin/Layout'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AllUsers = lazy(() => import('./pages/admin/AllUsers'));
 const AdminAllAuctions = lazy(() => import('./pages/admin/AllAuctions'));
+const AdminCreateAuction = lazy(() => import('./pages/admin/CreateAuction'));
 const AdminEditAuction = lazy(() => import('./pages/admin/EditAuction'));
 const UserQueries = lazy(() => import('./pages/admin/UserQueries'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
@@ -57,7 +59,9 @@ const AdminProfile = lazy(() => import('./pages/admin/Profile'));
 const AdminComments = lazy(() => import('./pages/admin/Comments'));
 const Commissions = lazy(() => import('./pages/admin/Commissions'));
 const AdminBidHistory = lazy(() => import('./pages/admin/BidHistory'));
+const AdminAllOffers = lazy(() => import('./pages/admin/AllOffers'));
 const Transactions = lazy(() => import('./pages/admin/Transactions'));
+const Categories = lazy(() => import('./pages/admin/Categories'));
 
 createRoot(document.getElementById('root')).render(
     //<StrictMode>
@@ -88,7 +92,7 @@ createRoot(document.getElementById('root')).render(
 
                             <Route path='/payment-refund-policy' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><PaymentRefundPolicy /></Suspense>} />
 
-                            <Route path='/seller-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><SellerAgreement /></Suspense>} />
+                            {/* <Route path='/seller-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><SellerAgreement /></Suspense>} /> */}
 
                             <Route path='/buyer-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><BuyerAgreement /></Suspense>} />
 
@@ -225,6 +229,16 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
+                            {/* Bidder My Offers */}
+                            <Route
+                                path='/bidder/offers'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <MyOffers />
+                                    </Suspense>
+                                }
+                            />
+
                             {/* Bidder My Bids */}
                             <Route
                                 path='/bidder/auctions/won'
@@ -255,14 +269,14 @@ createRoot(document.getElementById('root')).render(
                             /> */}
 
                             {/* Bidder Billing */}
-                            <Route
+                            {/* <Route
                                 path='/bidder/billing'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <BidderBilling />
                                     </Suspense>
                                 }
-                            />
+                            /> */}
                         </Route>
 
                         {/* Admin Layout */}
@@ -298,12 +312,32 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
+                            {/* Admin All Auctions */}
+                            <Route
+                                path='/admin/auctions/create'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminCreateAuction />
+                                    </Suspense>
+                                }
+                            />
+
                             {/* Admin Edit Auction */}
                             <Route
                                 path='/admin/auctions/edit/:auctionId'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <AdminEditAuction />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Categories */}
+                            <Route
+                                path='/admin/categories'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <Categories />
                                     </Suspense>
                                 }
                             />
@@ -318,15 +352,15 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
-                            {/* Admin Support */}
-                            <Route
+                            {/* Admin Notifications */}
+                            {/* <Route
                                 path='/admin/notifications'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <AdminNotifications />
                                     </Suspense>
                                 }
-                            />
+                            /> */}
 
                             {/* Admin Profile */}
                             <Route
@@ -338,7 +372,7 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
-                            {/* Admin Profile */}
+                            {/* Admin Comments */}
                             <Route
                                 path='/admin/comments'
                                 element={
@@ -348,35 +382,45 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
-                            {/* Admin Profile */}
-                            <Route
+                            {/* Admin Commissions */}
+                            {/* <Route
                                 path='/admin/commissions'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <Commissions />
                                     </Suspense>
                                 }
-                            />
+                            /> */}
 
-                            {/* Admin Profile */}
-                            <Route
+                            {/* Admin Bids */}
+                            {/* <Route
                                 path='/admin/bids'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <AdminBidHistory />
                                     </Suspense>
                                 }
+                            /> */}
+
+                            {/* Admin Offers */}
+                            <Route
+                                path='/admin/offers'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminAllOffers />
+                                    </Suspense>
+                                }
                             />
 
-                            {/* Admin Profile */}
-                            <Route
+                            {/* Admin Transactions */}
+                            {/* <Route
                                 path='/admin/transactions'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <Transactions />
                                     </Suspense>
                                 }
-                            />
+                            /> */}
                         </Route>
                     </Routes>
                 </BrowserRouter>

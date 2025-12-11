@@ -6,15 +6,18 @@ import menuIcon from './menuIcon.svg';
 import closeMenu from './closeMenu.svg';
 import faqImg from './faqImg.webp';
 import aboutUs from './aboutUs.webp';
-import cessna from './cessna.webp';
-import cirrus from './cirrus.webp';
-import piper from './piper.webp';
-import beechCraft from './beechCraft.webp';
-import mooney from './mooney.webp';
-import diamond from './diamond.webp';
-import pilatus from './pilatus.webp';
-import bell from './bell.webp';
-import airBus from './airBus.webp';
+import bmw from './bmw.webp';
+import hyundai from './hyundai.webp';
+import volvo from './volvo.webp';
+import audi from './audi.webp';
+import mercedes from './mercedes.webp';
+import kia from './kia.webp';
+import skoda from './skoda.webp';
+import ford from './ford.webp';
+import volkswagen from './volkswagen.webp';
+import lamborghini from './lamborghini.webp';
+import renault from './renault.webp';
+import tesla from './tesla.webp';
 import about from './about.webp';
 import cta from './cta.webp';
 import parts from './parts.webp';
@@ -25,13 +28,23 @@ import liveAuctions from './liveAuctions.webp';
 import soldAuctions from './soldAuctions.webp';
 import endingSoonAuctions from './endingSoonAuctions.webp';
 import upcomingAuctions from './upcomingAuctions.webp';
-import spinner from './spinner.webp';
+import spinner from './spinner.png';
 import engineCategoryIcon from './engineCategoryIcon.webp';
 import whoWeAre from './whoWeAre.webp';
+import convertible from './convertible.webp';
+import electric from './electric.webp';
+import hatchback from './hatchback.webp';
+import luxury from './luxury.webp';
+import pickup from './pickup.webp';
+import sports from './sports.webp';
+import sedan from './sedan.webp';
+import suv from './suv.webp';
+import truck from './truck.webp';
+import van from './van.webp';
 
 const otherData = {
-    phone: '+19413911070',
-    email: 'admin@planevault.com',
+    phone: '+19428747458',
+    email: 'info@speedwaysuk.com',
     address: 'United States of America'
 }
 
@@ -45,15 +58,18 @@ export {
     contactUs,
     faqImg,
     aboutUs,
-    cessna,
-    cirrus,
-    piper,
-    beechCraft,
-    mooney,
-    diamond,
-    pilatus,
-    bell,
-    airBus,
+    bmw,
+    hyundai,
+    volvo,
+    audi,
+    mercedes,
+    kia,
+    skoda,
+    ford,
+    volkswagen,
+    lamborghini,
+    renault,
+    tesla,
     about,
     cta,
     airCrafts,
@@ -66,5 +82,15 @@ export {
     upcomingAuctions,
     spinner,
     engineCategoryIcon,
-    whoWeAre
+    whoWeAre,
+    convertible,
+    electric,
+    hatchback,
+    luxury,
+    pickup,
+    sports,
+    sedan,
+    suv,
+    truck,
+    van,
 }

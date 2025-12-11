@@ -55,7 +55,6 @@ export const uploadDocumentToCloudinary = (buffer, originalName, folder = 'aucti
 
         // For PDFs, use minimal settings to avoid security flags
         if (isPDF) {
-            console.log('📄 PDF detected - using minimal upload settings');
             // Remove these parameters for PDFs
             delete uploadOptions.use_filename;
             delete uploadOptions.unique_filename;

@@ -169,7 +169,7 @@ const Comments = () => {
         }
 
         try {
-            const { data } = await axiosInstance.patch(`/api/v1/users/${userId}/status`, {
+            const { data } = await axiosInstance.patch(`/api/v1/admin/users/${userId}/status`, {
                 isActive: newStatus
             });
 

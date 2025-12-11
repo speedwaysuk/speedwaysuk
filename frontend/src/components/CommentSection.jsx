@@ -227,7 +227,7 @@ const CommentSection = ({ auctionId }) => {
                         <button
                             type="submit"
                             disabled={!newComment.trim() || addingComment}
-                            className="self-start px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                            className="self-start px-6 py-3 bg-[#edcd1f] text-black rounded-lg hover:bg-[#edcd1f]/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                         >
                             {addingComment ? (
                                 <>
@@ -348,7 +348,7 @@ const CommentSection = ({ auctionId }) => {
                                             <div className="flex gap-2 mt-2">
                                                 <button
                                                     onClick={() => handleSaveEdit(comment._id)}
-                                                    className="px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary/90"
+                                                    className="px-3 py-1 bg-[#edcd1f] text-white text-sm rounded hover:bg-[#edcd1f]/90"
                                                 >
                                                     Save
                                                 </button>
@@ -395,7 +395,7 @@ const CommentSection = ({ auctionId }) => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                    className="px-6 py-2 bg-[#edcd1f] text-white rounded-lg hover:bg-[#edcd1f]/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
                                     {loadingMore ? (
                                         <>

@@ -83,40 +83,10 @@ const userSchema = new Schema({
         favoriteCategories: [{ type: String }]
     },
 
-    // Stripe Payment Info (For Bidders Only)
-    stripeCustomerId: {
-        type: String,
-        sparse: true
-    },
-    paymentMethodId: {
-        type: String,
-        sparse: true
-    },
-    cardLast4: {
-        type: String,
-        trim: true
-    },
-    cardBrand: {
-        type: String,
-        trim: true
-    },
-    cardExpMonth: {
-        type: Number
-    },
-    cardExpYear: {
-        type: Number
-    },
-
-    // Payment status
-    isPaymentVerified: {
-        type: Boolean,
-        default: false
-    },
-
     // Account Status
     isVerified: {
         type: Boolean,
-        default: false
+        default: true
     },
     isActive: {
         type: Boolean,
@@ -143,7 +113,6 @@ const userSchema = new Schema({
 
 // Index for better query performance
 userSchema.index({ userType: 1, email: 1 });
-// userSchema.index({ stripeCustomerId: 1 }, { sparse: true });
 
 // Pre-save middleware for password hashing
 userSchema.pre('save', async function (next) {

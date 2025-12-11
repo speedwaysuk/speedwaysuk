@@ -13,9 +13,31 @@ export const useAuctions = () => {
         category: '',
         status: 'active',
         search: '',
+        priceMin: '',
+        priceMax: '',
+        location: '',
         sortBy: 'createdAt',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
+        // Add all the new car filters
+        make: '',
+        model: '',
+        yearMin: '',
+        yearMax: '',
+        transmission: '',
+        fuelType: '',
+        condition: '',
+        auctionType: '',
+        allowOffers: ''
     });
+
+    // Clean filters - remove empty values
+    const cleanFilters = (currentFilters) => {
+        return Object.fromEntries(
+            Object.entries(currentFilters).filter(([_, value]) => 
+                value !== '' && value !== null && value !== undefined
+            )
+        );
+    };
 
     // Fetch auctions with pagination and filters
     const fetchAuctions = async (page = 1, limit = 12, currentFilters = {}) => {
@@ -23,18 +45,14 @@ export const useAuctions = () => {
         loadingState(true);
 
         try {
-            // Clean up filters - remove empty values
-            const cleanFilters = Object.fromEntries(
-                Object.entries(currentFilters).filter(([_, value]) => 
-                    value !== '' && value !== null && value !== undefined
-                )
-            );
-
+            // Clean up filters
+            const clean = cleanFilters(currentFilters);
+            
             // Build query string with all filters
             const queryParams = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                ...cleanFilters
+                ...clean
             }).toString();
 
             const { data } = await axiosInstance.get(`/api/v1/auctions?${queryParams}`);
@@ -72,38 +90,44 @@ export const useAuctions = () => {
         fetchAuctions(1, 12, updatedFilters);
     };
 
-    // FIXED: Handle URL parameters on initial load
+    // Handle URL parameters on initial load
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         
-        // Extract URL parameters
+        // Extract ALL URL parameters including new ones
         const urlFilters = {
             category: searchParams.get('category') || '',
-            status: searchParams.get('status') || '',
-            search: searchParams.get('search') || '', // Map 'search' param to 'search'
+            status: searchParams.get('status') || 'active',
+            search: searchParams.get('search') || '',
             priceMin: searchParams.get('priceMin') || '',
             priceMax: searchParams.get('priceMax') || '',
             location: searchParams.get('location') || '',
+            // New car filters from URL
+            make: searchParams.get('make') || '',
+            model: searchParams.get('model') || '',
+            yearMin: searchParams.get('yearMin') || '',
+            yearMax: searchParams.get('yearMax') || '',
+            transmission: searchParams.get('transmission') || '',
+            fuelType: searchParams.get('fuelType') || '',
+            condition: searchParams.get('condition') || '',
+            auctionType: searchParams.get('auctionType') || '',
+            allowOffers: searchParams.get('allowOffers') || '',
+            sortBy: searchParams.get('sortBy') || 'createdAt',
+            sortOrder: searchParams.get('sortOrder') || 'desc'
         };
 
         // Clean empty values
-        const cleanUrlFilters = Object.fromEntries(
-            Object.entries(urlFilters).filter(([_, value]) => value !== '')
-        );
+        const cleanUrlFilters = cleanFilters(urlFilters);
 
         if (Object.keys(cleanUrlFilters).length > 0) {
             // If we have URL parameters, use them for initial fetch
-            const initialFilters = {
-                ...filters,
-                ...cleanUrlFilters
-            };
-            setFilters(initialFilters);
-            fetchAuctions(1, 12, initialFilters);
+            setFilters(urlFilters);
+            fetchAuctions(1, 12, urlFilters);
         } else {
             // If no URL parameters, fetch with default filters
             fetchAuctions(1, 12, filters);
         }
-    }, [location.search]); // Run when URL changes
+    }, [location.search]);
 
     return {
         auctions,

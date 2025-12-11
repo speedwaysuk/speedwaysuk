@@ -63,7 +63,6 @@ export const registerUser = async (req, res) => {
             countryName,
             phone = '',
             image = '',
-            paymentMethodId // Only for bidders
         } = req.body;
 
         // Normalize email to lowercase
@@ -85,47 +84,6 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        let stripeCustomerId = null;
-        let paymentMethodDetails = null;
-
-        // Handle bidder-specific payment verification
-        // if (userType === 'bidder') {
-            if (!paymentMethodId) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Payment method ID is required for bidders'
-                });
-            }
-
-            try {
-                // Create Stripe customer
-                const customer = await StripeService.createCustomer(
-                    email,
-                    `${firstName} ${lastName}`
-                );
-                stripeCustomerId = customer.id;
-
-                // VERIFY AND SAVE CARD FOR FUTURE USE
-                const verificationResult = await StripeService.verifyAndSaveCard(
-                    stripeCustomerId,
-                    paymentMethodId
-                );
-
-                if (!verificationResult.success) {
-                    throw new Error('Card verification failed');
-                }
-
-                paymentMethodDetails = verificationResult.paymentMethod;
-
-            } catch (stripeError) {
-                console.error('Stripe verification error:', stripeError);
-                return res.status(400).json({
-                    success: false,
-                    message: `Card verification failed: ${stripeError.message}`
-                });
-            }
-        // }
-
         // Create user in database
         const userData = {
             firstName,
@@ -138,21 +96,8 @@ export const registerUser = async (req, res) => {
             countryName,
             phone,
             image,
-            stripeCustomerId,
-            isVerified: false
+            isVerified: true
         };
-
-        // Add payment details for bidders
-        // if (userType === 'bidder' && paymentMethodDetails) {
-        if (paymentMethodDetails) {
-            userData.paymentMethodId = paymentMethodDetails.id;
-            userData.cardLast4 = paymentMethodDetails.last4;
-            userData.cardBrand = paymentMethodDetails.brand;
-            userData.cardExpMonth = paymentMethodDetails.expMonth;
-            userData.cardExpYear = paymentMethodDetails.expYear;
-            userData.isVerified = true; // Users are verified after payment verification
-            userData.isPaymentVerified = true;
-        }
 
         const user = await User.create(userData);
 
@@ -385,8 +330,6 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-// Add these to your user controller
-
 export const getBillingInfo = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select(
@@ -443,7 +386,7 @@ export const getBillingInfo = async (req, res) => {
 //         }
 
 //         const user = await User.findById(userId);
-        
+
 //         if (!user) {
 //             return res.status(404).json({
 //                 success: false,
@@ -520,7 +463,7 @@ export const updatePaymentMethod = async (req, res) => {
         }
 
         const user = await User.findById(userId);
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -562,7 +505,7 @@ export const updatePaymentMethod = async (req, res) => {
         // These are the old $2500 authorizations that were replaced by final commissions
         const succeededAuthorizations = await BidPayment.find({
             bidder: userId,
-            type: 'bid_authorization', 
+            type: 'bid_authorization',
             status: 'succeeded'
         });
 

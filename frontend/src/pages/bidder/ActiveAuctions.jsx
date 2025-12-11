@@ -132,7 +132,7 @@ function ActiveAuctions() {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                             <div>
                                 <h2 className="text-3xl md:text-4xl font-bold my-5">Active Auctions</h2>
-                                <p className="text-secondary">Discover and bid on exclusive aviation items and memorabilia.</p>
+                                <p className="text-secondary">Discover and bid on exclusive vehicles and cars.</p>
                             </div>
                             <div className="mt-4 md:mt-0">
                                 <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -172,7 +172,7 @@ function ActiveAuctions() {
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                                     <input
                                         type="text"
-                                        placeholder="Search aviation auctions by title or description..."
+                                        placeholder="Search vehicle auctions by title or description..."
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -278,7 +278,7 @@ function ActiveAuctions() {
                                     setSearchTerm("");
                                     setCategoryFilter("all");
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                                className="bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black px-6 py-2 rounded-lg transition-colors"
                             >
                                 Clear All Filters
                             </button>

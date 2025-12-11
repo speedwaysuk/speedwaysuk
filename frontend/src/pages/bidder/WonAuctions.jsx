@@ -96,7 +96,7 @@ function WonAuctions() {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: "USD",
+            currency: "GBP",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
@@ -145,7 +145,7 @@ function WonAuctions() {
                             <p className="text-red-600">{error}</p>
                             <button
                                 onClick={fetchWonAuctions}
-                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                className="mt-4 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-[#1e2d3b]/90"
                             >
                                 Try Again
                             </button>
@@ -210,7 +210,7 @@ function WonAuctions() {
                                     <p className="text-3xl font-bold mt-1">
                                         {formatCurrency(statistics.totalSpent)}
                                     </p>
-                                    <p className="text-green-200 text-xs mt-1">In Winning Bids</p>
+                                    <p className="text-green-200 text-xs mt-1">In Winning Auctions</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
                                     <DollarSign size={24} />
@@ -241,7 +241,7 @@ function WonAuctions() {
                                         {((1 - statistics.averageSavings) * 100).toFixed(1)}%
                                     </p>
                                     <p className="text-purple-200 text-xs mt-1">
-                                        Over Starting Bid
+                                        Over Starting Price
                                     </p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
@@ -292,7 +292,7 @@ function WonAuctions() {
                         {auctions.map((auction) => (
                             <div
                                 key={auction._id}
-                                className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transform hover:scale-105 transition-all duration-300"
+                                className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transform hover:scale-[102%] transition-all duration-300"
                             >
 
                                 <div className="p-6">
@@ -312,7 +312,8 @@ function WonAuctions() {
                                             <div className="text-2xl font-bold text-green-600">
                                                 {formatCurrency(auction.finalBid)}
                                             </div>
-                                            <div className="text-sm text-gray-500">Winning Bid</div>
+                                            {/* <div className="text-sm text-gray-500">Winning Bid</div> */}
+                                            <div className="text-sm text-gray-500">Winning Amount</div>
                                         </div>
                                     </div>
 
@@ -339,21 +340,48 @@ function WonAuctions() {
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">Starting Bid</p>
+                                            {/* <p className="text-sm text-gray-500">Starting Bid</p> */}
+                                            <p className="text-sm text-gray-500">Starting Price</p>
                                             <p className="font-semibold text-blue-600">
                                                 {formatCurrency(auction.startingBid)}
                                             </p>
                                         </div>
+                                        {
+                                            auction.buyNowPrice && (
+                                                <div>
+                                                    {/* <p className="text-sm text-gray-500">Your Max Bid</p> */}
+                                                    <p className="text-sm text-gray-500">Buy Now Price</p>
+                                                    <p className="font-semibold">
+                                                        {formatCurrency(auction?.buyNowPrice)}
+                                                    </p>
+                                                </div>
+                                            )
+                                        }
                                         <div>
-                                            <p className="text-sm text-gray-500">Your Max Bid</p>
-                                            <p className="font-semibold">
-                                                {formatCurrency(auction.yourMaxBid)}
-                                            </p>
+                                            {/* <p className="text-sm text-gray-500">Total Bids</p> */}
+                                            <p className="text-sm text-gray-500">Total Offers</p>
+                                            <p className="font-semibold">{auction?.offersCount} offers</p>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">Total Bids</p>
-                                            <p className="font-semibold">{auction.bids} bids</p>
-                                        </div>
+                                        {
+                                            auction?.paymentStatus && (
+                                                <div>
+                                                    {/* <p className="text-sm text-gray-500">Your Max Bid</p> */}
+                                                    <p className="text-sm text-gray-500">Payment Status</p>
+                                                    <p className="font-semibold capitalize">{auction?.paymentStatus}</p>
+                                                </div>
+                                            )
+                                        }
+                                        {
+                                            auction?.invoice && (
+                                                <div>
+                                                    {/* <p className="text-sm text-gray-500">Your Max Bid</p> */}
+                                                    <p className="text-sm text-gray-500">Invoice</p>
+                                                    <Link target="_blank" to={auction?.invoice?.url} className="font-semibold text-blue-600 underline">
+                                                        View
+                                                    </Link>
+                                                </div>
+                                            )
+                                        }
                                     </div>
 
                                     {/* Seller Info */}
@@ -385,7 +413,7 @@ function WonAuctions() {
                                         <Link
                                             to={`/auction/${auction._id}`}
                                             target="_blank"
-                                            className="flex-1 text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all"
+                                            className="flex-1 text-center bg-gradient-to-r from-[#edcd1f]/80 to-[#edcd1f] text-black py-3 rounded-lg font-semibold hover:from-[#edcd1f]/90 hover:to-[#edcd1f] transition-all"
                                         >
                                             View Auction
                                         </Link>

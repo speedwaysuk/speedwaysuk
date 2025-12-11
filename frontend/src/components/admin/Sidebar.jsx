@@ -21,7 +21,9 @@ import {
     DollarSign,
     UserCircle,
     MessageCircle,
-    Hand
+    Hand,
+    Tags,
+    PoundSterling
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
@@ -45,56 +47,40 @@ const navigation = [
         icon: <Gavel size={20} />
     },
     {
-        name: 'Bids',
-        path: '/admin/bids',
+        name: 'Offers',
+        path: '/admin/offers',
         icon: <Hand size={20} />
     },
     {
-        name: 'Transactions',
-        path: '/admin/transactions',
-        icon: <DollarSign size={20} />,
-        // submenu: [
-        //     { name: 'Transactions', path: '/admin/financial/transactions' },
-        //     { name: 'Revenue Analytics', path: '/admin/financial/revenue' },
-        //     { name: 'Commission Reports', path: '/admin/financial/commissions' },
-        //     { name: 'Payouts', path: '/admin/financial/payouts' },
-        //     { name: 'Tax Documents', path: '/admin/financial/taxes' }
-        // ]
+        name: 'Categories',
+        path: '/admin/categories',
+        icon: <Tags size={20} />
     },
+    // {
+    //     name: 'Bids',
+    //     path: '/admin/bids',
+    //     icon: <Hand size={20} />
+    // },
+    // {
+    //     name: 'Transactions',
+    //     path: '/admin/transactions',
+    //     icon: <PoundSterling size={20} />
+    // },
     {
         name: 'Comments',
         path: '/admin/comments',
         icon: <MessageCircle size={20} />,
-        // submenu: [
-        //     { name: 'Reported Content', path: '/admin/moderation/reports' },
-        //     { name: 'Flagged Listings', path: '/admin/moderation/flagged' },
-        //     { name: 'User Reports', path: '/admin/moderation/user-reports' },
-        //     { name: 'Approval Queue', path: '/admin/moderation/approval' }
-        // ]
     },
     {
         name: 'Support',
         path: '/admin/support/inquiries',
         icon: <MessageSquare size={20} />,
-        // submenu: [
-        //     { name: 'Support Tickets', path: '/admin/support/tickets' },
-        //     { name: 'User Inquiries', path: '/admin/support/inquiries' },
-        //     { name: 'Dispute Resolution', path: '/admin/support/disputes' },
-        //     { name: 'FAQ Management', path: '/admin/support/faq' }
-        // ]
     },
-    {
-        name: 'Commissions',
-        path: '/admin/commissions',
-        icon: <Settings size={20} />,
-        // submenu: [
-        //     { name: 'Platform Settings', path: '/admin/settings/platform' },
-        //     { name: 'Payment Gateway', path: '/admin/settings/payments' },
-        //     { name: 'Email Templates', path: '/admin/settings/emails' },
-        //     { name: 'API Management', path: '/admin/settings/api' },
-        //     { name: 'Backup & Security', path: '/admin/settings/security' }
-        // ]
-    },
+    // {
+    //     name: 'Commissions',
+    //     path: '/admin/commissions',
+    //     icon: <Settings size={20} />,
+    // },
     // {
     //     name: 'Notifications',
     //     path: '/admin/notifications',
@@ -160,7 +146,7 @@ function Sidebar() {
             {/* Mobile menu button */}
             <button
                 onClick={toggleSidebar}
-                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-black text-white`}
+                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-[#1e2d3b] text-white`}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -168,21 +154,21 @@ function Sidebar() {
             {/* Overlay for mobile */}
             {isOpen && isMobile && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    className="fixed inset-0 bg-[#1e2d3b] bg-opacity-50 z-40"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white h-screen md:h-auto md:min-h-screen overflow-y-auto z-50 p-4 flex flex-col 
+                fixed md:relative w-64 bg-gradient-to-b from-[#1e2d3b] to-[#1e2d3b] text-white h-screen md:h-auto md:min-h-screen overflow-y-auto z-50 p-4 flex flex-col 
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 {/* Logo/Brand */}
                 <div className="px-4 mb-8 flex items-center justify-between pb-2 border-b border-gray-700">
                     <Link to={'/'}>
-                        <img src={logo} className="h-10" alt="logo" />
+                        <img src={logo} className="h-12 md:h-14" alt="logo" />
                     </Link>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -194,12 +180,12 @@ function Sidebar() {
 
                 {/* Admin Badge */}
                 <div className="px-4 mb-6">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-3 text-center">
+                    <div className="bg-gradient-to-r from-[#edcd1f]/90 via-[#edcd1f]/75 to-[#edcd1f]/60 rounded-lg p-3 text-center">
                         <div className="flex items-center justify-center gap-2">
                             <Shield size={16} />
                             <span className="text-sm font-medium">Administrator</span>
                         </div>
-                        <p className="text-xs text-blue-200 mt-1">Full System Access</p>
+                        <p className="text-xs text-white mt-1">Full System Access</p>
                     </div>
                 </div>
 
@@ -257,8 +243,8 @@ function Sidebar() {
                                         onClick={() => isMobile && setIsOpen(false)}
                                         className={({ isActive }) =>
                                             `flex items-center p-3 rounded-lg transition-all duration-200 ${isActive
-                                                ? 'bg-white text-black shadow-lg'
-                                                : 'text-white hover:bg-white hover:text-black'
+                                                ? 'bg-[#edcd1f] text-black shadow-lg'
+                                                : 'text-white hover:bg-[#edcd1f] hover:text-black'
                                             }`
                                         }
                                     >

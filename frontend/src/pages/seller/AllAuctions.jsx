@@ -385,7 +385,8 @@ function AllAuctions() {
                                                     </td>
                                                     <td className="py-4 px-6 text-sm text-gray-900">${auction.startPrice?.toLocaleString()}</td>
                                                     <td className="py-4 px-6 text-sm font-medium text-green-600">
-                                                        ${auction.currentPrice?.toLocaleString()}
+                                                        {/* ${auction.currentPrice?.toLocaleString()} */}
+                                                        {auction.bids?.length > 0 ? auction.currentPrice?.toLocaleString() : 'No Bids'}
                                                     </td>
                                                     <td className="py-4 px-6 text-sm text-gray-900">
                                                         <div className="flex items-center">

@@ -11,62 +11,55 @@ function Footer() {
         { name: 'Home', href: '/' },
         { name: 'About', href: '/about' },
         { name: 'Contact', href: '/contact' },
-        { name: 'Auctions', href: '/auctions' },
         { name: 'FAQs', href: '/faqs' },
     ];
 
     const legalPolicies = [
         { name: 'Privacy Policy', href: '/privacy-policy' },
         { name: 'Terms of Use', href: '/terms-of-use' },
-        { name: 'Seller Agreement', href: '/seller-agreement' },
+        // { name: 'Seller Agreement', href: '/seller-agreement' },
         { name: 'Buyer Agreement', href: '/buyer-agreement' },
         { name: 'Payment Refund Policy', href: '/payment-refund-policy' },
     ];
 
-    const categories = [
-        { name: 'Aircrafts', href: '/aircrafts' },
-        { name: 'Engines & Parts', href: '/parts' },
-        { name: 'Aviation Memorabilia', href: '/memorabilia' },
-    ];
-
     const categoryImg = [
         {
-            title: 'Aircraft',
+            title: 'Live',
+            url: '/auctions?status=active'
         },
         {
-            title: 'Engines & Parts',
+            title: 'Sold',
+            url: '/auctions?status=sold'
         },
         {
-            title: 'Memorabilia',
+            title: 'Upcoming',
+            url: '/auctions?status=approved'
+        },
+        {
+            title: 'Explore All',
+            url: '/auctions'
         }
     ];
 
-    const handleSearchByCategory = (title) => {
-        const params = new URLSearchParams();
-        params.append('category', title);
-
-        navigate(`/auctions?${params.toString()}`);
-    }
-
     return (
-        <footer className="bg-primary text-gray-200 font-light py-12">
+        <footer className="bg-[#1e2d3b] text-gray-200 font-light py-12">
             <Container className=' px-6 md:px-16 lg:px-24 xl:px-32'>
                 <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                     <div className='max-w-80'>
                         <Link to='/' className="flex gap-2 z-50 mb-4">
-                            <img src={logo} alt="logo" className="h-12" />
+                            <img src={logo} alt="logo" className="h-12 md:h-14" />
                         </Link>
                         <p className=''>
-                            Bid confidently on verified aircraft and rare aviation collectibles, with real-time auction updates to ensure every bidding experience is seamless, transparent, and trusted.
+                            Secure top-quality cars with confidence — verified listings and instant updates ensure a seamless and trustworthy buying experience.
                         </p>
                         <div className='flex items-center gap-3 mt-4'>
                             {/* Instagram */}
-                            <Link to="https://www.instagram.com/plane_vault/" target="_blank">
+                            <Link to="#" target="_blank">
                                 <Instagram strokeWidth={1.25} />
                             </Link>
 
                             {/* Facebook */}
-                            <Link to="https://www.facebook.com/people/Plane-Vault/61581993906127/" target="_blank">
+                            <Link to="#" target="_blank">
                                 <Facebook strokeWidth={1.25} />
                             </Link>
 
@@ -99,12 +92,14 @@ function Footer() {
 
                     <div>
                         <p className='text-lg text-gray-300 font-semibold'>
-                            Categories
+                            Auctions
                         </p>
                         <ul className='mt-3 flex flex-col gap-2 '>
                             {
                                 categoryImg.map(category => (
-                                    <li key={category.title} title={category.title} onClick={() => handleSearchByCategory(category.title)} className="cursor-pointer hover:underline" >{category.title}</li>
+                                    <li key={category.title} title={category.title} className="cursor-pointer hover:underline" >
+                                        <Link to={category?.url}>{category.title}</Link>
+                                    </li>
                                 ))
                             }
                         </ul>
@@ -133,7 +128,7 @@ function Footer() {
                             <li className="flex items-center gap-2">
                                 <Phone size={18} />
 
-                                <Link className="hover:underline" to={`tel:+1${otherData.phone}`}>(941) 391-1070</Link>
+                                <Link className="hover:underline" to={`tel:+1${otherData.phone}`}>(942) 874-7458</Link>
                             </li>
 
                             <li className="flex items-center gap-2">
@@ -151,7 +146,7 @@ function Footer() {
                     <p>
                         <span>© {new Date().getFullYear()} &nbsp;</span>
                         <Link to="/" className="underline">
-                            PlaneVault LLC.
+                            Speed Ways UK.
                         </Link>
                         &nbsp; All rights reserved. &nbsp;
                     </p>

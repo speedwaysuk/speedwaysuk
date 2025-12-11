@@ -22,13 +22,13 @@ const auctionRouter = Router();
 auctionRouter.post('/create', authSeller, upload.fields([
     { name: 'photos' },
     { name: 'documents' },
-    { name: 'logbooks' },
+    { name: 'serviceRecords' },
 ]), createAuction);
 
 auctionRouter.put('/update/:id', authSeller, upload.fields([
     { name: 'photos' },
     { name: 'documents' },
-    { name: 'logbooks' },
+    { name: 'serviceRecords' },
 ]), updateAuction);
 auctionRouter.delete('/delete/:id', authSeller, deleteAuction);
 auctionRouter.post('/bid/:id', authBidder, placeBid);

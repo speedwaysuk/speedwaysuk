@@ -20,6 +20,10 @@ const navLinks = [
         href: '/contact'
     },
     {
+        name: 'FAQs',
+        href: '/faqs'
+    },
+    {
         name: 'Auctions',
         href: '/auctions'
     },
@@ -49,7 +53,7 @@ function Header() {
         <header className={`${isScrolled ? 'fixed bg-white bg-opacity-100 shadow-lg shadow-primary/5' : 'absolute bg-opacity-0'} w-full transition-all duration-150 z-50`}>
             <Container className={`flex items-center justify-between py-4`}>
                 <Link to="/">
-                    <img src={(isScrolled || isMenuOpen) ? `${darkLogo}` : `${logo}`} alt="PlaneVault Logo" className="h-10 md:h-12 z-10" />
+                    <img src={(isScrolled || isMenuOpen) ? `${darkLogo}` : `${logo}`} alt="Speed Ways UK Logo" className="h-12 md:h-14 z-10" />
                 </Link>
 
                 {/* Navlinks for larger screens */}
@@ -61,15 +65,12 @@ function Header() {
                         {
                             navLinks.map(link => (
                                 <li key={link.name}>
-                                    <NavLink to={link.href} className={({ isActive }) => `${isActive && isScrolled ? 'text-secondary' : isActive && !isScrolled ? 'text-secondary' : isScrolled ? 'text-black' : 'text-white'} hover:underline`}>
+                                    <NavLink to={link.href} className={({ isActive }) => `${isActive && isScrolled ? 'text-[#edcd1f]' : isActive && !isScrolled ? 'text-[#edcd1f]' : isScrolled ? 'text-black' : 'text-white'} hover:underline`}>
                                         {link.name}
                                     </NavLink>
                                 </li>
                             ))
                         }
-                        <li>
-                            <NavLink className={({ isActive }) => `${isActive && isScrolled ? 'text-secondary' : isActive && !isScrolled ? 'text-secondary' : isScrolled ? 'text-black' : 'text-white'} hover:underline`} to={user ? '/seller/auctions/create' : '/register'}>Sell with Us</NavLink>
-                        </li>
                         <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
                             <button onClick={() => openPopup('category')} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
                         </li>
@@ -77,9 +78,9 @@ function Header() {
                             {
                                 user
                                     ?
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
+                                    <button className="flex items-center gap-2 bg-[#edcd1f] text-black px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
                                     :
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
+                                    <button className="flex items-center gap-2 bg-[#edcd1f] text-black px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
                             }
                         </li>
                     </ul>
@@ -102,9 +103,9 @@ function Header() {
                             {
                                 user
                                     ?
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
+                                    <button className="flex items-center gap-2 bg-[#edcd1f] text-black px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
                                     :
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => { navigate('/login'); setIsMenuOpen(false) }}><LogIn size={20} /> Log In</button>
+                                    <button className="flex items-center gap-2 bg-[#edcd1f] text-black px-5 py-2 rounded-md cursor-pointer" onClick={() => { navigate('/login'); setIsMenuOpen(false) }}><LogIn size={20} /> Log In</button>
                             }
                         </li>
                     </ul>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminContainer, AdminHeader, AdminSidebar, LoadingSpinner } from "../../components";
-import { Search, Filter, Mail, Phone, MapPin, Calendar, Award, Gavel, DollarSign, Shield, User, Edit, MoreVertical, UserX, Trash2, TrendingUp, Eye } from "lucide-react";
+import { Search, Filter, Mail, Phone, MapPin, Calendar, Award, Gavel, DollarSign, Shield, User, Edit, MoreVertical, UserX, Trash2, TrendingUp, Eye, Hand } from "lucide-react";
 import { about, dummyUserImg } from "../../assets";
 import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosInstance";
@@ -164,7 +164,7 @@ function AllUsers() {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'GBP',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(amount);
@@ -572,10 +572,10 @@ function AllUsers() {
                                                 {selectedUser.userType === 'bidder' && selectedUser.stats && (
                                                     <>
                                                         <div className="flex items-center gap-3">
-                                                            <Gavel size={18} className="text-blue-500" />
+                                                            <Hand size={18} className="text-blue-500" />
                                                             <div>
-                                                                <div className="text-sm text-gray-500">Total Bids</div>
-                                                                <div className="font-medium">{selectedUser.stats.totalBids || 0}</div>
+                                                                <div className="text-sm text-gray-500">Total Offers</div>
+                                                                <div className="font-medium">{selectedUser.stats.totalOffers || 0}</div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3">

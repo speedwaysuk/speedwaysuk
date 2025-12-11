@@ -44,7 +44,7 @@ function Contact() {
             name: '',
             email: '',
             phone: '',
-            userType: '',
+            userType: 'bidder',
             message: '',
         }
     });
@@ -153,23 +153,23 @@ function Contact() {
                             </label>
 
                             <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch gap-3 my-2">
-                                <label className={`flex items-center gap-5 border  py-3 px-5 rounded cursor-pointer ${userType === 'bidder' ? 'border-primary' : 'border-gray-200'}`}>
+                                <label className={`flex items-center gap-5 border  py-3 px-5 rounded cursor-pointer ${userType === 'bidder' ? 'border-[#edcd1f]' : 'border-gray-200'}`}>
                                     <input type="radio" value="bidder" hidden {...register('userType', { required: false })} />
-                                    <Gavel size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'bidder' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} />
+                                    <Gavel size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'bidder' ? 'bg-[#edcd1f] text-black' : 'bg-gray-200 text-primary'}`} />
                                     <div>
-                                        <p className="text-sm font-semibold">I'm a bidder</p>
-                                        <p className="text-sm text-gray-600">I need help related to bidding on the platform.</p>
+                                        <p className="text-sm font-semibold">I'm a buyer</p>
+                                        <p className="text-sm text-gray-600">I need help related to buying on the platform.</p>
                                     </div>
                                 </label>
 
-                                <label className={`flex items-center gap-5 border py-3 px-5 rounded cursor-pointer ${userType === 'seller' ? 'border-primary' : 'border-gray-200'}`}>
+                                {/* <label className={`flex items-center gap-5 border py-3 px-5 rounded cursor-pointer ${userType === 'seller' ? 'border-primary' : 'border-gray-200'}`}>
                                     <input type="radio" value="seller" hidden {...register('userType', { required: false })} />
                                     <Store size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'seller' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} />
                                     <div>
                                         <p className="text-sm font-semibold">I'm a seller</p>
                                         <p className="text-sm text-gray-600">I need help related to listing on the platform.</p>
                                     </div>
-                                </label>
+                                </label> */}
                             </div>
                         </div>
 
@@ -185,14 +185,14 @@ function Contact() {
                             )}
                         </div>
 
-                        <button className="inline-flex items-center justify-center gap-2 text-sm font-medium h-11 rounded-md px-8 w-full bg-primary hover:bg-primary/90 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer" type="submit">
+                        <button className="inline-flex items-center justify-center gap-2 text-sm font-medium h-11 rounded-md px-8 w-full bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer" type="submit">
                             {
                                 !sending ? 'Send Message' :
                                     (<span className="flex space-x-1">
-                                        <span className="w-2.5 h-2.5 bg-white rounded-full animate-bounce [animation-delay:-0.2s]"></span>
-                                        <span className="w-2.5 h-2.5 bg-white rounded-full animate-bounce [animation-delay:-0.1s]"></span>
-                                        <span className="w-2.5 h-2.5 bg-white rounded-full animate-bounce [animation-delay:-0.1s]"></span>
-                                        <span className="w-2.5 h-2.5 bg-white rounded-full animate-bounce"></span>
+                                        <span className="w-2.5 h-2.5 bg-black rounded-full animate-bounce [animation-delay:-0.2s]"></span>
+                                        <span className="w-2.5 h-2.5 bg-black rounded-full animate-bounce [animation-delay:-0.1s]"></span>
+                                        <span className="w-2.5 h-2.5 bg-black rounded-full animate-bounce [animation-delay:-0.1s]"></span>
+                                        <span className="w-2.5 h-2.5 bg-black rounded-full animate-bounce"></span>
                                     </span>)
                             }
                         </button>
@@ -205,12 +205,12 @@ function Contact() {
                     <img src={logo} alt="Logo" className="absolute top-7 left-7 h-10" loading="lazy" />
 
                     <div className="text-white absolute bottom-7 right-7 left-7">
-                        <p className="text-base md:text-lg">I had such a great experience with the customer support team! They were super friendly and quick to respond. Big thumbs up!</p>
+                        <p className="text-base md:text-lg">The customer support team was outstanding! They were friendly, responsive, and resolved my queries quickly. Highly impressed.</p>
 
                         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
                             <div>
-                                <p className="font-semibold">Leo Jepard</p>
-                                <p className="text-sm">PlaneVault's Bidder</p>
+                                <p className="font-semibold">Jake Frazer</p>
+                                <p className="text-sm">Speed Ways UK's Buyer</p>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 {
@@ -232,18 +232,18 @@ function Contact() {
                         Get In Touch
                     </h2>
                     <p className="text-primary mt-6 mb-8">
-                        Have questions about bidding or the listing process? Reach out and we'll get back to you within 24 hours.
+                        Have questions about buying process? Reach out and we'll get back to you within 24 hours.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                                <Phone size={20} className="text-white" />
+                            <div className="w-12 h-12 bg-[#edcd1f] rounded-lg flex items-center justify-center">
+                                <Phone size={20} className="text-wblack" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-1 text-lg">
                                     Phone
                                 </h3>
-                                <Link to={`tel:${otherData.phone}`} className="text-primary hover:underline">(941) 391-1070</Link>
+                                <Link to={`tel:${otherData.phone}`} className="text-primary hover:underline">(942) 874-7458</Link>
                                 <p className="text-sm text-gray-500">
                                     We respond within 24 hours
                                 </p>
@@ -251,8 +251,8 @@ function Contact() {
                         </div>
 
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                                <Mail size={20} className="text-white" />
+                            <div className="w-12 h-12 bg-[#edcd1f] rounded-lg flex items-center justify-center">
+                                <Mail size={20} className="text-whblack" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-1 text-lg">
@@ -266,8 +266,8 @@ function Contact() {
                         </div>
 
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                                <MapPin size={20} className="text-white" />
+                            <div className="w-12 h-12 bg-[#edcd1f] rounded-lg flex items-center justify-center">
+                                <MapPin size={20} className="text-black" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-1 text-lg">
@@ -281,8 +281,8 @@ function Contact() {
                         </div>
 
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                                <Clock size={20} className="text-white" />
+                            <div className="w-12 h-12 bg-[#edcd1f] rounded-lg flex items-center justify-center">
+                                <Clock size={20} className="text-wblack" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-1 text-lg">
@@ -300,9 +300,9 @@ function Contact() {
                 </div>
             </section>
 
-            <section className="my-14">
+            {/* <section className="my-14">
                 <FAQs faqs={faqs} />
-            </section>
+            </section> */}
         </Container>
     );
 }

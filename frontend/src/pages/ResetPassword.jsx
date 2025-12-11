@@ -98,7 +98,7 @@ function ResetPassword() {
                     </div>
 
                     <button 
-                        className="w-full bg-black py-2 text-white rounded cursor-pointer my-2 font-light hover:bg-black disabled:bg-black disabled:cursor-not-allowed flex items-center justify-center" 
+                        className="w-full bg-[#edcd1f] py-2 text-black rounded cursor-pointer my-2 font-light hover:bg-[#edcd1f] disabled:bg-[#edcd1f] disabled:cursor-not-allowed flex items-center justify-center" 
                         type="submit"
                         disabled={isLoading}
                     >

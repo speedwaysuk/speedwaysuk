@@ -5,7 +5,7 @@ function LoadingSpinner({height}) {
     <div
     style={{ minHeight: height }}
     className="w-full flex justify-center items-center">
-      <img src={spinner} alt="spinner" className="h-20 w-auto animate-spin" style={{ animation: "spin 0.35s linear infinite" }} />
+      <img src={spinner} alt="spinner" className="h-20 w-auto animate-spin" style={{ animation: "spin 0.65s linear infinite" }} />
     </div>
   );
 }

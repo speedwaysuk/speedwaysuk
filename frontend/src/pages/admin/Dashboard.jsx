@@ -3,7 +3,7 @@ import { LoadingSpinner, AdminContainer, AdminHeader, AdminSidebar } from "../..
 import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosInstance";
 import { useState } from "react";
-import { TrendingUp, Users, Gavel, DollarSign, Settings, Crown, Heart, MessageCircle, Hand, Store, UserCog, CheckSquare } from "lucide-react";
+import { TrendingUp, Users, Gavel, PoundSterling, Settings, Crown, Heart, MessageCircle, Hand, Store, UserCog, CheckSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function Dashboard() {
@@ -55,7 +55,7 @@ function Dashboard() {
         },
         {
             title: "Total Sellers",
-            value: adminStats?.userTypeStats?.seller?.toLocaleString(),
+            value: adminStats?.userTypeStats?.seller?.toLocaleString() || 0,
             change: `+${adminStats.recentUsers || 0} this week`,
             icon: <Store size={24} />,
             trend: "up",
@@ -102,21 +102,56 @@ function Dashboard() {
             description: "Needs Approval"
         },
         {
+            title: "Total Offers",
+            value: adminStats?.totalOffers?.toLocaleString(),
+            change: `Today: £${adminStats?.totalOffers?.toLocaleString() || 0}`,
+            icon: <Hand size={24} />,
+            trend: "up",
+            description: "All-time offers received"
+        },
+        {
+            title: "Total Offer Value",
+            value: adminStats?.totalOfferValue?.toLocaleString(),
+            change: `Today: £${adminStats?.totalOfferValue?.toLocaleString() || 0}`,
+            icon: <Hand size={24} />,
+            trend: "up",
+            currency: "£",
+            description: "Total value of all offers"
+        },
+        {
+            title: "Highest Offer",
+            value: adminStats?.highestOfferAmount?.toLocaleString(),
+            change: `Today: £${adminStats?.highestOfferAmount?.toLocaleString() || 0}`,
+            icon: <Hand size={24} />,
+            trend: "up",
+            currency: "£",
+            description: "All-time highest offer"
+        },
+        {
+            title: "Average Offer",
+            value: adminStats?.averageOfferAmount?.toFixed(0)?.toLocaleString(),
+            change: `Today: £${adminStats?.averageOfferAmount?.toLocaleString() || 0}`,
+            icon: <Hand size={24} />,
+            trend: "up",
+            currency: "£",
+            description: "Average offer amount"
+        },
+        {
             title: "Total Sales",
             value: adminStats.totalRevenue?.toLocaleString(),
-            change: `Today: $${adminStats.todayRevenue?.toLocaleString() || 0}`,
-            icon: <DollarSign size={24} />,
+            change: `Today: £${adminStats.todayRevenue?.toLocaleString() || 0}`,
+            icon: <PoundSterling size={24} />,
             trend: "up",
-            currency: "$",
+            currency: "£",
             description: "All-time platform revenue"
         },
         {
             title: "Today Sales",
             value: adminStats?.todayRevenue?.toLocaleString(),
-            change: `Today: $${adminStats.todayRevenue?.toLocaleString() || 0}`,
-            icon: <DollarSign size={24} />,
+            change: `Today: £${adminStats.todayRevenue?.toLocaleString() || 0}`,
+            icon: <PoundSterling size={24} />,
             trend: "up",
-            currency: "$ ",
+            currency: "£ ",
             description: "Today's Platform Revenue"
         },
         {
@@ -125,25 +160,33 @@ function Dashboard() {
             change: "Record sale",
             icon: <Crown size={24} />,
             trend: "up",
-            currency: "$",
+            currency: "£",
             description: adminStats.highestSaleAuction?.title || "No sales yet"
         },
         {
             title: "Average Sale",
             value: adminStats?.averageSalePrice?.toLocaleString(),
             change: "Record sale",
-            icon: <Crown size={24} />,
+            icon: <PoundSterling size={24} />,
             trend: "up",
-            currency: "$",
+            currency: "£",
             description: `${adminStats?.totalSoldAuctions} Sold Auctions`
         },
+        // {
+        //     title: "Total Bids",
+        //     value: adminStats?.totalBids?.toLocaleString(),
+        //     change: "Record sale",
+        //     icon: <Hand size={24} />,
+        //     trend: "up",
+        //     description: `On ${adminStats?.totalAuctions} Auctions`
+        // },
         {
-            title: "Total Bids",
-            value: adminStats?.totalBids?.toLocaleString(),
-            change: "Record sale",
+            title: "Pending Offers",
+            value: adminStats?.pendingOffers?.toLocaleString(),
+            change: `Today: £${adminStats?.pendingOffers?.toLocaleString() || 0}`,
             icon: <Hand size={24} />,
-            trend: "up",
-            description: `On ${adminStats?.totalAuctions} Auctions`
+            trend: "down",
+            description: "Offers awaiting review"
         },
         {
             title: "Total Comments",
@@ -182,7 +225,7 @@ function Dashboard() {
                 <AdminContainer>
                     <div className="max-w-full pt-16 pb-7 md:pt-0">
                         <div className="flex items-center gap-3 mb-2">
-                            <Crown size={32} className="text-blue-600" />
+                            <Crown size={32} className="text-[#1e2d3b]" />
                             <h2 className="text-3xl md:text-4xl font-bold">Admin Dashboard</h2>
                         </div>
                         <p className="text-gray-600">Monitor platform performance and manage system operations</p>
@@ -226,21 +269,21 @@ function Dashboard() {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <div className="flex items-center gap-2 mb-2">
-                                                <Crown size={20} className="text-purple-600" />
-                                                <h3 className="text-lg font-semibold text-purple-800">Highest Sale Record</h3>
+                                                <Crown size={20} className="text-[#1e2d3b]" />
+                                                <h3 className="text-lg font-semibold text-[#1e2d3b]">Highest Sale Record</h3>
                                             </div>
-                                            <p className="text-2xl font-bold text-purple-900">
-                                                ${adminStats.highestSaleAmount?.toLocaleString()}
+                                            <p className="text-2xl font-bold text-[#1e2d3b]">
+                                                £{adminStats.highestSaleAmount?.toLocaleString()}
                                             </p>
-                                            <p className="text-sm text-purple-600 mt-1">{adminStats.highestSaleAuction.title}</p>
-                                            <div className="flex gap-4 mt-2 text-xs text-purple-700">
+                                            <p className="text-sm text-[#1e2d3b] mt-1">{adminStats.highestSaleAuction.title}</p>
+                                            <div className="flex gap-4 mt-2 text-xs text-[#1e2d3b]">
                                                 <span>Seller: {adminStats.highestSaleAuction.seller}</span>
                                                 <span>Buyer: {adminStats.highestSaleAuction.winner}</span>
                                                 <span>Date: {new Date(adminStats.highestSaleAuction.date).toLocaleDateString()}</span>
                                             </div>
                                         </div>
-                                        <div className="hidden md:block bg-purple-100 p-3 rounded-lg">
-                                            <Crown size={32} className="text-purple-600" />
+                                        <div className="hidden md:block bg-[#1e2d3b]/10 p-3 rounded-lg">
+                                            <Crown size={32} className="text-[#1e2d3b]" />
                                         </div>
                                     </div>
                                 </div>
@@ -260,13 +303,13 @@ function Dashboard() {
                                             <Gavel size={24} className="mx-auto mb-2 text-green-600 group-hover:scale-110 transition-transform" />
                                             <p className="text-sm font-medium text-green-800">Auction Oversight</p>
                                         </Link>
-                                        <Link to="/admin/transactions" className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center hover:bg-purple-100 transition-colors group">
-                                            <DollarSign size={24} className="mx-auto mb-2 text-purple-600 group-hover:scale-110 transition-transform" />
-                                            <p className="text-sm font-medium text-purple-800">Transactions</p>
+                                        <Link to="/admin/offers" className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center hover:bg-purple-100 transition-colors group">
+                                            <Hand size={24} className="mx-auto mb-2 text-purple-600 group-hover:scale-110 transition-transform" />
+                                            <p className="text-sm font-medium text-purple-800">Offers</p>
                                         </Link>
-                                        <Link to="/admin/commissions" className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors group">
-                                            <Settings size={24} className="mx-auto mb-2 text-gray-600 group-hover:scale-110 transition-transform" />
-                                            <p className="text-sm font-medium text-gray-800">Commission</p>
+                                        <Link to="/admin/comments" className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors group">
+                                            <MessageCircle size={24} className="mx-auto mb-2 text-gray-600 group-hover:scale-110 transition-transform" />
+                                            <p className="text-sm font-medium text-gray-800">Comments</p>
                                         </Link>
                                     </div>
                                 </div>

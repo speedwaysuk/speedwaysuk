@@ -87,8 +87,6 @@ export const addComment = async (req, res) => {
             user: { $ne: userId }
         }).distinct('user');
 
-        console.log('Previous commenter IDs:', previousCommenters);
-
         const commenterUsers = await User.find({
             _id: { $in: previousCommenters },
         });

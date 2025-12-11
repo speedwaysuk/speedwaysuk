@@ -17,10 +17,14 @@ import {
     MapPin,
     Gavel,
     Youtube,
-    Plane,
+    Car,
     Cog,
     Trophy,
-    Move
+    Move,
+    Fuel,
+    Gauge,
+    Calendar,
+    User
 } from "lucide-react";
 import { RTE, SellerContainer, SellerHeader, SellerSidebar } from '../../components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -32,7 +36,7 @@ const ItemTypes = {
     PHOTO: 'photo',
 };
 
-// Draggable Photo Component (same as admin)
+// Draggable Photo Component
 const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
     const ref = useRef(null);
 
@@ -111,7 +115,7 @@ const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
     );
 };
 
-// Photo Gallery Component (same as admin)
+// Photo Gallery Component
 const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
     return (
         <div className="mt-4">
@@ -136,7 +140,32 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
     );
 };
 
-// Upload Progress Modal (same as admin)
+// Service History Gallery Component
+const ServiceHistoryGallery = ({ serviceRecords, moveServiceRecord, removeServiceRecord }) => {
+    return (
+        <div className="mt-4">
+            <p className="text-sm text-secondary mb-3">
+                Drag and drop to reorder service history images.
+                <span className="block text-xs text-gray-500 mt-1">
+                    Blue badge indicates existing service records
+                </span>
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {serviceRecords.map((record, index) => (
+                    <DraggablePhoto
+                        key={record.id}
+                        photo={record}
+                        index={index}
+                        movePhoto={moveServiceRecord}
+                        removePhoto={removeServiceRecord}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// Upload Progress Modal
 const UploadProgressModal = ({ isOpen, fileCount, isEdit = false }) => {
     if (!isOpen) return null;
 
@@ -144,7 +173,7 @@ const UploadProgressModal = ({ isOpen, fileCount, isEdit = false }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md mx-4">
                 <div className="flex items-center mb-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mr-3"></div>
                     <h3 className="text-lg font-semibold">
                         {isEdit ? 'Updating Your Auction' : 'Creating Your Auction'}
                     </h3>
@@ -175,36 +204,25 @@ const UploadProgressModal = ({ isOpen, fileCount, isEdit = false }) => {
     );
 };
 
-// Category-specific field configurations (same as admin)
+// Category-specific field configurations (Same as CreateAuction)
 const categoryFields = {
-    'Aircraft': [
-        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
-        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
+    'ALL': [
+        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Porsche, Toyota, Tesla' },
+        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 911, Camry, Model S' },
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
-        { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
-        { name: 'totalHours', label: 'Total Hours', type: 'number', required: true, min: 0 },
-        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
-        { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
-        { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
-        { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
-        { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
-        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] }
-    ],
-    'Engines & Parts': [
-        { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
-        { name: 'partNumber', label: 'Part Number', type: 'text', required: true, placeholder: 'Manufacturer part number' },
-        { name: 'manufacturer', label: 'Manufacturer', type: 'text', required: true, placeholder: 'e.g., Lycoming, Garmin, Honeywell' },
-        { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed'] },
-        { name: 'hoursSinceNew', label: 'Hours Since New/Overhaul', type: 'number', required: false, min: 0 },
-        { name: 'serialNumber', label: 'Serial Number', type: 'text', required: false },
-    ],
-    'Memorabilia': [
-        { name: 'itemType', label: 'Item Type', type: 'select', required: true, options: ['Uniform', 'Document', 'Model', 'Photograph', 'Instrument', 'Other'] },
-        { name: 'era', label: 'Historical Era', type: 'select', required: true, options: ['WWI', 'WWII', 'Cold War', 'Modern', 'Vintage'] },
-        { name: 'authenticity', label: 'Authenticity', type: 'select', required: true, options: ['Certified', 'Documented', 'Unknown'] },
-        { name: 'year', label: 'Year', type: 'number', required: false, min: 1800, max: 2025 },
-        { name: 'dimensions', label: 'Dimensions', type: 'text', required: false, placeholder: 'e.g., 24x36 inches' },
-        { name: 'material', label: 'Material', type: 'text', required: false, placeholder: 'e.g., Brass, Wood, Fabric' }
+        { name: 'vin', label: 'VIN', type: 'text', required: true, placeholder: '17-character Vehicle Identification Number' },
+        { name: 'mileage', label: 'Mileage', type: 'number', required: true, min: 0, placeholder: 'e.g., 15000' },
+        { name: 'engine', label: 'Engine', type: 'text', required: true, placeholder: 'e.g., 3.8L Flat-6, 2.0L Turbo, Electric' },
+        { name: 'horsepower', label: 'Horsepower', type: 'number', required: true, min: 0, placeholder: 'e.g., 300' },
+        { name: 'transmission', label: 'Transmission', type: 'select', required: true, options: ['Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
+        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'] },
+        { name: 'color', label: 'Exterior Color', type: 'text', required: true, placeholder: 'e.g., Red, Blue, Black' },
+        { name: 'interiorColor', label: 'Interior Color', type: 'text', required: true, placeholder: 'e.g., Black Leather, Beige Cloth' },
+        { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project', 'Modified'] },
+        { name: 'owners', label: 'Number of Previous Owners', type: 'number', required: false, min: 1 },
+        { name: 'accidentHistory', label: 'Accident History', type: 'select', required: true, options: ['Clean', 'Minor', 'Major', 'Salvage'] },
+        { name: 'seating', label: 'Seating Capacity', type: 'number', required: true, min: 2, max: 9 },
+        { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Coupe', 'Sedan', 'Hatchback', 'SUV', 'Convertible', 'Truck', 'Van', 'Wagon'] },
     ]
 };
 
@@ -218,27 +236,35 @@ const EditAuction = () => {
     const [initialSpecifications, setInitialSpecifications] = useState({});
     const [removedPhotos, setRemovedPhotos] = useState([]);
     const [removedDocuments, setRemovedDocuments] = useState([]);
-    const [allLogbooks, setAllLogbooks] = useState([]);
-    const [removedLogbooks, setRemovedLogbooks] = useState([]);
-
-    // Calculate if there are new files to upload
-    const newPhotos = allPhotos.filter(photo => !photo.isExisting);
-    const hasNewUploads = newPhotos.length > 0 || uploadedDocuments.length > 0;
-    const totalNewFiles = newPhotos.length + uploadedDocuments.length;
+    const [allServiceRecords, setAllServiceRecords] = useState([]);
+    const [removedServiceRecords, setRemovedServiceRecords] = useState([]);
 
     const { auctionId } = useParams();
     const navigate = useNavigate();
 
     const categories = [
-        'Aircraft',
-        'Engines & Parts',
-        'Memorabilia'
+        'Sports',
+        'Convertible',
+        'Electric',
+        'Hatchback',
+        'Sedan',
+        'SUV',
+        'Classic',
+        'Luxury',
+        'Muscle',
+        'Off-Road',
+        'Truck',
+        'Van',
     ];
 
     const categoryIcons = {
-        'Aircraft': Plane,
-        'Engines & Parts': Cog,
-        'Memorabilia': Trophy
+        'Sports': Trophy,
+        'Convertible': Car,
+        'Electric': Cog,
+        'Hatchback': Car,
+        'Sedan': Car,
+        'SUV': Car,
+        'Classic': Calendar
     };
 
     const {
@@ -254,7 +280,10 @@ const EditAuction = () => {
         reset,
         formState: { errors }
     } = useForm({
-        mode: 'onChange'
+        mode: 'onChange',
+        defaultValues: {
+            auctionType: 'buy_now' // Add this
+        }
     });
 
     const auctionType = watch('auctionType');
@@ -264,10 +293,10 @@ const EditAuction = () => {
 
     // Get category-specific fields
     const getCategoryFields = () => {
-        return categoryFields[selectedCategory] || [];
+        return categoryFields['ALL'] || [];
     };
 
-    // Move photo function (same as admin)
+    // Move photo function
     const movePhoto = useCallback((dragIndex, hoverIndex) => {
         setAllPhotos(prevPhotos => {
             const updatedPhotos = [...prevPhotos];
@@ -277,7 +306,17 @@ const EditAuction = () => {
         });
     }, []);
 
-    // Format date for datetime-local input (same as admin)
+    // Move service record function
+    const moveServiceRecord = useCallback((dragIndex, hoverIndex) => {
+        setAllServiceRecords(prevRecords => {
+            const updatedRecords = [...prevRecords];
+            const [movedRecord] = updatedRecords.splice(dragIndex, 1);
+            updatedRecords.splice(hoverIndex, 0, movedRecord);
+            return updatedRecords;
+        });
+    }, []);
+
+    // Format date for datetime-local input
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -285,7 +324,7 @@ const EditAuction = () => {
         return localDate.toISOString().slice(0, 16);
     };
 
-    // Convert Map to object for form handling (same as admin)
+    // Convert Map to object for form handling
     const mapToObject = (map) => {
         if (!map) return {};
         if (map instanceof Map) {
@@ -298,7 +337,7 @@ const EditAuction = () => {
         return map;
     };
 
-    // Fetch auction data (same as admin)
+    // Fetch auction data
     useEffect(() => {
         const fetchAuctionData = async () => {
             try {
@@ -314,7 +353,7 @@ const EditAuction = () => {
                     const formData = {
                         title: auction.title,
                         category: auction.category,
-                        avionics: auction.avionics || '',
+                        features: auction.features || '',
                         description: auction.description,
                         location: auction.location,
                         video: auction.videoLink,
@@ -324,6 +363,8 @@ const EditAuction = () => {
                         bidIncrement: auction.bidIncrement,
                         auctionType: auction.auctionType,
                         reservePrice: auction.reservePrice,
+                        buyNowPrice: auction.buyNowPrice, // Add this
+                        allowOffers: auction.allowOffers // Add this
                     };
 
                     reset(formData);
@@ -342,20 +383,21 @@ const EditAuction = () => {
                     const existingPhotosWithFlag = (auction.photos || []).map(photo => ({
                         ...photo,
                         isExisting: true,
-                        id: photo.publicId || photo._id
+                        id: photo.publicId || photo._id,
+                        url: photo.url
                     }));
                     setAllPhotos(existingPhotosWithFlag);
 
                     setExistingDocuments(auction.documents || []);
 
-                    // Add logbooks initialization:
-                    const existingLogbooksWithFlag = (auction.logbooks || []).map(logbook => ({
-                        ...logbook,
+                    // Initialize service records (changed from logbooks)
+                    const existingServiceRecordsWithFlag = (auction.serviceRecords || []).map(record => ({
+                        ...record,
                         isExisting: true,
-                        id: logbook.publicId || logbook._id
+                        id: record.publicId || record._id,
+                        url: record.url
                     }));
-
-                    setAllLogbooks(existingLogbooksWithFlag);
+                    setAllServiceRecords(existingServiceRecordsWithFlag);
 
                     toast.success('Auction data loaded successfully');
                 }
@@ -371,7 +413,7 @@ const EditAuction = () => {
         if (auctionId) fetchAuctionData();
     }, [auctionId, reset, setValue, navigate]);
 
-    // Render category fields (same as admin - using register)
+    // Render category fields (Same as CreateAuction)
     const renderCategoryFields = () => {
         const fields = getCategoryFields();
 
@@ -379,10 +421,10 @@ const EditAuction = () => {
             <div className="mb-6">
                 <label className="text-sm font-medium text-secondary mb-4 flex items-center">
                     {(() => {
-                        const IconComponent = categoryIcons[selectedCategory] || FileText;
+                        const IconComponent = Car;
                         return <IconComponent size={20} className="mr-2" />;
                     })()}
-                    {selectedCategory} Specifications *
+                    Vehicle Specifications *
                 </label>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -411,7 +453,7 @@ const EditAuction = () => {
                                         required: field.required ? `${field.label} is required` : false
                                     })}
                                     id={field.name}
-                                    rows={3}
+                                    rows={1}
                                     placeholder={field.placeholder}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                 />
@@ -441,22 +483,20 @@ const EditAuction = () => {
         );
     };
 
-    // Next step function (same as admin)
+    // Next step function (Same as CreateAuction)
     const nextStep = async () => {
         let isValid = true;
 
         if (step === 1) {
             const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
 
-            // Add category-specific fields to validation
-            if (selectedCategory) {
-                const categoryFields = getCategoryFields();
-                categoryFields.forEach(field => {
-                    if (field.required) {
-                        fieldsToValidate.push(`specifications.${field.name}`);
-                    }
-                });
-            }
+            // Add ALL specification fields to validation
+            const allSpecFields = getCategoryFields();
+            allSpecFields.forEach(field => {
+                if (field.required) {
+                    fieldsToValidate.push(`specifications.${field.name}`);
+                }
+            });
 
             const overallValidationPassed = await trigger(fieldsToValidate);
 
@@ -477,9 +517,21 @@ const EditAuction = () => {
         }
 
         if (step === 2) {
-            const fieldsToValidate = ['startPrice', 'bidIncrement', 'auctionType'];
-            if (watch('auctionType') === 'reserve') {
+            // Check pricing fields based on auction type
+            const fieldsToValidate = ['auctionType'];
+
+            if (auctionType === 'standard' || auctionType === 'reserve') {
+                fieldsToValidate.push('startPrice', 'bidIncrement');
+            }
+
+            if (auctionType === 'reserve') {
                 fieldsToValidate.push('reservePrice');
+            }
+
+            if (auctionType === 'buy_now') {
+                fieldsToValidate.push('buyNowPrice');
+                // For buy now auctions, startPrice is also required
+                fieldsToValidate.push('startPrice');
             }
 
             const overallValidationPassed = await trigger(fieldsToValidate);
@@ -500,15 +552,13 @@ const EditAuction = () => {
         setStep(step - 1);
     };
 
-    // Fixed handlePhotoUpload function
+    // Handle photo upload
     const handlePhotoUpload = (e) => {
         const files = Array.from(e.target.files);
 
         if (files.length === 0) return;
 
-        // Generate consistent IDs using file properties and timestamp
         const newPhotos = files.map(file => {
-            // Create a more stable ID using file properties
             const fileId = `${file.name}-${file.size}-${file.lastModified}`;
             const uniqueId = `new-${Date.now()}-${fileId.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
@@ -516,12 +566,10 @@ const EditAuction = () => {
                 file,
                 isExisting: false,
                 id: uniqueId,
-                // Add a unique identifier to prevent duplicates
                 _fileSignature: `${file.name}-${file.size}-${file.lastModified}`
             };
         });
 
-        // Filter out duplicates based on file signature
         const existingSignatures = new Set(
             allPhotos
                 .filter(photo => !photo.isExisting)
@@ -538,7 +586,6 @@ const EditAuction = () => {
         }
 
         setAllPhotos(prev => {
-            // Remove any potential duplicates from previous state
             const existingSignatures = new Set(
                 prev.filter(p => !p.isExisting).map(p => p._fileSignature)
             );
@@ -551,21 +598,17 @@ const EditAuction = () => {
         });
 
         clearErrors('photos');
-
-        // Reset the file input
         e.target.value = '';
     };
 
-    // Remove photo (SAME AS ADMIN)
+    // Remove photo
     const removePhoto = (index) => {
         const photoToRemove = allPhotos[index];
 
         if (photoToRemove.isExisting) {
-            // Add to removed photos list for backend
             setRemovedPhotos(prev => [...prev, photoToRemove.id]);
         }
 
-        // Remove from all photos
         setAllPhotos(prev => prev.filter((_, i) => i !== index));
 
         if (allPhotos.length === 1) {
@@ -576,23 +619,15 @@ const EditAuction = () => {
         }
     };
 
-    const moveLogbook = useCallback((dragIndex, hoverIndex) => {
-        setAllLogbooks(prevLogbooks => {
-            const updatedLogbooks = [...prevLogbooks];
-            const [movedLogbook] = updatedLogbooks.splice(dragIndex, 1);
-            updatedLogbooks.splice(hoverIndex, 0, movedLogbook);
-            return updatedLogbooks;
-        });
-    }, []);
-
-    const handleLogbookUpload = (e) => {
+    // Handle service record upload
+    const handleServiceRecordUpload = (e) => {
         const files = Array.from(e.target.files);
 
         if (files.length === 0) return;
 
-        const newLogbooks = files.map(file => {
+        const newServiceRecords = files.map(file => {
             const fileId = `${file.name}-${file.size}-${file.lastModified}`;
-            const uniqueId = `new-logbook-${Date.now()}-${fileId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            const uniqueId = `new-service-${Date.now()}-${fileId.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
             return {
                 file,
@@ -603,52 +638,53 @@ const EditAuction = () => {
         });
 
         const existingSignatures = new Set(
-            allLogbooks
-                .filter(logbook => !logbook.isExisting)
-                .map(logbook => logbook._fileSignature)
+            allServiceRecords
+                .filter(record => !record.isExisting)
+                .map(record => record._fileSignature)
         );
 
-        const uniqueNewLogbooks = newLogbooks.filter(logbook =>
-            !existingSignatures.has(logbook._fileSignature)
+        const uniqueNewRecords = newServiceRecords.filter(record =>
+            !existingSignatures.has(record._fileSignature)
         );
 
-        if (uniqueNewLogbooks.length === 0) {
-            toast.error('Some logbook images are already added');
+        if (uniqueNewRecords.length === 0) {
+            toast.error('Some service records are already added');
             return;
         }
 
-        setAllLogbooks(prev => {
+        setAllServiceRecords(prev => {
             const existingSignatures = new Set(
-                prev.filter(l => !l.isExisting).map(l => l._fileSignature)
+                prev.filter(r => !r.isExisting).map(r => r._fileSignature)
             );
 
-            const filteredNewLogbooks = uniqueNewLogbooks.filter(logbook =>
-                !existingSignatures.has(logbook._fileSignature)
+            const filteredNewRecords = uniqueNewRecords.filter(record =>
+                !existingSignatures.has(record._fileSignature)
             );
 
-            return [...filteredNewLogbooks, ...prev];
+            return [...filteredNewRecords, ...prev];
         });
 
         e.target.value = '';
     };
 
-    const removeLogbook = (index) => {
-        const logbookToRemove = allLogbooks[index];
+    // Remove service record
+    const removeServiceRecord = (index) => {
+        const recordToRemove = allServiceRecords[index];
 
-        if (logbookToRemove.isExisting) {
-            setRemovedLogbooks(prev => [...prev, logbookToRemove.id]);
+        if (recordToRemove.isExisting) {
+            setRemovedServiceRecords(prev => [...prev, recordToRemove.id]);
         }
 
-        setAllLogbooks(prev => prev.filter((_, i) => i !== index));
+        setAllServiceRecords(prev => prev.filter((_, i) => i !== index));
     };
 
-    // Handle document upload (SAME AS ADMIN)
+    // Handle document upload
     const handleDocumentUpload = (e) => {
         const files = Array.from(e.target.files);
         setUploadedDocuments([...uploadedDocuments, ...files]);
     };
 
-    // Remove document (SAME AS ADMIN)
+    // Remove document
     const removeDocument = (index, isExisting = false) => {
         if (isExisting) {
             const removedDoc = existingDocuments[index];
@@ -659,24 +695,23 @@ const EditAuction = () => {
         }
     };
 
-    // Update auction handler (SAME AS ADMIN but with seller endpoint)
-    // Update auction handler with fixed photo handling
+    // Update auction handler
     const updateAuctionHandler = async (formData) => {
         try {
             setIsSubmitting(true);
 
             const formDataToSend = new FormData();
 
-            // Append all text fields
+            // Append all text fields (same as CreateAuction)
             formDataToSend.append('title', formData.title);
             formDataToSend.append('category', formData.category);
-            formDataToSend.append('avionics', formData.avionics || '');
+            formDataToSend.append('features', formData.features || '');
             formDataToSend.append('description', formData.description);
             formDataToSend.append('location', formData.location || '');
             formDataToSend.append('videoLink', formData.video || '');
             formDataToSend.append('startPrice', formData.startPrice);
-            formDataToSend.append('bidIncrement', formData.bidIncrement);
             formDataToSend.append('auctionType', formData.auctionType);
+            formDataToSend.append('allowOffers', formData.allowOffers || false); // Add this
             formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
             formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
 
@@ -686,14 +721,24 @@ const EditAuction = () => {
                 formDataToSend.append('specifications', JSON.stringify(currentSpecifications));
             }
 
-            // Add removed photos and documents
-            if (removedPhotos.length > 0) {
-                formDataToSend.append('removedPhotos', JSON.stringify(removedPhotos));
+            // Add bid increment only for standard/reserve auctions
+            if (formData.auctionType === 'standard' || formData.auctionType === 'reserve') {
+                formDataToSend.append('bidIncrement', formData.bidIncrement);
             }
 
             // Append reserve price if applicable
             if (formData.auctionType === 'reserve' && formData.reservePrice) {
                 formDataToSend.append('reservePrice', formData.reservePrice);
+            }
+
+            // Append buy now price if applicable
+            if (formData.auctionType === 'buy_now' && formData.buyNowPrice) {
+                formDataToSend.append('buyNowPrice', formData.buyNowPrice);
+            }
+
+            // Add removed photos and documents
+            if (removedPhotos.length > 0) {
+                formDataToSend.append('removedPhotos', JSON.stringify(removedPhotos));
             }
 
             if (removedDocuments.length > 0) {
@@ -707,12 +752,10 @@ const EditAuction = () => {
             }));
             formDataToSend.append('photoOrder', JSON.stringify(photoOrder));
 
-            // FIX: Only append new photos that haven't been uploaded before
+            // Append new photos (files) in the order they appear in allPhotos
             const newPhotosToUpload = allPhotos.filter(photo =>
                 !photo.isExisting && photo.file && !photo._uploaded
             );
-
-            // Append new photos (files) in the order they appear in allPhotos
             newPhotosToUpload.forEach((photo) => {
                 if (photo.file) {
                     formDataToSend.append('photos', photo.file);
@@ -724,28 +767,27 @@ const EditAuction = () => {
                 formDataToSend.append('documents', doc);
             });
 
-            // Send the complete logbook order
-            const logbookOrder = allLogbooks.map(logbook => ({
-                id: logbook.id,
-                isExisting: logbook.isExisting
+            // Add removed service records
+            if (removedServiceRecords.length > 0) {
+                formDataToSend.append('removedServiceRecords', JSON.stringify(removedServiceRecords));
+            }
+
+            // Send the complete service record order
+            const serviceRecordOrder = allServiceRecords.map(record => ({
+                id: record.id,
+                isExisting: record.isExisting
             }));
-            formDataToSend.append('logbookOrder', JSON.stringify(logbookOrder));
+            formDataToSend.append('serviceRecordOrder', JSON.stringify(serviceRecordOrder));
 
-            // Append new logbooks
-            const newLogbooksToUpload = allLogbooks.filter(logbook =>
-                !logbook.isExisting && logbook.file && !logbook._uploaded
+            // Append new service records
+            const newServiceRecordsToUpload = allServiceRecords.filter(record =>
+                !record.isExisting && record.file && !record._uploaded
             );
-
-            newLogbooksToUpload.forEach((logbook) => {
-                if (logbook.file) {
-                    formDataToSend.append('logbooks', logbook.file);
+            newServiceRecordsToUpload.forEach((record) => {
+                if (record.file) {
+                    formDataToSend.append('serviceRecords', record.file);
                 }
             });
-
-            // Append removed logbooks
-            if (removedLogbooks.length > 0) {
-                formDataToSend.append('removedLogbooks', JSON.stringify(removedLogbooks));
-            }
 
             // Use seller-specific endpoint
             const { data } = await axiosInstance.put(
@@ -782,8 +824,14 @@ const EditAuction = () => {
                     URL.revokeObjectURL(photo.url);
                 }
             });
+            // Clean up object URLs for new service records
+            allServiceRecords.forEach(record => {
+                if (!record.isExisting && record.url && record.url.startsWith('blob:')) {
+                    URL.revokeObjectURL(record.url);
+                }
+            });
         };
-    }, []);
+    }, [allPhotos, allServiceRecords]);
 
     if (isLoading) {
         return (
@@ -807,8 +855,8 @@ const EditAuction = () => {
                 <SellerSidebar />
 
                 <UploadProgressModal
-                    isOpen={isSubmitting && hasNewUploads}
-                    fileCount={totalNewFiles}
+                    isOpen={isSubmitting}
+                    fileCount={allPhotos.filter(p => !p.isExisting).length + uploadedDocuments.length}
                     isEdit={true}
                 />
 
@@ -817,13 +865,13 @@ const EditAuction = () => {
 
                     <SellerContainer>
                         <div className="pt-16 md:py-7">
-                            <h1 className="text-3xl md:text-4xl font-bold mb-5">Edit Auction</h1>
-                            <p className="text-secondary mb-8">Update your auction listing</p>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-5">Edit Car Auction</h1>
+                            <p className="text-secondary mb-8">Update your vehicle auction listing</p>
 
                             {/* Progress Steps */}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between mb-4">
-                                    {['Auction Info', 'Pricing & Bidding', 'Review & Submit'].map((label, index) => (
+                                    {['Vehicle Info', 'Pricing & Bidding', 'Review & Submit'].map((label, index) => (
                                         <div key={index} className="flex flex-col items-center">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step > index + 1 ? 'bg-green-500 text-white' :
                                                 step === index + 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
@@ -843,23 +891,23 @@ const EditAuction = () => {
                             </div>
 
                             <form onSubmit={handleSubmit(updateAuctionHandler)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                                {/* Step 1: Auction Information */}
+                                {/* Step 1: Vehicle Information */}
                                 {step === 1 && (
                                     <div>
                                         <h2 className="text-xl font-semibold mb-6 flex items-center">
-                                            <FileText size={20} className="mr-2" />
-                                            Auction Details
+                                            <Car size={20} className="mr-2" />
+                                            Vehicle Details
                                         </h2>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                             <div>
-                                                <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1">Item Name *</label>
+                                                <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1">Vehicle Name *</label>
                                                 <input
-                                                    {...register('title', { required: 'Item name is required' })}
+                                                    {...register('title', { required: 'Vehicle name is required' })}
                                                     id="title"
                                                     type="text"
                                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                    placeholder="e.g., 2017 VANS RV-6A"
+                                                    placeholder="e.g., 2020 Porsche 911 Carrera S"
                                                 />
                                                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
                                             </div>
@@ -883,23 +931,22 @@ const EditAuction = () => {
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
 
-                                        {/* Avionics Section - Only for Aircraft */}
-                                        {selectedCategory === 'Aircraft' && (
-                                            <div className="mb-6">
-                                                <label className="block text-sm font-medium text-secondary mb-1">
-                                                    Avionics & Equipment
-                                                </label>
-                                                <RTE
-                                                    name="avionics"
-                                                    control={control}
-                                                    label="Avionics:"
-                                                    defaultValue={getValues('avionics') || ''}
-                                                    onBlur={(value) => {
-                                                        setValue('avionics', value, { shouldValidate: true });
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
+                                        {/* Features & Options (commented out as in CreateAuction) */}
+                                        {/* <div className="mb-6">
+                                            <label className="block text-sm font-medium text-secondary mb-1">
+                                                Features & Options
+                                            </label>
+                                            <RTE
+                                                name="features"
+                                                control={control}
+                                                label="Features:"
+                                                defaultValue={getValues('features') || ''}
+                                                placeholder="List all features, options, and special equipment..."
+                                                onBlur={(value) => {
+                                                    setValue('features', value, { shouldValidate: true });
+                                                }}
+                                            />
+                                        </div> */}
 
                                         <div className="mb-6">
                                             <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
@@ -908,6 +955,7 @@ const EditAuction = () => {
                                                 control={control}
                                                 label="Description:"
                                                 defaultValue={getValues('description') || ''}
+                                                placeholder="Describe the vehicle's history, condition, and any notable details..."
                                                 onBlur={(value) => {
                                                     setValue('description', value, { shouldValidate: true });
                                                 }}
@@ -925,7 +973,7 @@ const EditAuction = () => {
                                                         id="location"
                                                         type="text"
                                                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="e.g., Dallas, Texas"
+                                                        placeholder="e.g., Los Angeles, California"
                                                     />
                                                 </div>
                                             </div>
@@ -944,7 +992,7 @@ const EditAuction = () => {
                                                         id="video"
                                                         type="url"
                                                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="YouTube video URL"
+                                                        placeholder="YouTube video URL (walkaround, test drive)"
                                                     />
                                                 </div>
                                                 {errors.video && <p className="text-red-500 text-sm mt-1">{errors.video.message}</p>}
@@ -1004,12 +1052,12 @@ const EditAuction = () => {
                                                 <label htmlFor="photo-upload" className="cursor-pointer">
                                                     <Image size={40} className="mx-auto text-gray-400 mb-2" />
                                                     <p className="text-gray-600">Browse photo(s) to upload</p>
-                                                    <p className="text-sm text-secondary">Recommended: at least 40 high-quality photos</p>
+                                                    <p className="text-sm text-secondary">Recommended: exterior, interior, engine, undercarriage, wheels</p>
                                                 </label>
                                             </div>
                                             {errors.photos && <p className="text-red-500 text-sm mt-1">{errors.photos.message}</p>}
 
-                                            {/* Unified Photo Gallery with Fixed Drag & Drop */}
+                                            {/* Unified Photo Gallery with Drag & Drop */}
                                             {allPhotos.length > 0 && (
                                                 <PhotoGallery
                                                     photos={allPhotos}
@@ -1032,7 +1080,7 @@ const EditAuction = () => {
                                                 <label htmlFor="document-upload" className="cursor-pointer">
                                                     <File size={40} className="mx-auto text-gray-400 mb-2" />
                                                     <p className="text-gray-600">Browse document(s) to upload</p>
-                                                    <p className="text-sm text-secondary">logbooks, maintenance records, ownership docs, etc.</p>
+                                                    <p className="text-sm text-secondary">Title, registration, maintenance records, ownership docs, etc.</p>
                                                 </label>
                                             </div>
 
@@ -1079,48 +1127,34 @@ const EditAuction = () => {
                                             )}
                                         </div>
 
-                                        {/* Logbook Images Section */}
+                                        {/* Service History Images Section */}
                                         <div className="mb-6">
-                                            <label htmlFor="logbook-upload" className="block text-sm font-medium text-secondary mb-1">
-                                                Logbook Images {selectedCategory === 'Aircraft' && '*'}
+                                            <label htmlFor="service-upload" className="block text-sm font-medium text-secondary mb-1">
+                                                Service History Images *
                                             </label>
                                             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                                                 <input
                                                     type="file"
                                                     multiple
                                                     accept="image/*"
-                                                    onChange={handleLogbookUpload}
+                                                    onChange={handleServiceRecordUpload}
                                                     className="hidden"
-                                                    id="logbook-upload"
+                                                    id="service-upload"
                                                 />
-                                                <label htmlFor="logbook-upload" className="cursor-pointer">
+                                                <label htmlFor="service-upload" className="cursor-pointer">
                                                     <FileText size={40} className="mx-auto text-gray-400 mb-2" />
-                                                    <p className="text-gray-600">Browse logbook image(s) to upload</p>
-                                                    <p className="text-sm text-secondary">Maintenance records, logbook pages, etc.</p>
+                                                    <p className="text-gray-600">Browse service record image(s) to upload</p>
+                                                    <p className="text-sm text-secondary">Service invoices, maintenance records, repair receipts, etc.</p>
                                                 </label>
                                             </div>
 
-                                            {/* Unified Logbook Gallery with Drag & Drop */}
-                                            {allLogbooks.length > 0 && (
-                                                <div className="mt-4">
-                                                    <p className="text-sm text-secondary mb-3">
-                                                        Drag and drop to reorder logbook images.
-                                                        <span className="block text-xs text-gray-500 mt-1">
-                                                            Blue badge indicates existing logbook images
-                                                        </span>
-                                                    </p>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                                        {allLogbooks.map((logbook, index) => (
-                                                            <DraggablePhoto
-                                                                key={logbook.id}
-                                                                photo={logbook}
-                                                                index={index}
-                                                                movePhoto={moveLogbook}
-                                                                removePhoto={removeLogbook}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                            {/* Unified Service History Gallery with Drag & Drop */}
+                                            {allServiceRecords.length > 0 && (
+                                                <ServiceHistoryGallery
+                                                    serviceRecords={allServiceRecords}
+                                                    moveServiceRecord={moveServiceRecord}
+                                                    removeServiceRecord={removeServiceRecord}
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -1133,6 +1167,28 @@ const EditAuction = () => {
                                             <DollarSign size={20} className="mr-2" />
                                             Pricing & Bidding
                                         </h2>
+
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {[
+                                                    // { value: 'standard', label: 'Standard Auction' },
+                                                    // { value: 'reserve', label: 'Reserve Price Auction' },
+                                                    { value: 'buy_now', label: 'Buy Now Auction' },
+                                                ].map((type) => (
+                                                    <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            {...register('auctionType', { required: 'Auction type is required' })}
+                                                            value={type.value}
+                                                            className="mr-3"
+                                                        />
+                                                        <span>{type.label}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.auctionType && <p className="text-red-500 text-sm mt-1">{errors.auctionType.message}</p>}
+                                        </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                             <div>
@@ -1155,46 +1211,27 @@ const EditAuction = () => {
                                                 {errors.startPrice && <p className="text-red-500 text-sm mt-1">{errors.startPrice.message}</p>}
                                             </div>
 
-                                            <div>
-                                                <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-                                                    <input
-                                                        {...register('bidIncrement', {
-                                                            required: 'Bid increment is required',
-                                                            min: { value: 0, message: 'Increment must be positive' }
-                                                        })}
-                                                        id="bidIncrement"
-                                                        type="number"
-                                                        step="0.01"
-                                                        min="0"
-                                                        className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                                                        placeholder="0.00"
-                                                    />
-                                                </div>
-                                                {errors.bidIncrement && <p className="text-red-500 text-sm mt-1">{errors.bidIncrement.message}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {[
-                                                    { value: 'standard', label: 'Standard Auction' },
-                                                    { value: 'reserve', label: 'Reserve Price Auction' },
-                                                ].map((type) => (
-                                                    <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                            {(auctionType === 'standard' || auctionType === 'reserve') && (
+                                                <div>
+                                                    <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
                                                         <input
-                                                            type="radio"
-                                                            {...register('auctionType', { required: 'Auction type is required' })}
-                                                            value={type.value}
-                                                            className="mr-3"
+                                                            {...register('bidIncrement', {
+                                                                required: 'Bid increment is required',
+                                                                min: { value: 0, message: 'Increment must be positive' }
+                                                            })}
+                                                            id="bidIncrement"
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                            placeholder="0.00"
                                                         />
-                                                        <span>{type.label}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                            {errors.auctionType && <p className="text-red-500 text-sm mt-1">{errors.auctionType.message}</p>}
+                                                    </div>
+                                                    {errors.bidIncrement && <p className="text-red-500 text-sm mt-1">{errors.bidIncrement.message}</p>}
+                                                </div>
+                                            )}
                                         </div>
 
                                         {auctionType === 'reserve' && (
@@ -1221,9 +1258,66 @@ const EditAuction = () => {
                                                     />
                                                 </div>
                                                 {errors.reservePrice && <p className="text-red-500 text-sm mt-1">{errors.reservePrice.message}</p>}
-                                                <p className="text-sm text-secondary mt-1">Item will not sell if bids don't reach this price</p>
+                                                <p className="text-sm text-secondary mt-1">Vehicle will not sell if bids don't reach this price</p>
                                             </div>
                                         )}
+
+                                        {/* Buy Now Price (for buy_now auction type) */}
+                                        {auctionType === 'buy_now' && (
+                                            <>
+                                                <div className="mb-4">
+                                                    <label htmlFor="buyNowPrice" className="block text-sm font-medium text-secondary mb-1">
+                                                        Buy Now Price *
+                                                    </label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+                                                        <input
+                                                            {...register('buyNowPrice', {
+                                                                required: auctionType === 'buy_now' ? 'Buy Now price is required' : false,
+                                                                min: { value: 0, message: 'Price must be positive' },
+                                                                validate: value => {
+                                                                    const startPrice = parseFloat(watch('startPrice') || 0);
+                                                                    const buyNowPrice = parseFloat(value);
+                                                                    return buyNowPrice >= startPrice || 'Buy Now price must be greater than or equal to start price';
+                                                                }
+                                                            })}
+                                                            id="buyNowPrice"
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                            placeholder="0.00"
+                                                        />
+                                                    </div>
+                                                    {errors.buyNowPrice && <p className="text-red-500 text-sm mt-1">{errors.buyNowPrice.message}</p>}
+                                                    <p className="text-sm text-secondary mt-1">
+                                                        Buyers can purchase immediately at this price, ending the auction
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Allow Offers Toggle */}
+                                        <div className="mb-6">
+                                            <label className="flex items-center cursor-pointer">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        {...register('allowOffers')}
+                                                        id="allowOffers"
+                                                        className="sr-only"
+                                                    />
+                                                    <div className={`block w-14 h-8 rounded-full ${watch('allowOffers') ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${watch('allowOffers') ? 'transform translate-x-6' : ''}`}></div>
+                                                </div>
+                                                <div className="ml-3">
+                                                    <span className="font-medium text-secondary">Allow Offers</span>
+                                                    <p className="text-sm text-secondary mt-1">
+                                                        Enable buyers to make purchase offers during the auction
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
                                 )}
 
@@ -1239,13 +1333,13 @@ const EditAuction = () => {
                                             <h3 className="font-medium text-lg mb-4 border-b pb-2">Auction Summary</h3>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {/* Item Details */}
+                                                {/* Vehicle Details */}
                                                 <div className="space-y-4">
                                                     <div className="bg-white p-4 rounded-lg shadow-sm">
-                                                        <h4 className="font-medium mb-3">Item Details</h4>
+                                                        <h4 className="font-medium mb-3">Vehicle Details</h4>
                                                         <div className="space-y-2">
                                                             <div>
-                                                                <p className="text-xs text-secondary">Item Name</p>
+                                                                <p className="text-xs text-secondary">Vehicle Name</p>
                                                                 <p className="font-medium">{watch('title') || 'Not provided'}</p>
                                                             </div>
                                                             <div>
@@ -1275,27 +1369,6 @@ const EditAuction = () => {
                                                             </div>
                                                         </div>
                                                     )}
-
-                                                    {/* Pricing */}
-                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                                                        <h4 className="font-medium mb-3">Pricing</h4>
-                                                        <div className="space-y-2">
-                                                            <div>
-                                                                <p className="text-xs text-secondary">Start Price</p>
-                                                                <p className="font-medium">${watch('startPrice') || '0.00'}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-xs text-secondary">Bid Increment</p>
-                                                                <p className="font-medium">${watch('bidIncrement') || '0.00'}</p>
-                                                            </div>
-                                                            {watch('auctionType') === 'reserve' && (
-                                                                <div>
-                                                                    <p className="text-xs text-secondary">Reserve Price</p>
-                                                                    <p className="font-medium text-green-600">${watch('reservePrice') || '0.00'}</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
                                                 </div>
 
                                                 {/* Auction Details */}
@@ -1308,8 +1381,15 @@ const EditAuction = () => {
                                                                 <p className="font-medium">
                                                                     {watch('auctionType') === 'standard' && 'Standard Auction'}
                                                                     {watch('auctionType') === 'reserve' && 'Reserve Price Auction'}
+                                                                    {watch('auctionType') === 'buy_now' && 'Buy Now Auction'}
                                                                 </p>
                                                             </div>
+                                                            {watch('allowOffers') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Allow Offers</p>
+                                                                    <p className="font-medium text-green-600">Yes</p>
+                                                                </div>
+                                                            )}
                                                             <div>
                                                                 <p className="text-xs text-secondary">Start Date</p>
                                                                 <p className="font-medium">
@@ -1325,7 +1405,7 @@ const EditAuction = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Media */}
+                                                    {/* Media - UPDATED for edit page */}
                                                     <div className="bg-white p-4 rounded-lg shadow-sm">
                                                         <h4 className="font-medium mb-3">Media & Documents</h4>
                                                         <div className="space-y-2">
@@ -1354,9 +1434,9 @@ const EditAuction = () => {
                                                                 </span>
                                                             </div>
                                                             <div className="flex justify-between items-center">
-                                                                <p className="text-xs text-secondary">Logbook Images</p>
+                                                                <p className="text-xs text-secondary">Service Records</p>
                                                                 <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
-                                                                    {allLogbooks.length} total ({allLogbooks.filter(l => l.isExisting).length} existing, {allLogbooks.filter(l => !l.isExisting).length} new)
+                                                                    {allServiceRecords.length} total ({allServiceRecords.filter(l => l.isExisting).length} existing, {allServiceRecords.filter(l => !l.isExisting).length} new)
                                                                 </span>
                                                             </div>
                                                             {watch('video') && (
@@ -1369,17 +1449,42 @@ const EditAuction = () => {
                                                             )}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
 
-                                            {watch('avionics') && (
-                                                <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
-                                                    <h4 className="font-medium text-black mb-3">Avionics & Equipment</h4>
-                                                    <div className="prose prose-lg max-w-none border rounded-lg p-4 bg-gray-50">
-                                                        {parse(watch('avionics'))}
+                                                    {/* Pricing */}
+                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                        <h4 className="font-medium mb-3">Pricing</h4>
+                                                        <div className="space-y-2">
+                                                            {(watch('auctionType') === 'standard' || watch('auctionType') === 'reserve' || watch('auctionType') === 'buy_now') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Start Price</p>
+                                                                    <p className="font-medium">${watch('startPrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {(watch('auctionType') === 'standard' || watch('auctionType') === 'reserve') && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Bid Increment</p>
+                                                                    <p className="font-medium">${watch('bidIncrement') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {watch('auctionType') === 'reserve' && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Reserve Price</p>
+                                                                    <p className="font-medium text-green-600">${watch('reservePrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {watch('auctionType') === 'buy_now' && (
+                                                                <div>
+                                                                    <p className="text-xs text-secondary">Buy Now Price</p>
+                                                                    <p className="font-medium text-blue-600">${watch('buyNowPrice') || '0.00'}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
@@ -1403,7 +1508,7 @@ const EditAuction = () => {
                                                     className="mt-1 mr-2"
                                                 />
                                                 <span className="text-sm font-medium text-secondary">
-                                                    I agree to the terms and conditions and confirm that I have the right to sell this item
+                                                    I agree to the terms and conditions and confirm that I have the right to sell this vehicle
                                                 </span>
                                             </label>
                                             {errors.termsAgreed && <p className="text-red-500 text-sm mt-1">{errors.termsAgreed.message}</p>}

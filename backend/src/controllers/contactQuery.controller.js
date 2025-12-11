@@ -29,11 +29,6 @@ export const submitContactQuery = async (req, res) => {
         // Populate for response
         await contactQuery.populate('assignedTo', 'username firstName lastName');
 
-        if(contactQuery){
-            await contactEmail(name, email, phone, userType, message);
-            await contactConfirmationEmail(name, email);
-        }
-
         res.status(201).json({
             success: true,
             message: 'Your query has been submitted successfully. We will get back to you within 24 hours.',
@@ -42,6 +37,11 @@ export const submitContactQuery = async (req, res) => {
                 query: contactQuery
             }
         });
+
+        if(contactQuery){
+            contactEmail(name, email, phone, userType, message).catch(err => console.error('Contact email error:', err));
+            contactConfirmationEmail(name, email).catch(err => console.error('Confirmation email error:', err));
+        }
 
     } catch (error) {
         console.error('Submit contact query error:', error);

@@ -225,7 +225,7 @@ function Profile() {
                             <p className="text-red-600">Failed to load profile data</p>
                             <button
                                 onClick={fetchUserData}
-                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                className="mt-4 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-[#edcd1f]/90"
                             >
                                 Try Again
                             </button>
@@ -265,7 +265,7 @@ function Profile() {
                                             key={section.id}
                                             onClick={() => setActiveSection(section.id)}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeSection === section.id
-                                                ? `text-white bg-black font-medium`
+                                                ? `text-black bg-[#edcd1f] font-medium`
                                                 : "text-secondary hover:bg-gray-100"
                                                 }`}
                                         >
@@ -309,7 +309,7 @@ function Profile() {
                                             ) : (
                                                 <button
                                                     onClick={() => setIsEditing(true)}
-                                                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-black/90 transition-colors"
+                                                    className="flex items-center gap-2 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-black/90 transition-colors"
                                                 >
                                                     <Edit size={16} />
                                                     Edit
@@ -698,7 +698,7 @@ const PasswordChangeForm = ({ onChangePassword, saving }) => {
                 <button
                     type="submit"
                     disabled={saving}
-                    className="bg-black text-white px-6 py-3 rounded-lg hover:bg-black/90 transition-colors disabled:opacity-50"
+                    className="bg-[#edcd1f] text-black px-6 py-3 rounded-lg hover:bg-[#edcd1f]/90 transition-colors disabled:opacity-50"
                 >
                     {saving ? 'Changing Password...' : 'Change Password'}
                 </button>

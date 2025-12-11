@@ -1,65 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, User, Gavel, Store, CreditCard, MapPin, Phone, Building, ChevronDown } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Phone, ChevronDown } from 'lucide-react';
 import { darkLogo } from '../assets';
-import { loadStripe } from '@stripe/stripe-js';
-import { useStripe, useElements, CardElement, Elements } from '@stripe/react-stripe-js';
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useAuth } from '../contexts/AuthContext';
 import useCountryStates from '../hooks/useCountryStates';
-
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
-// CardSection component that uses Stripe hooks
-const CardSection = () => {
-    const stripe = useStripe();
-    const elements = useElements();
-
-    return (
-        <div className="space-y-4 border-t pt-6 mt-6">
-            <h3 className="text-lg font-semibold text-gray-800">Payment Information</h3>
-            <p className="text-sm text-gray-600">
-                PlaneVault requires a credit card to bid. There is no charge to register.
-                We will only authorize that your card is valid.
-            </p>
-
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Credit Card Information
-                    </label>
-                    <div className="p-4 border border-gray-300 rounded-lg bg-gray-50">
-                        <CardElement
-                            options={{
-                                style: {
-                                    base: {
-                                        fontSize: '16px',
-                                        color: '#424770',
-                                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-                                        '::placeholder': {
-                                            color: '#aab7c4',
-                                        },
-                                    },
-                                    invalid: {
-                                        color: '#fa755a',
-                                        iconColor: '#fa755a',
-                                    },
-                                },
-                            }}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <p className="text-sm text-gray-500 mt-4">
-                Note: Your card will be verified with a small authorization which won't get charged.
-            </p>
-        </div>
-    );
-};
 
 // Main Register component
 const Register = () => {
@@ -85,10 +32,6 @@ const Register = () => {
         }
     }, [user])
 
-    // Stripe hooks - these must be used at the top level of the component
-    const stripe = useStripe();
-    const elements = useElements();
-
     const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
         defaultValues: {
             email: '',
@@ -99,7 +42,7 @@ const Register = () => {
             firstName: '',
             lastName: '',
             country: '',
-            userType: ''
+            userType: 'bidder'
         }
     });
 
@@ -114,47 +57,6 @@ const Register = () => {
     const onSubmit = async (registrationData) => {
         setIsLoading(true);
         try {
-            let paymentMethodId = null;
-
-            // Handle bidder card verification
-            // if (registrationData.userType === 'bidder') {
-                if (!stripe || !elements) {
-                    toast.error('Stripe not initialized properly');
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Validate card element
-                const cardElement = elements.getElement(CardElement);
-                if (!cardElement) {
-                    toast.error('Please enter your card details');
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Create payment method with country code
-                const { error, paymentMethod } = await stripe.createPaymentMethod({
-                    type: 'card',
-                    card: cardElement,
-                    billing_details: {
-                        name: `${registrationData.firstName} ${registrationData.lastName}`,
-                        email: registrationData.email,
-                        phone: registrationData.phone,
-                        address: {
-                            country: registrationData.country, // This should be 'US', 'IN', etc.
-                        }
-                    }
-                });
-
-                if (error) {
-                    toast.error(`Payment error: ${error.message}`);
-                    setIsLoading(false);
-                    return;
-                }
-
-                paymentMethodId = paymentMethod.id;
-            // }
-
             // Prepare registration data - store both name and code
             const registrationPayload = {
                 firstName: registrationData.firstName,
@@ -163,11 +65,9 @@ const Register = () => {
                 phone: registrationData.phone,
                 password: registrationData.password,
                 username: registrationData.username,
-                countryCode: registrationData.country, // This will be the code like 'IN', 'US'
+                countryCode: registrationData.country,
                 countryName: countries.find(c => c.code === registrationData.country)?.name || registrationData.country,
                 userType: registrationData.userType,
-                // ...(registrationData.userType === 'bidder' && { paymentMethodId })
-                paymentMethodId: paymentMethodId
             };
 
             // Send registration request
@@ -207,7 +107,7 @@ const Register = () => {
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden">
                 {/* Header */}
                 <div className="pt-8 text-center flex flex-col items-center justify-center gap-3">
-                    <img src={darkLogo} alt="logo" className='h-10' />
+                    <img src={darkLogo} alt="logo" className='h-12' />
                     <p className="text-black text-lg">Create your account</p>
                 </div>
 
@@ -439,7 +339,7 @@ const Register = () => {
                         </div>
 
                         {/* User Type Selection */}
-                        <div className={`border-t pt-6 ${errors.email && 'mb-3'}`}>
+                        {/* <div className={`border-t pt-6 ${errors.email && 'mb-3'}`}>
                             <label className="text-sm font-medium leading-none text-gray-700 flex items-center gap-2 mb-4">
                                 <User size={20} />
                                 <span>User Type</span>
@@ -487,11 +387,7 @@ const Register = () => {
                             {errors.userType && (
                                 <p className="text-red-500 text-sm mt-1 absolute">{errors.userType.message}</p>
                             )}
-                        </div>
-
-                        {/* Stripe Card Section for Bidders */}
-                        {/* {userType === 'bidder' && <CardSection />} */}
-                        <CardSection />
+                        </div> */}
 
                         <div className={`${errors.termsConditions && 'mb-3'}`}>
                             <label className='flex items-center gap-2'>
@@ -510,8 +406,8 @@ const Register = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={isLoading || (userType === 'bidder' && !stripe)}
-                            className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                            disabled={isLoading}
+                            className="w-full bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
                         >
                             {isLoading ? 'Creating account...' : 'Create Account'}
                         </button>
@@ -531,7 +427,7 @@ const Register = () => {
                 {/* Footer */}
                 <div className="bg-white px-4 pb-4 text-center">
                     <p className="text-xs text-gray-500">
-                        © {new Date().getFullYear()} PlaneVault. All rights reserved.
+                        © {new Date().getFullYear()} Speed Ways UK. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -539,11 +435,5 @@ const Register = () => {
     );
 };
 
-// Wrap the main component with Stripe Elements provider
-const RegisterWithStripe = () => (
-    <Elements stripe={stripePromise}>
-        <Register />
-    </Elements>
-);
 
-export default RegisterWithStripe;
+export default Register;

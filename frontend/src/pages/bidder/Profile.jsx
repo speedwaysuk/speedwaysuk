@@ -4,7 +4,9 @@ import {
     User, Mail, Phone, MapPin, Camera, Edit, Save, X, Shield, Lock,
     Upload, Award, Gavel, Heart, Star, TrendingUp, Bell, Newspaper,
     Clock,
-    DollarSign
+    DollarSign,
+    PoundSterling,
+    Hand
 } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 
@@ -236,7 +238,7 @@ function Profile() {
                             <p className="text-red-600">Failed to load profile data</p>
                             <button
                                 onClick={fetchUserData}
-                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                className="mt-4 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-[#edcd1f]/90"
                             >
                                 Try Again
                             </button>
@@ -276,7 +278,7 @@ function Profile() {
                                             key={section.id}
                                             onClick={() => setActiveSection(section.id)}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeSection === section.id
-                                                ? `text-white bg-black font-medium`
+                                                ? `text-black bg-[#edcd1f] font-medium`
                                                 : "text-secondary hover:bg-gray-100"
                                                 }`}
                                         >
@@ -303,7 +305,7 @@ function Profile() {
                                                     <button
                                                         onClick={handleSave}
                                                         disabled={saving}
-                                                        className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-black/90 transition-colors disabled:opacity-50"
+                                                        className="flex items-center gap-2 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-black/90 transition-colors disabled:opacity-50"
                                                     >
                                                         <Save size={16} />
                                                         {saving ? 'Saving...' : 'Save Changes'}
@@ -320,7 +322,7 @@ function Profile() {
                                             ) : (
                                                 <button
                                                     onClick={() => setIsEditing(true)}
-                                                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-black/90 transition-colors"
+                                                    className="flex items-center gap-2 bg-[#edcd1f] text-black px-4 py-2 rounded-lg hover:bg-[#edcd1f]/90 transition-colors"
                                                 >
                                                     <Edit size={16} />
                                                     Edit
@@ -610,13 +612,22 @@ function Profile() {
                             {/* Bidder Stats Cards */}
                             {stats && (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-5">
-                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
+                                    {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
                                         <div className="p-3 rounded-lg mr-4 bg-blue-100">
                                             <Gavel size={20} className="text-blue-600" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Total Bids</p>
                                             <p className="font-semibold text-lg">{stats.totalBids || 0}</p>
+                                        </div>
+                                    </div> */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
+                                        <div className="p-3 rounded-lg mr-4 bg-blue-100">
+                                            <Hand size={20} className="text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Total Offers</p>
+                                            <p className="font-semibold text-lg">{stats.totalOffers || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -638,13 +649,22 @@ function Profile() {
                                         </div>
                                     </div>
                                     {/* Additional bidder stats */}
-                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
+                                    {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
                                         <div className="p-3 rounded-lg mr-4 bg-purple-100">
                                             <Clock size={20} className="text-purple-600" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Active Bids</p>
                                             <p className="font-semibold text-lg">{stats.activeBids || 0}</p>
+                                        </div>
+                                    </div> */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
+                                        <div className="p-3 rounded-lg mr-4 bg-purple-100">
+                                            <Clock size={20} className="text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Active Offers</p>
+                                            <p className="font-semibold text-lg">{stats.activeOffers || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -658,14 +678,14 @@ function Profile() {
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
                                         <div className="p-3 rounded-lg mr-4 bg-indigo-100">
-                                            <DollarSign size={20} className="text-indigo-600" />
+                                            <PoundSterling size={20} className="text-indigo-600" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Total Spent</p>
                                             <p className="font-semibold text-lg">
                                                 {new Intl.NumberFormat('en-US', {
                                                     style: 'currency',
-                                                    currency: 'USD',
+                                                    currency: 'GBP',
                                                     minimumFractionDigits: 0
                                                 }).format(stats.totalSpent) || 0}
                                             </p>
@@ -776,7 +796,7 @@ const PasswordChangeForm = ({ onChangePassword, saving }) => {
                 <button
                     type="submit"
                     disabled={saving}
-                    className="bg-black text-white px-6 py-3 rounded-lg hover:bg-black/90 transition-colors disabled:opacity-50"
+                    className="bg-[#edcd1f] text-black px-6 py-3 rounded-lg hover:bg-[#edcd1f]/90 transition-colors disabled:opacity-50"
                 >
                     {saving ? 'Changing Password...' : 'Change Password'}
                 </button>

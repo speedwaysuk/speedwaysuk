@@ -58,7 +58,7 @@ const TimerDisplay = ({ countdown, auction }) => {
                 <div className="text-lg font-semibold text-gray-600">Auction Ended</div>
                 {auction?.finalPrice ? (
                     <div className="text-2xl font-bold text-green-600 mt-2">
-                        Sold for ${auction.finalPrice.toLocaleString()}
+                        Sold for £{auction.finalPrice.toLocaleString()}
                     </div>
                 ) : auction?.status == 'reserve_not_met' ? (
                     <div className="text-lg text-orange-600 mt-2">
@@ -79,7 +79,7 @@ const TimerDisplay = ({ countdown, auction }) => {
                 <div className="text-lg font-semibold text-gray-600">Auction Pending</div>
                 {auction?.finalPrice ? (
                     <div className="text-2xl font-bold text-green-600 mt-2">
-                        Sold for ${auction.finalPrice.toLocaleString()}
+                        Sold for £{auction.finalPrice.toLocaleString()}
                     </div>
                 ) : auction?.status === 'reserve_not_met' ? (
                     <div className="text-lg text-orange-600 mt-2">
@@ -104,7 +104,7 @@ const TimerDisplay = ({ countdown, auction }) => {
                 <div className="text-lg font-semibold text-red-600">Auction Cancelled</div>
                 {auction?.finalPrice ? (
                     <div className="text-2xl font-bold text-green-600 mt-2">
-                        Sold for ${auction.finalPrice.toLocaleString()}
+                        Sold for £{auction.finalPrice.toLocaleString()}
                     </div>
                 ) : auction?.status === 'reserve_not_met' ? (
                     <div className="text-lg text-orange-600 mt-2">

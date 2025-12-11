@@ -45,6 +45,12 @@ import SearchFormPopUp from "./SearchFormPopUp";
 import CategoryImagesSection from "./CategoryImagesSection";
 import BidConfirmationModal from "./BidConfirmationModal";
 import LowerReserveModal from "./LowerReserveModal";
+import MakeOfferModal from "./MakeOfferModal";
+import OffersSection from "./OffersSection";
+import BuyNowModal from "./BuyNowModal";
+import PaymentStatusModal from "./PaymentStatusModal";
+import PaymentStatusDropdown from "./admin/PaymentStatusDropdown";
+import CategoryIconsSection from "./CategoryIconsSection";
 
 export {
     Container,
@@ -94,4 +100,10 @@ export {
     CategoryImagesSection,
     BidConfirmationModal,
     LowerReserveModal,
+    MakeOfferModal,
+    OffersSection,
+    BuyNowModal,
+    PaymentStatusModal,
+    PaymentStatusDropdown,
+    CategoryIconsSection,
 }

@@ -318,7 +318,7 @@ function Watchlist() {
                                 <p className="text-gray-500 mb-6 max-w-md mx-auto">
                                     Start adding items to your watchlist to track their progress and get notified when auctions are ending.
                                 </p>
-                                <Link to={'/bidder/auctions/active'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                                <Link to={'/bidder/auctions/active'} className="bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black px-6 py-3 rounded-lg transition-colors">
                                     Browse Available Auctions
                                 </Link>
                             </div>
@@ -435,10 +435,10 @@ function WatchlistItem({ item, onRemove }) {
                         {/* Bid Information */}
                         <div className="lg:text-right">
                             <div className="text-2xl font-bold text-green-600 mb-1">
-                                ${item.currentBid.toLocaleString()}
+                                £{item.currentBid.toLocaleString()}
                             </div>
                             <div className="text-sm text-gray-500 mb-3">
-                                Starting: ${item.startingBid.toLocaleString()}
+                                Starting: £{item.startingBid.toLocaleString()}
                             </div>
                             <div className={`flex items-center justify-center lg:justify-end text-sm font-medium ${getTimeLeftColor(item.timeLeft)}`}>
                                 <Clock size={14} className="mr-1" />

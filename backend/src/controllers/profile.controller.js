@@ -1,469 +1,603 @@
-import User from '../models/user.model.js';
-import Watchlist from '../models/watchlist.model.js';
-import { uploadToCloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
-import bcrypt from 'bcrypt';
+import User from "../models/user.model.js";
+import Watchlist from "../models/watchlist.model.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
+import bcrypt from "bcrypt";
 
 // Get user profile
 export const getProfile = async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id).select('-password -refreshToken');
+  try {
+    const user = await User.findById(req.user._id).select(
+      "-password -refreshToken"
+    );
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: {
-                user
-            }
-        });
-
-    } catch (error) {
-        console.error('Get profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error while fetching profile'
-        });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching profile",
+    });
+  }
 };
 
 // Update user profile
 export const updateProfile = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const {
-            firstName,
-            lastName,
-            phone,
-            countryCode,
-            countryName,
-            street,
-            city,
-            state,
-            zipCode,
-            country
-        } = req.body;
+  try {
+    const userId = req.user._id;
+    const {
+      firstName,
+      lastName,
+      phone,
+      countryCode,
+      countryName,
+      street,
+      city,
+      state,
+      zipCode,
+      country,
+    } = req.body;
 
-        const updateData = {
-            ...(firstName && { firstName }),
-            ...(lastName && { lastName }),
-            ...(phone && { phone }),
-            ...(countryCode && { countryCode }),
-            ...(countryName && { countryName })
-        };
+    const updateData = {
+      ...(firstName && { firstName }),
+      ...(lastName && { lastName }),
+      ...(phone && { phone }),
+      ...(countryCode && { countryCode }),
+      ...(countryName && { countryName }),
+    };
 
-        // Handle address fields if provided
-        if (street || city || state || zipCode || country) {
-            updateData.address = {
-                ...(street && { street }),
-                ...(city && { city }),
-                ...(state && { state }),
-                ...(zipCode && { zipCode }),
-                ...(country && { country })
-            };
-        }
-
-        // Handle avatar upload
-        if (req.file) {
-            try {
-                // Delete old avatar if exists
-                const oldUser = await User.findById(userId);
-                if (oldUser.image) {
-                    await deleteFromCloudinary(oldUser.image);
-                }
-
-                // Upload new avatar
-                const result = await uploadToCloudinary(req.file.buffer, 'user-avatars');
-                updateData.image = result.secure_url;
-
-            } catch (uploadError) {
-                console.error('Avatar upload error:', uploadError);
-                return res.status(400).json({
-                    success: false,
-                    message: 'Failed to upload avatar image'
-                });
-            }
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            updateData,
-            {
-                new: true,
-                runValidators: true
-            }
-        ).select('-password -refreshToken');
-
-        res.status(200).json({
-            success: true,
-            message: 'Profile updated successfully',
-            data: {
-                user: updatedUser
-            }
-        });
-
-    } catch (error) {
-        console.error('Update profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error while updating profile'
-        });
+    // Handle address fields if provided
+    if (street || city || state || zipCode || country) {
+      updateData.address = {
+        ...(street && { street }),
+        ...(city && { city }),
+        ...(state && { state }),
+        ...(zipCode && { zipCode }),
+        ...(country && { country }),
+      };
     }
+
+    // Handle avatar upload
+    if (req.file) {
+      try {
+        // Delete old avatar if exists
+        const oldUser = await User.findById(userId);
+        if (oldUser.image) {
+          await deleteFromCloudinary(oldUser.image);
+        }
+
+        // Upload new avatar
+        const result = await uploadToCloudinary(
+          req.file.buffer,
+          "user-avatars"
+        );
+        updateData.image = result.secure_url;
+      } catch (uploadError) {
+        console.error("Avatar upload error:", uploadError);
+        return res.status(400).json({
+          success: false,
+          message: "Failed to upload avatar image",
+        });
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password -refreshToken");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        user: updatedUser,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating profile",
+    });
+  }
 };
 
 // Change password
 export const changePassword = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const { currentPassword, newPassword } = req.body;
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
 
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({
-                success: false,
-                message: 'Current password and new password are required'
-            });
-        }
-
-        if (newPassword.length < 6) {
-            return res.status(400).json({
-                success: false,
-                message: 'New password must be at least 6 characters long'
-            });
-        }
-
-        const user = await User.findById(userId);
-
-        // Verify current password
-        const isCurrentPasswordValid = await user.isPasswordCorrect(currentPassword);
-        if (!isCurrentPasswordValid) {
-            return res.status(400).json({
-                success: false,
-                message: 'Current password is incorrect'
-            });
-        }
-
-        // Update password
-        user.password = newPassword;
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Password updated successfully'
-        });
-
-    } catch (error) {
-        console.error('Change password error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error while changing password'
-        });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required",
+      });
     }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    // Verify current password
+    const isCurrentPasswordValid = await user.isPasswordCorrect(
+      currentPassword
+    );
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while changing password",
+    });
+  }
 };
 
 // Update preferences
 export const updatePreferences = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const { preferences } = req.body;
+  try {
+    const userId = req.user._id;
+    const { preferences } = req.body;
 
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { preferences },
-            {
-                new: true,
-                runValidators: true
-            }
-        ).select('-password -refreshToken');
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { preferences },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password -refreshToken");
 
-        res.status(200).json({
-            success: true,
-            message: 'Preferences updated successfully',
-            data: {
-                user: updatedUser
-            }
-        });
-
-    } catch (error) {
-        console.error('Update preferences error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error while updating preferences'
-        });
-    }
+    res.status(200).json({
+      success: true,
+      message: "Preferences updated successfully",
+      data: {
+        user: updatedUser,
+      },
+    });
+  } catch (error) {
+    console.error("Update preferences error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating preferences",
+    });
+  }
 };
 
 export const getUserStats = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const { userType } = req.params;
+  try {
+    const userId = req.user._id;
+    const { userType } = req.params;
 
-        const Auction = (await import('../models/auction.model.js')).default;
+    const Auction = (await import("../models/auction.model.js")).default;
 
-        let statistics = {};
+    let statistics = {};
 
-        if (userType === 'bidder') {
-            // Bidder-specific statistics
-            const totalBidsResult = await Auction.aggregate([
-                { $match: { 'bids.bidder': userId } },
-                { $unwind: '$bids' },
-                { $match: { 'bids.bidder': userId } },
-                { $group: { _id: null, total: { $sum: 1 } } }
-            ]);
+    if (userType === "bidder") {
+      // Bidder-specific statistics
 
-            const participatedAuctions = await Auction.countDocuments({
-                'bids.bidder': userId
-            });
+      // 1. Total Bids Count (excluding buy now bids)
+      const totalBidsResult = await Auction.aggregate([
+        { $match: { "bids.bidder": userId } },
+        { $unwind: "$bids" },
+        { $match: { "bids.bidder": userId, "bids.isBuyNow": { $ne: true } } },
+        { $group: { _id: null, total: { $sum: 1 } } },
+      ]);
 
-            const activeBids = await Auction.countDocuments({
-                'bids.bidder': userId,
-                status: 'active',
-                endDate: { $gt: new Date() }
-            });
+      // 2. Total Offers Count
+      const totalOffersCount = await Auction.aggregate([
+        { $match: { "offers.buyer": userId } },
+        { $unwind: "$offers" },
+        { $match: { "offers.buyer": userId } },
+        { $group: { _id: null, total: { $sum: 1 } } },
+      ]);
 
-            const wonAuctions = await Auction.countDocuments({
-                winner: userId,
-                status: 'sold'
-            });
+      // 3. Total Participated Auctions (bids OR offers OR winner)
+      const participatedAuctions = await Auction.countDocuments({
+        $or: [
+          { "bids.bidder": userId },
+          { "offers.buyer": userId },
+          { winner: userId },
+        ],
+      });
 
-            // const watchlistItems = await Watchlist.countDocuments({
-            //     user: userId
-            // }).populate({
-            //     path: 'auction',
-            //     match: { status: 'active' }
-            // });
+      // 4. Active Auctions where user is currently winning (highest bidder)
+      const currentlyWinning = await Auction.countDocuments({
+        currentBidder: userId,
+        status: "active",
+        endDate: { $gt: new Date() },
+      });
 
-            const watchlistItems = await Watchlist.aggregate([
-                {
-                    $lookup: {
-                        from: 'auctions',
-                        localField: 'auction',
-                        foreignField: '_id',
-                        as: 'auction'
-                    }
-                },
-                {
-                    $unwind: '$auction'
-                },
-                {
-                    $match: {
-                        'auction.status': 'active',
-                        'user': userId
-                    }
-                },
-                {
-                    $count: 'count'
-                }
-            ]);
+      // 5. Active Bids (bids on live auctions)
+      const activeBidsResult = await Auction.aggregate([
+        {
+          $match: {
+            "bids.bidder": userId,
+            status: "active",
+            endDate: { $gt: new Date() },
+          },
+        },
+        { $unwind: "$bids" },
+        { $match: { "bids.bidder": userId } },
+        { $group: { _id: null, count: { $sum: 1 } } },
+      ]);
 
-            const watchlistCount = watchlistItems[0]?.count || 0;
+      const activeBids = activeBidsResult[0]?.count || 0;
 
-            const totalBids = totalBidsResult[0]?.total || 0;
-            // const successRate = totalBids > 0 ? Math.round((wonAuctions / totalBids) * 100) : 0;
-            const successRate = participatedAuctions > 0 ? Math.round((wonAuctions / participatedAuctions) * 100) : 0;
+      // 6. Active Offers (pending offers on live auctions)
+      const activeOffersResult = await Auction.aggregate([
+        {
+          $match: {
+            "offers.buyer": userId,
+            status: "active",
+            endDate: { $gt: new Date() },
+          },
+        },
+        { $unwind: "$offers" },
+        { $match: { "offers.buyer": userId, "offers.status": "pending" } },
+        { $group: { _id: null, count: { $sum: 1 } } },
+      ]);
 
-            // Calculate total spent (sum of winning bids)
-            const totalSpentResult = await Auction.aggregate([
-                { $match: { winner: userId, status: 'sold' } },
-                { $group: { _id: null, total: { $sum: '$finalPrice' } } }
-            ]);
+      const activeOffers = activeOffersResult[0]?.count || 0;
 
-            const totalSpent = totalSpentResult[0]?.total || 0;
-            const avgBidAmount = totalBids > 0 ? totalSpent / totalBids : 0;
+      // 7. Won Auctions (user is winner AND auction is sold)
+      const wonAuctions = await Auction.countDocuments({
+        winner: userId,
+        status: { $in: ["sold", "sold_buy_now"] },
+      });
 
-            statistics = {
-                userType: 'bidder',
-                totalBids,
-                activeBids,
-                wonAuctions,
-                watchlistCount,
-                successRate,
-                totalSpent,
-                avgBidAmount: Math.round(avgBidAmount),
-                // Additional bidder insights
-                totalParticipatedAuctions: await Auction.countDocuments({
-                    'bids.bidder': userId
-                }),
-                currentlyWinning: await Auction.countDocuments({
-                    'currentBidder': userId,
-                    status: 'active',
-                    endDate: { $gt: new Date() }
-                })
-            };
+      // 8. Watchlist count
+      const watchlistItems = await Watchlist.aggregate([
+        {
+          $lookup: {
+            from: "auctions",
+            localField: "auction",
+            foreignField: "_id",
+            as: "auction",
+          },
+        },
+        {
+          $unwind: "$auction",
+        },
+        {
+          $match: {
+            "auction.status": "active",
+            user: userId,
+          },
+        },
+        {
+          $count: "count",
+        },
+      ]);
 
-        } else if (userType === 'seller') {
-            // Seller-specific statistics
-            const totalAuctions = await Auction.countDocuments({
-                seller: userId
-            });
+      const watchlistCount = watchlistItems[0]?.count || 0;
 
-            const activeAuctions = await Auction.countDocuments({
-                seller: userId,
-                status: 'active',
-                endDate: { $gt: new Date() }
-            });
+      // 9. Total Spent (sum of winning bids + accepted offers)
+      const winningBidsSpent = await Auction.aggregate([
+        {
+          $match: {
+            winner: userId,
+            status: { $in: ["sold"] },
+            finalPrice: { $exists: true },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$finalPrice" },
+          },
+        },
+      ]);
 
-            const soldAuctions = await Auction.countDocuments({
-                seller: userId,
-                status: 'sold'
-            });
+      const acceptedOffersSpent = await Auction.aggregate([
+        { $match: { "offers.buyer": userId, "offers.status": "accepted" } },
+        { $unwind: "$offers" },
+        { $match: { "offers.buyer": userId, "offers.status": "accepted" } },
+        { $group: { _id: null, total: { $sum: "$offers.amount" } } },
+      ]);
 
-            const draftAuctions = await Auction.countDocuments({
-                seller: userId,
-                status: 'draft'
-            });
+      const totalSpent =
+        (winningBidsSpent[0]?.total || 0) +
+        (acceptedOffersSpent[0]?.total || 0);
 
-            const endedNotSold = await Auction.countDocuments({
-                seller: userId,
-                status: 'ended',
-                winner: { $exists: false }
-            });
+      // 10. Average Bid Amount (only for regular bids, not buy now)
+      const totalBids = totalBidsResult[0]?.total || 0;
+      const totalOffers = totalOffersCount[0]?.total || 0;
 
-            const endingSoonAuctions = await Auction.countDocuments({
-                seller: userId,
-                status: 'active',
-                endDate: {
-                    $gt: new Date(),
-                    $lt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Less than 24 hours from now
-                }
-            });
+      const totalBidAmount = await Auction.aggregate([
+        { $match: { "bids.bidder": userId } },
+        { $unwind: "$bids" },
+        { $match: { "bids.bidder": userId, "bids.isBuyNow": { $ne: true } } },
+        { $group: { _id: null, total: { $sum: "$bids.amount" } } },
+      ]);
 
-            const reserveNotMet = await Auction.countDocuments({
-                seller: userId,
-                status: 'reserve_not_met'
-            });
+      const avgBidAmount =
+        totalBids > 0 ? (totalBidAmount[0]?.total || 0) / totalBids : 0;
 
-            // Calculate total revenue from sold auctions
-            const totalRevenueResult = await Auction.aggregate([
-                { $match: { seller: userId, status: 'sold' } },
-                { $group: { _id: null, total: { $sum: '$finalPrice' } } }
-            ]);
+      // 11. Average Offer Amount
+      const totalOfferValue = await Auction.aggregate([
+        { $match: { "offers.buyer": userId } },
+        { $unwind: "$offers" },
+        { $match: { "offers.buyer": userId } },
+        { $group: { _id: null, total: { $sum: "$offers.amount" } } },
+      ]);
 
-            const totalRevenue = totalRevenueResult[0]?.total || 0;
+      const avgOfferAmount =
+        totalOffers > 0 ? (totalOfferValue[0]?.total || 0) / totalOffers : 0;
 
-            // Calculate average sale price
-            const avgSalePrice = soldAuctions > 0 ? totalRevenue / soldAuctions : 0;
+      // 12. Success Rate (won auctions / participated auctions)
+      const successRate =
+        participatedAuctions > 0
+          ? Math.round((wonAuctions / participatedAuctions) * 100)
+          : 0;
 
-            // Calculate success rate (sold vs total completed auctions)
-            const completedAuctions = soldAuctions + endedNotSold + reserveNotMet;
-            const successRate = completedAuctions > 0 ? Math.round((soldAuctions / completedAuctions) * 100) : 0;
+      // 13. Buy Now purchases (if any)
+      const buyNowPurchases = await Auction.countDocuments({
+        winner: userId,
+        status: "sold_buy_now",
+      });
 
-            // Calculate total bids across all seller's auctions
-            const totalBidsOnAuctions = await Auction.aggregate([
-                { $match: { seller: userId } },
-                { $group: { _id: null, totalBids: { $sum: '$bidCount' } } }
-            ]);
+      statistics = {
+        userType: "bidder",
+        totalBids,
+        totalOffers,
+        activeOffers,
+        activeBids,
+        wonAuctions,
+        watchlistCount,
+        successRate,
+        totalSpent,
+        avgBidAmount: Math.round(avgBidAmount),
+        avgOfferAmount: Math.round(avgOfferAmount),
 
-            const totalBidsReceived = totalBidsOnAuctions[0]?.totalBids || 0;
+        // Frontend requested fields
+        currentlyWinning,
+        totalParticipatedAuctions: participatedAuctions,
 
-            // Calculate average bids per auction
-            const avgBidsPerAuction = totalAuctions > 0 ? (totalBidsReceived / totalAuctions) : 0;
+        // Additional useful metrics
+        buyNowPurchases,
+        totalAcceptedOffers: acceptedOffersSpent[0]?.total || 0,
+        totalRejectedOffers: await Auction.aggregate([
+          { $match: { "offers.buyer": userId } },
+          { $unwind: "$offers" },
+          { $match: { "offers.buyer": userId, "offers.status": "rejected" } },
+          { $group: { _id: null, count: { $sum: 1 } } },
+        ]).then((result) => result[0]?.count || 0),
 
-            // Get highest selling auction
-            const highestSaleResult = await Auction.findOne({
-                seller: userId,
-                status: 'sold'
-            }).sort({ finalPrice: -1 }).select('title finalPrice');
+        // Recent activity (last 7 days)
+        recentBids: await Auction.aggregate([
+          {
+            $match: {
+              "bids.bidder": userId,
+              "bids.timestamp": {
+                $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+              },
+            },
+          },
+          { $unwind: "$bids" },
+          {
+            $match: {
+              "bids.bidder": userId,
+              "bids.timestamp": {
+                $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+              },
+            },
+          },
+          { $group: { _id: null, count: { $sum: 1 } } },
+        ]).then((result) => result[0]?.count || 0),
+      };
+    } else if (userType === "seller") {
+      // Seller-specific statistics
+      const totalAuctions = await Auction.countDocuments({
+        seller: userId,
+      });
 
-            // Get most bid-on auction
-            const mostPopularAuction = await Auction.findOne({
-                seller: userId,
-                bidCount: { $gt: 0 },
-                watchlistCount: { $gte: 0 },
-            }).sort({ bidCount: -1 }).select('title bidCount');
+      const activeAuctions = await Auction.countDocuments({
+        seller: userId,
+        status: "active",
+        endDate: { $gt: new Date() },
+      });
 
-            // const totalWatchlists = await Watchlist.countDocuments({
-            //     auction: { $in: await Auction.find({ seller: userId }).select('_id') }
-            // });
+      const soldAuctions = await Auction.countDocuments({
+        seller: userId,
+        status: "sold",
+      });
 
-            const totalWatchlists = await Watchlist.aggregate([
-                {
-                    $lookup: {
-                        from: 'auctions',
-                        localField: 'auction',
-                        foreignField: '_id',
-                        as: 'auction'
-                    }
-                },
-                {
-                    $unwind: '$auction'
-                },
-                {
-                    $match: {
-                        'auction.status': 'active',
-                        'auction.seller': userId
-                    }
-                },
-                {
-                    $count: 'count'
-                }
-            ]);
+      const draftAuctions = await Auction.countDocuments({
+        seller: userId,
+        status: "draft",
+      });
 
-            const totalWatchlistsCount = totalWatchlists[0]?.count || 0;
+      const endedNotSold = await Auction.countDocuments({
+        seller: userId,
+        status: "ended",
+        winner: { $exists: false },
+      });
 
-            statistics = {
-                userType: 'seller',
-                // Basic counts
-                totalAuctions,
-                activeAuctions,
-                soldAuctions,
-                draftAuctions,
-                endedNotSold,
-                endingSoonAuctions,
-                reserveNotMet,
+      const endingSoonAuctions = await Auction.countDocuments({
+        seller: userId,
+        status: "active",
+        endDate: {
+          $gt: new Date(),
+          $lt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Less than 24 hours from now
+        },
+      });
 
-                // Financial metrics
-                totalRevenue,
-                avgSalePrice: Math.round(avgSalePrice),
-                successRate,
+      const reserveNotMet = await Auction.countDocuments({
+        seller: userId,
+        status: "reserve_not_met",
+      });
 
-                // Engagement metrics
-                totalBidsReceived,
-                avgBidsPerAuction: Math.round(avgBidsPerAuction * 100) / 100,
+      // Calculate total revenue from sold auctions
+      const totalRevenueResult = await Auction.aggregate([
+        { $match: { seller: userId, status: "sold" } },
+        { $group: { _id: null, total: { $sum: "$finalPrice" } } },
+      ]);
 
-                // Performance highlights
-                highestSale: highestSaleResult ? {
-                    title: highestSaleResult.title,
-                    amount: highestSaleResult.finalPrice
-                } : null,
+      const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-                mostPopularAuction: mostPopularAuction ? {
-                    title: mostPopularAuction.title,
-                    bidCount: mostPopularAuction.bidCount,
-                    watchlistCount: mostPopularAuction.watchlistCount,
-                } : null,
+      // Calculate average sale price
+      const avgSalePrice = soldAuctions > 0 ? totalRevenue / soldAuctions : 0;
 
-                // Additional insights
-                totalViews: await Auction.aggregate([
-                    { $match: { seller: userId } },
-                    { $group: { _id: null, totalViews: { $sum: '$views' } } }
-                ]).then(result => result[0]?.totalViews || 0),
+      // Calculate success rate (sold vs total completed auctions)
+      const completedAuctions = soldAuctions + endedNotSold + reserveNotMet;
+      const successRate =
+        completedAuctions > 0
+          ? Math.round((soldAuctions / completedAuctions) * 100)
+          : 0;
 
-                totalWatchlists: totalWatchlistsCount
-            };
-        }
+      // Calculate total bids across all seller's auctions
+      const totalBidsOnAuctions = await Auction.aggregate([
+        { $match: { seller: userId } },
+        { $group: { _id: null, totalBids: { $sum: "$bidCount" } } },
+      ]);
 
-        res.status(200).json({
-            success: true,
-            data: {
-                statistics,
-                userType
+      const totalBidsReceived = totalBidsOnAuctions[0]?.totalBids || 0;
+
+      // Calculate average bids per auction
+      const avgBidsPerAuction =
+        totalAuctions > 0 ? totalBidsReceived / totalAuctions : 0;
+
+      // Get highest selling auction
+      const highestSaleResult = await Auction.findOne({
+        seller: userId,
+        status: "sold",
+      })
+        .sort({ finalPrice: -1 })
+        .select("title finalPrice");
+
+      // Get most bid-on auction
+      const mostPopularAuction = await Auction.findOne({
+        seller: userId,
+        bidCount: { $gt: 0 },
+        watchlistCount: { $gte: 0 },
+      })
+        .sort({ bidCount: -1 })
+        .select("title bidCount");
+
+      // const totalWatchlists = await Watchlist.countDocuments({
+      //     auction: { $in: await Auction.find({ seller: userId }).select('_id') }
+      // });
+
+      const totalWatchlists = await Watchlist.aggregate([
+        {
+          $lookup: {
+            from: "auctions",
+            localField: "auction",
+            foreignField: "_id",
+            as: "auction",
+          },
+        },
+        {
+          $unwind: "$auction",
+        },
+        {
+          $match: {
+            "auction.status": "active",
+            "auction.seller": userId,
+          },
+        },
+        {
+          $count: "count",
+        },
+      ]);
+
+      const totalWatchlistsCount = totalWatchlists[0]?.count || 0;
+
+      statistics = {
+        userType: "seller",
+        // Basic counts
+        totalAuctions,
+        activeAuctions,
+        soldAuctions,
+        draftAuctions,
+        endedNotSold,
+        endingSoonAuctions,
+        reserveNotMet,
+
+        // Financial metrics
+        totalRevenue,
+        avgSalePrice: Math.round(avgSalePrice),
+        successRate,
+
+        // Engagement metrics
+        totalBidsReceived,
+        avgBidsPerAuction: Math.round(avgBidsPerAuction * 100) / 100,
+
+        // Performance highlights
+        highestSale: highestSaleResult
+          ? {
+              title: highestSaleResult.title,
+              amount: highestSaleResult.finalPrice,
             }
-        });
+          : null,
 
-    } catch (error) {
-        console.error('Get user stats error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error while fetching user statistics'
-        });
+        mostPopularAuction: mostPopularAuction
+          ? {
+              title: mostPopularAuction.title,
+              bidCount: mostPopularAuction.bidCount,
+              watchlistCount: mostPopularAuction.watchlistCount,
+            }
+          : null,
+
+        // Additional insights
+        totalViews: await Auction.aggregate([
+          { $match: { seller: userId } },
+          { $group: { _id: null, totalViews: { $sum: "$views" } } },
+        ]).then((result) => result[0]?.totalViews || 0),
+
+        totalWatchlists: totalWatchlistsCount,
+      };
     }
-};
 
-// export const getUserStats = async (req, res) => {
+    res.status(200).json({
+      success: true,
+      data: {
+        statistics,
+        userType,
+      },
+    });
+  } catch (error) {
+    console.error("Get user stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching user statistics",
+    });
+  }
+};
 //     try {
 //         const userId = req.user._id;
 //         const userType = req.user.userType;

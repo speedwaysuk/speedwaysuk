@@ -1,84 +1,45 @@
 import { useState, useEffect, useCallback } from "react";
-import { Filter, ChevronDown, Search, SlidersHorizontal, X, Loader, Plane, Cog, Trophy } from "lucide-react";
+import { Filter, ChevronDown, Search, SlidersHorizontal, X, Loader } from "lucide-react";
 import { Container } from "../components";
 import AuctionCard from "../components/AuctionCard";
 import { useAuctions } from "../hooks/useAuctions";
 import { useLocation } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";
 
-// Category-specific filter configurations
-const categoryFilters = {
-    'Aircraft': {
+// Car filters that apply to ALL categories
+const carFilters = {
+    'ALL': {
         basic: [
-            { name: 'make', label: 'Make', type: 'text', placeholder: 'e.g., Cessna, Piper' },
-            { name: 'model', label: 'Model', type: 'text', placeholder: 'e.g., 172, PA-28' }
+            { name: 'make', label: 'Make', type: 'text', placeholder: 'e.g., Toyota, BMW, Tesla' },
+            { name: 'model', label: 'Model', type: 'text', placeholder: 'e.g., Camry, 3 Series, Model S' },
+            { name: 'yearRange', label: 'Year Range', type: 'range', min: 1900, max: 2025, fields: ['yearMin', 'yearMax'] }
         ],
-        technical: [
-            {
-                name: 'yearRange',
-                label: 'Year Range',
-                type: 'range',
-                min: 1900,
-                max: 2025,
-                fields: ['yearMin', 'yearMax']
-            },
-            {
-                name: 'seatingCapacity',
-                label: 'Seating Capacity',
-                type: 'range',
-                min: 1,
-                max: 1000,
-                fields: ['seatingCapacityMin', 'seatingCapacityMax']
-            },
-            {
-                name: 'fuelType',
-                label: 'Fuel Type',
-                type: 'select',
-                options: ['Avgas', 'Jet A', 'Diesel', 'Electric']
-            },
-            {
-                name: 'engineType',
-                label: 'Engine Type',
-                type: 'select',
-                options: ['Piston', 'Turboprop', 'Jet', 'Turbofan']
-            }
-        ]
-    },
-    'Engines & Parts': {
-        basic: [
-            { name: 'manufacturer', label: 'Manufacturer', type: 'text', placeholder: 'e.g., Lycoming, Garmin' },
-            { name: 'partType', label: 'Part Type', type: 'select', options: ['Engine', 'Propeller', 'Avionics', 'Airframe'] }
+        details: [
+            { name: 'transmission', label: 'Transmission', type: 'select', options: ['', 'Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
+            { name: 'fuelType', label: 'Fuel Type', type: 'select', options: ['', 'Gasoline', 'Diesel', 'Hybrid', 'Electric'] },
+            { name: 'condition', label: 'Condition', type: 'select', options: ['', 'Excellent', 'Good', 'Fair', 'Project', 'Modified'] }
         ],
-        condition: [
-            {
-                name: 'condition',
-                label: 'Condition',
-                type: 'select',
-                options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed']
-            }
-        ]
-    },
-    'Memorabilia': {
-        basic: [
-            { name: 'itemType', label: 'Item Type', type: 'select', options: ['Uniform', 'Document', 'Model', 'Photograph'] },
-            { name: 'era', label: 'Historical Era', type: 'select', options: ['WWI', 'WWII', 'Cold War', 'Modern'] }
+        auction: [
+            { name: 'auctionType', label: 'Auction Type', type: 'select', options: ['', 'standard', 'reserve', 'buy_now'] },
+            { name: 'allowOffers', label: 'Accepts Offers', type: 'select', options: ['', 'true', 'false'] }
         ]
     }
 };
 
-// FiltersSection component moved outside to prevent focus loss
+// FiltersSection Component
 const FiltersSection = ({
     uiFilters,
+    categories,
+    loadingCategories,
     handleFilterChange,
     handleRangeChange,
-    applyFilters,
     resetFilters,
     toggleFilterSection,
     activeFilterSections,
-    setShowMobileFilters,
-    updateFilters
+    setShowMobileFilters
 }) => {
     const getCurrentCategoryFilters = () => {
-        return categoryFilters[uiFilters.category] || {};
+        return carFilters['ALL'] || {};
     };
 
     const renderFilterInput = (filter) => {
@@ -104,8 +65,10 @@ const FiltersSection = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                         <option value="">Any {filter.label}</option>
-                        {filter.options.map(option => (
-                            <option key={option} value={option}>{option}</option>
+                        {filter.options.filter(opt => opt !== '').map(option => (
+                            <option key={option} value={option}>
+                                {option === 'true' ? 'Yes' : option === 'false' ? 'No' : option}
+                            </option>
                         ))}
                     </select>
                 );
@@ -115,7 +78,7 @@ const FiltersSection = ({
                     <div className="flex gap-2">
                         <input
                             type="number"
-                            placeholder={`Min ${filter.label}`}
+                            placeholder={`Min ${filter.label.replace('Range', '')}`}
                             min={filter.min}
                             max={filter.max}
                             value={uiFilters[filter.fields[0]] || ''}
@@ -130,7 +93,7 @@ const FiltersSection = ({
                         <span className="self-center text-gray-400">-</span>
                         <input
                             type="number"
-                            placeholder={`Max ${filter.label}`}
+                            placeholder={`Max ${filter.label.replace('Range', '')}`}
                             min={filter.min}
                             max={filter.max}
                             value={uiFilters[filter.fields[1]] || ''}
@@ -150,13 +113,8 @@ const FiltersSection = ({
         }
     };
 
-    const categories = [
-        "Aircraft",
-        "Engines & Parts",
-        "Memorabilia"
-    ];
-
     const statusOptions = [
+        { value: "", label: "All Status" },
         { value: "active", label: "Active" },
         { value: "approved", label: "Upcoming" },
         { value: "ended", label: "Ended" },
@@ -199,11 +157,18 @@ const FiltersSection = ({
                         value={uiFilters.category}
                         onChange={handleFilterChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        disabled={loadingCategories}
                     >
                         <option value="">All Categories</option>
-                        {categories.map(category => (
-                            <option key={category} value={category}>{category}</option>
-                        ))}
+                        {loadingCategories ? (
+                            <option value="" disabled>Loading categories...</option>
+                        ) : (
+                            categories.map(category => (
+                                <option key={category.slug} value={category.slug}>
+                                    {category.name}
+                                </option>
+                            ))
+                        )}
                     </select>
                 </div>
 
@@ -216,7 +181,6 @@ const FiltersSection = ({
                         onChange={handleFilterChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
-                        <option value="">All Status</option>
                         {statusOptions.map(status => (
                             <option key={status.value} value={status.value}>{status.label}</option>
                         ))}
@@ -225,7 +189,7 @@ const FiltersSection = ({
 
                 {/* Price Range */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price Range ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price Range (£)</label>
                     <div className="flex gap-2">
                         <input
                             type="number"
@@ -262,60 +226,38 @@ const FiltersSection = ({
                     />
                 </div>
 
-                {/* Category-specific Filters */}
-                {uiFilters.category && Object.keys(currentFilters).length > 0 && (
-                    <div className="border-t pt-6">
-                        <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            {uiFilters.category === 'Aircraft' && <Plane size={18} />}
-                            {uiFilters.category === 'Engines & Parts' && <Cog size={18} />}
-                            {uiFilters.category === 'Memorabilia' && <Trophy size={18} />}
-                            {uiFilters.category} Filters
-                        </h3>
+                {/* Car-specific Filters (Always shown since all auctions are cars) */}
+                <div className="border-t pt-6">
+                    <h3 className="font-semibold text-gray-800 mb-4">Car Filters</h3>
 
-                        {Object.entries(currentFilters).map(([section, filters]) => (
-                            <div key={section} className="mb-4">
-                                <button
-                                    onClick={() => toggleFilterSection(section)}
-                                    className="flex items-center justify-between w-full text-left font-medium text-gray-700 mb-2"
-                                >
-                                    <span>{section.charAt(0).toUpperCase() + section.slice(1)}</span>
-                                    <ChevronDown
-                                        size={16}
-                                        className={`transform transition-transform ${activeFilterSections[section] ? 'rotate-180' : ''}`}
-                                    />
-                                </button>
+                    {Object.entries(currentFilters).map(([section, filters]) => (
+                        <div key={section} className="mb-4">
+                            <button
+                                onClick={() => toggleFilterSection(section)}
+                                className="flex items-center justify-between w-full text-left font-medium text-gray-700 mb-2"
+                            >
+                                <span>{section.charAt(0).toUpperCase() + section.slice(1)}</span>
+                                <ChevronDown
+                                    size={16}
+                                    className={`transform transition-transform ${activeFilterSections[section] ? 'rotate-180' : ''}`}
+                                />
+                            </button>
 
-                                <div className={`space-y-3 ${activeFilterSections[section] ? 'block' : 'hidden'}`}>
-                                    {filters.map(filter => (
-                                        <div key={filter.name}>
-                                            <label className="block text-sm text-gray-600 mb-1">
-                                                {filter.label}
-                                            </label>
-                                            {renderFilterInput(filter)}
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className={`space-y-3 ${activeFilterSections[section] ? 'block' : 'hidden'}`}>
+                                {filters.map(filter => (
+                                    <div key={filter.name}>
+                                        <label className="block text-sm text-gray-600 mb-1">
+                                            {filter.label}
+                                        </label>
+                                        {renderFilterInput(filter)}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            {/* Filter Actions
-            <div className="flex flex-col gap-3 mt-8">
-                <button
-                    onClick={applyFilters}
-                    className="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                >
-                    Apply Filters
-                </button>
-                <button
-                    onClick={resetFilters}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                    Reset Filters
-                </button>
-            </div> */}
             {/* Filter Actions */}
             <div className="flex flex-col gap-3 mt-8">
                 <button
@@ -328,20 +270,6 @@ const FiltersSection = ({
         </div>
     );
 };
-
-const MobileSearch = ({ uiFilters, handleFilterChange, updateFilters }) => (
-    <div className="relative flex-grow">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-        <input
-            type="text"
-            placeholder="Search auctions..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            value={uiFilters.search}
-            onChange={handleFilterChange}
-            name="search"
-        />
-    </div>
-);
 
 function Auctions() {
     const {
@@ -362,48 +290,56 @@ function Auctions() {
         priceMax: "",
         location: "",
         sortBy: "createdAt",
-        sortOrder: "desc"
+        sortOrder: "desc",
+        auctionType: "",
+        allowOffers: "",
+        make: "",
+        model: "",
+        yearMin: "",
+        yearMax: "",
+        transmission: "",
+        fuelType: "",
+        condition: ""
     });
 
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
     const location = useLocation();
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [activeFilterSections, setActiveFilterSections] = useState({});
     const [debounceTimer, setDebounceTimer] = useState(null);
 
+    // Fetch categories on component mount
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await axiosInstance.get('/api/v1/admin/categories/public/active');
+
+            if (response.data.success) {
+                // Filter out "Explore" category
+                const apiCategories = response.data.data.filter(cat =>
+                    !cat.isExplore && cat.name && cat.slug
+                );
+                setCategories(apiCategories);
+            }
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
+    // Sync UI filters with API filters
     useEffect(() => {
         setUiFilters(prev => ({
             ...prev,
             ...apiFilters
         }));
     }, [apiFilters]);
-
-    // const debouncedUpdateFilters = useCallback((newFilters) => {
-    //     if (debounceTimer) {
-    //         clearTimeout(debounceTimer);
-    //     }
-
-    //     const timer = setTimeout(() => {
-    //         updateFilters(newFilters);
-    //     }, 500); // 500ms debounce
-
-    //     setDebounceTimer(timer);
-    // }, [debounceTimer, updateFilters]);
-
-    // const handleFilterChange = (e) => {
-    //     const { name, value } = e.target;
-    //     const newFilters = {
-    //         ...uiFilters,
-    //         [name]: value
-    //     };
-
-    //     setUiFilters(newFilters);
-
-    //     if (['search', 'location', 'make', 'model', 'manufacturer'].includes(name)) {
-    //         debouncedUpdateFilters(newFilters);
-    //     } else {
-    //         updateFilters(newFilters);
-    //     }
-    // };
 
     const debouncedUpdateFilters = useCallback((newFilters) => {
         if (debounceTimer) {
@@ -412,7 +348,7 @@ function Auctions() {
 
         const timer = setTimeout(() => {
             updateFilters(newFilters);
-        }, 500); // 500ms debounce
+        }, 500);
 
         setDebounceTimer(timer);
     }, [debounceTimer, updateFilters]);
@@ -426,24 +362,13 @@ function Auctions() {
 
         setUiFilters(newFilters);
 
-        // Auto-apply filters for all fields except search/location (which use debounce)
-        if (['search', 'location'].includes(name)) {
+        // Use debounce for text inputs, immediate for others
+        if (['search', 'location', 'make', 'model'].includes(name)) {
             debouncedUpdateFilters(newFilters);
         } else {
-            // Auto-apply immediately for other filters
             updateFilters(newFilters);
         }
     };
-    // const handleRangeChange = (minName, maxName, minValue, maxValue) => {
-    //     const newFilters = {
-    //         ...uiFilters,
-    //         [minName]: minValue,
-    //         [maxName]: maxValue
-    //     };
-
-    //     setUiFilters(newFilters);
-    //     updateFilters(newFilters);
-    // };
 
     const handleRangeChange = (minName, maxName, minValue, maxValue) => {
         const newFilters = {
@@ -453,14 +378,7 @@ function Auctions() {
         };
 
         setUiFilters(newFilters);
-
-        // Auto-apply range filters immediately
         updateFilters(newFilters);
-    };
-
-    const applyFilters = () => {
-        updateFilters(uiFilters);
-        setShowMobileFilters(false);
     };
 
     const resetFilters = () => {
@@ -472,7 +390,16 @@ function Auctions() {
             priceMax: "",
             location: "",
             sortBy: "createdAt",
-            sortOrder: "desc"
+            sortOrder: "desc",
+            auctionType: "",
+            allowOffers: "",
+            make: "",
+            model: "",
+            yearMin: "",
+            yearMax: "",
+            transmission: "",
+            fuelType: "",
+            condition: ""
         };
         setUiFilters(resetFilters);
         updateFilters(resetFilters);
@@ -516,38 +443,44 @@ function Auctions() {
                 {/* Header */}
                 <div className="bg-white border-b border-gray-200 px-8 py-8">
                     <div className="container mx-auto">
-                        <h1 className="text-3xl font-bold text-gray-900">All Auctions</h1>
-                        <p className="text-gray-600 mt-2">Browse through our selection of premium aircraft, parts, engine, and memorabilias' auctions</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Car Auctions</h1>
+                        <p className="text-gray-600 mt-2">Browse through our selection of premium vehicles across all categories</p>
                     </div>
                 </div>
 
                 {/* Main Content */}
                 <div className="container mx-auto py-8">
                     <div className="flex flex-col lg:flex-row gap-8">
-                        {/* Filters Sidebar - Visible on large screens */}
+                        {/* Filters Sidebar */}
                         <div className="hidden lg:block lg:w-1/4 xl:w-1/5">
                             <FiltersSection
                                 uiFilters={uiFilters}
+                                categories={categories}
+                                loadingCategories={loadingCategories}
                                 handleFilterChange={handleFilterChange}
                                 handleRangeChange={handleRangeChange}
-                                applyFilters={applyFilters}
                                 resetFilters={resetFilters}
                                 toggleFilterSection={toggleFilterSection}
                                 activeFilterSections={activeFilterSections}
                                 setShowMobileFilters={setShowMobileFilters}
-                                updateFilters={updateFilters}
                             />
                         </div>
 
                         {/* Content Area */}
                         <div className="w-full lg:w-3/4 xl:w-4/5">
-                            {/* Mobile Filter Toggle - FIXED: Now using external MobileSearch */}
+                            {/* Mobile Filter Toggle */}
                             <div className="flex flex-col md:flex-row gap-4 mb-8 lg:hidden">
-                                <MobileSearch
-                                    uiFilters={uiFilters}
-                                    handleFilterChange={handleFilterChange}
-                                    updateFilters={updateFilters}
-                                />
+                                <div className="relative flex-grow">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search auctions..."
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        value={uiFilters.search}
+                                        onChange={handleFilterChange}
+                                        name="search"
+                                    />
+                                </div>
                                 <button
                                     onClick={() => setShowMobileFilters(true)}
                                     className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 md:w-auto font-medium"
@@ -655,14 +588,14 @@ function Auctions() {
                         <div className="absolute left-0 top-0 h-full w-4/5 max-w-sm bg-white overflow-y-auto p-6">
                             <FiltersSection
                                 uiFilters={uiFilters}
+                                categories={categories}
+                                loadingCategories={loadingCategories}
                                 handleFilterChange={handleFilterChange}
                                 handleRangeChange={handleRangeChange}
-                                applyFilters={applyFilters}
                                 resetFilters={resetFilters}
                                 toggleFilterSection={toggleFilterSection}
                                 activeFilterSections={activeFilterSections}
                                 setShowMobileFilters={setShowMobileFilters}
-                                updateFilters={updateFilters}
                             />
                         </div>
                     </div>
