@@ -1,4 +1,4 @@
-import { Gavel, Zap, DollarSign, Clock } from 'lucide-react';
+import { Gavel, Zap, PoundSterling, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const MobileBidStickyBar = ({
@@ -120,7 +120,7 @@ const MobileBidStickyBar = ({
                     onClick={onMakeOfferClick}
                     className="bg-[#edcd1f] hover:bg-[#edcd1f]/90 text-black py-2 px-4 rounded-md cursor-pointer flex items-center gap-2 text-sm font-medium w-full justify-center"
                   >
-                    <DollarSign size={16} />
+                    <PoundSterling size={16} />
                     <span>Make Offer</span>
                   </button>
                 )}

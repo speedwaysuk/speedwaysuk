@@ -3,7 +3,7 @@ import { AccountInactiveBanner, BidderContainer, BidderHeader, BidderSidebar, Lo
 import {
     Search,
     Filter,
-    DollarSign,
+    PoundSterling,
     CheckCircle,
     XCircle,
     Clock,
@@ -405,7 +405,7 @@ function MyOffers() {
                                     <p className="text-purple-200 text-xs mt-1">Across all offers</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-lg">
-                                    <DollarSign size={24} />
+                                    <PoundSterling size={24} />
                                 </div>
                             </div>
                         </div>
@@ -687,7 +687,7 @@ function MyOffers() {
                             })
                         ) : (
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                                <DollarSign size={64} className="mx-auto text-gray-300 mb-4" />
+                                <PoundSterling size={64} className="mx-auto text-gray-300 mb-4" />
                                 <h3 className="text-2xl font-semibold text-gray-700 mb-2">No offers found</h3>
                                 <p className="text-gray-500 mb-6">
                                     {searchTerm || filter !== "all"

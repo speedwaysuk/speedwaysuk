@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-    Search, Filter, Calendar, DollarSign, Users, TrendingUp, Award,
+    Search, Filter, Calendar, PoundSterling, Users, TrendingUp, Award,
     Clock, CheckCircle, XCircle, RefreshCw, AlertCircle, MessageSquare,
     Eye, Package, User, Mail, Phone, Building, FileText, Shield, Ban,
     ChevronRight, MoreVertical, Download, BarChart3, TrendingDown
@@ -310,7 +310,7 @@ function AllOffers() {
             title: "Total Offers",
             value: stats.totalOffers?.toString() || "0",
             change: "Across all auctions",
-            icon: <DollarSign size={24} />,
+            icon: <PoundSterling size={24} />,
             color: "blue"
         },
         {
@@ -783,7 +783,7 @@ function AllOffers() {
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                                    <DollarSign size={48} className="mx-auto text-gray-300 mb-4" />
+                                    <PoundSterling size={48} className="mx-auto text-gray-300 mb-4" />
                                     <h3 className="text-lg font-semibold text-gray-700 mb-2">No Offer Selected</h3>
                                     <p className="text-gray-500">Select an offer from the list to view details and take action</p>
                                 </div>

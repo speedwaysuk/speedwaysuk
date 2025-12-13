@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, FileText, CreditCard, Building, DollarSign, Globe, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Upload, FileText, CreditCard, Building, PoundSterling, Globe, AlertCircle, CheckCircle } from 'lucide-react';
 
 const PaymentStatusModal = ({ isOpen, onClose, auction, onSubmit, loading }) => {
     const [formData, setFormData] = useState({
@@ -148,7 +148,7 @@ const PaymentStatusModal = ({ isOpen, onClose, auction, onSubmit, loading }) => 
                                         {method === 'credit_card' && <CreditCard className="h-5 w-5" />}
                                         {method === 'bank_transfer' && <Building className="h-5 w-5" />}
                                         {method === 'paypal' && <Globe className="h-5 w-5" />}
-                                        {method === 'other' && <DollarSign className="h-5 w-5" />}
+                                        {method === 'other' && <PoundSterling className="h-5 w-5" />}
                                         <span className="text-xs capitalize">{method.replace('_', ' ')}</span>
                                     </button>
                                 ))}

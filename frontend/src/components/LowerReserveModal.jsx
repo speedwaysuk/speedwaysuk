@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, PoundSterling, AlertCircle, CheckCircle } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance.js';
 import toast from 'react-hot-toast';
 
@@ -81,7 +81,7 @@ function LowerReserveModal({ isOpen, onClose, auction, onReserveLowered }) {
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <div className="flex items-center gap-3">
-                        <DollarSign className="w-6 h-6 text-green-600" />
+                        <PoundSterling className="w-6 h-6 text-green-600" />
                         <h2 className="text-xl font-semibold text-gray-900">Lower Reserve Price</h2>
                     </div>
                     <button

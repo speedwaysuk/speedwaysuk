@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance';
-import { Crown, Save, DollarSign } from 'lucide-react';
+import { Crown, Save, PoundSterling } from 'lucide-react';
 import { AdminContainer, AdminHeader, AdminSidebar } from '../../components';
 
 const Commissions = () => {
@@ -91,7 +91,7 @@ const Commissions = () => {
                 <AdminContainer>
                     <div className="max-w-full pt-16 pb-7 md:pt-0">
                         <div className="flex items-center gap-3 mb-2">
-                            <DollarSign size={32} className="text-green-600" />
+                            <PoundSterling size={32} className="text-green-600" />
                             <h2 className="text-3xl md:text-4xl font-bold">Commission Settings</h2>
                         </div>
                         <p className="text-gray-600">Manage commission rates for different auction categories</p>
@@ -121,7 +121,7 @@ const Commissions = () => {
                                                     <p className="text-xs text-gray-400 mt-1">Current commission rate</p>
                                                 </div>
                                                 <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
-                                                    <DollarSign size={20} />
+                                                    <PoundSterling size={20} />
                                                 </div>
                                             </div>
                                             

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DollarSign, User, Clock, CheckCircle, XCircle, MessageSquare, AlertCircle, RefreshCw, TrendingUp, Shield } from 'lucide-react';
+import { PoundSterling, User, Clock, CheckCircle, XCircle, MessageSquare, AlertCircle, RefreshCw, TrendingUp, Shield } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import { toast } from 'react-hot-toast';
 
@@ -10,7 +10,7 @@ const OffersSection = ({ offers, auction, onAuctionUpdate }) => {
     if (!offers || offers.length === 0) {
         return (
             <div className="text-center py-8">
-                <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
+                <PoundSterling className="mx-auto h-12 w-12 text-gray-400" />
                 <p className="mt-4 text-gray-600">You haven't made any offers on this auction</p>
             </div>
         );

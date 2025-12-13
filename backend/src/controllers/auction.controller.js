@@ -2048,6 +2048,14 @@ export const buyNow = async (req, res) => {
     const { id } = req.params;
     const buyer = req.user;
 
+    // Validate auction status
+    if (!buyer?.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `Account is inactive. Can't send an offer.`,
+      });
+    }
+
     // Find auction
     const auction = await Auction.findById(id)
       .populate("seller", "username firstName lastName email phone address")

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
+import { Link } from 'react-router-dom';
 
 const AccountInactiveBanner = () => {
     const { user } = useAuth();
@@ -58,16 +59,12 @@ const AccountInactiveBanner = () => {
                         </div>
                     </div>
                     <div className="mt-3">
-                        <button
-                            type="button"
+                        <Link
+                        to={`/contact`}
                             className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-amber-700 bg-amber-100 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
-                            onClick={() => {
-                                // You can add functionality to resend verification or contact support
-                                console.log('Contact support clicked');
-                            }}
                         >
                             Contact Support
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

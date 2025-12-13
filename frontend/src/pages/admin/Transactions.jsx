@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Filter, Calendar, Download, BarChart3, User, DollarSign, TrendingUp, CreditCard, Shield, AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Search, Filter, Calendar, Download, BarChart3, User, PoundSterling, TrendingUp, CreditCard, Shield, AlertCircle, CheckCircle, Cloc, PoundSterlingk, XCircle } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance.js";
 import { toast } from "react-hot-toast";
 import { AdminContainer, AdminHeader, AdminSidebar, LoadingSpinner } from "../../components/index.js";
@@ -234,7 +234,7 @@ function Transactions() {
             title: "Total Revenue",
             value: formatCurrency(stats.overall?.totalRevenue || 0),
             change: "All Time",
-            icon: <DollarSign size={24} />,
+            icon: <PoundSterling size={24} />,
             color: "green"
         },
         {

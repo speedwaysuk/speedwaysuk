@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AccountInactiveBanner, BidderContainer, BidderHeader, BidderSidebar, LoadingSpinner } from "../../components";
-import { Eye, Gavel, Clock, DollarSign, Trash2, Bell, BellOff, Search, Filter, SortAsc, Bookmark, MapPin, Award, Loader } from "lucide-react";
+import { Eye, Gavel, Clock, Trash2, Bell, BellOff, Search, Filter, SortAsc, Bookmark, MapPin, Award, Loader } from "lucide-react";
 import { about } from "../../assets";
 import axiosInstance from "../../utils/axiosInstance";
 import { useWatchlist } from "../../hooks/useWatchlist";

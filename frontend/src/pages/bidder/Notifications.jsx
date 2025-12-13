@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BidderContainer, BidderHeader, BidderSidebar } from "../../components";
-import { Bell, BellOff, Settings, Filter, Check, X, Archive, Trash2, Eye, Gavel, Award, Clock, DollarSign, TrendingUp, TrendingDown, Star, MessageCircle, Zap, AlertTriangle, Info } from "lucide-react";
+import { Bell, BellOff, Settings, Filter, Check, X, Archive, Trash2, Eye, Gavel, Award, Clock, PoundSterling, TrendingUp, TrendingDown, Star, MessageCircle, Zap, AlertTriangle, Info } from "lucide-react";
 
 // Mock notifications data
 const notificationsData = [
@@ -222,7 +222,7 @@ function Notifications() {
             case "auction_won":
                 return (
                     <button className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
-                        <DollarSign size={14} />
+                        <PoundSterling size={14} />
                         Complete Payment
                     </button>
                 );

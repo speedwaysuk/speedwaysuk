@@ -1,6 +1,6 @@
 // components/BidHistory.jsx
 import { useState, useEffect, useMemo } from "react";
-import { Search, Filter, Calendar, Download, BarChart3, User, Gavel, Award, Clock, DollarSign, Users, TrendingUp, Package } from "lucide-react";
+import { Search, Filter, Calendar, Download, BarChart3, User, Gavel, Award, Clock, PoundSterling, Users, TrendingUp, Package } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance.js";
 import { toast } from "react-hot-toast";
 import { AdminContainer, AdminHeader, AdminSidebar } from "../../components/index.js";
@@ -224,7 +224,7 @@ function BidHistory() {
             title: "Total Revenue",
             value: formatCurrency(stats.totalRevenue || 0),
             change: "From Commissions",
-            icon: <DollarSign size={24} />,
+            icon: <PoundSterling size={24} />,
             color: "purple"
         },
         {

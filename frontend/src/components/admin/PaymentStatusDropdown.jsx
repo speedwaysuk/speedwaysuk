@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Circle, CheckCircle, AlertCircle, Clock, XCircle, RefreshCw, DollarSign } from 'lucide-react';
+import { ChevronDown, Circle, CheckCircle, AlertCircle, Clock, XCircle, RefreshCw, PoundSterling } from 'lucide-react';
 import { PaymentStatusModal } from '../index';
 
 const PaymentStatusDropdown = ({ auction, onStatusUpdate, disabled }) => {
@@ -31,7 +31,7 @@ const PaymentStatusDropdown = ({ auction, onStatusUpdate, disabled }) => {
             },
             refunded: {
                 color: 'text-blue-600 bg-blue-50 border-blue-200',
-                icon: <DollarSign className="h-4 w-4" />,
+                icon: <PoundSterling className="h-4 w-4" />,
                 label: 'Refunded'
             },
             cancelled: {

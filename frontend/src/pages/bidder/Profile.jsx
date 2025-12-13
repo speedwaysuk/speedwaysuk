@@ -4,7 +4,6 @@ import {
     User, Mail, Phone, MapPin, Camera, Edit, Save, X, Shield, Lock,
     Upload, Award, Gavel, Heart, Star, TrendingUp, Bell, Newspaper,
     Clock,
-    DollarSign,
     PoundSterling,
     Hand
 } from "lucide-react";

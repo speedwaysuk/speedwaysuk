@@ -6,7 +6,7 @@ import {
     Gavel,
     Award,
     Clock,
-    DollarSign,
+    PoundSterling,
     TrendingUp,
     TrendingDown,
     Eye,
@@ -273,7 +273,7 @@ function MyBids() {
                                     <p className="text-purple-200 text-xs mt-1">Across all auctions</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-lg">
-                                    <DollarSign size={24} />
+                                    <PoundSterling size={24} />
                                 </div>
                             </div>
                         </div>
