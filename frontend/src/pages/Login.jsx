@@ -18,7 +18,7 @@ const Login = () => {
 
     useEffect(() => {
         if (user) {
-            navigate(`/${user.userType}/profile`);
+            navigate(`/${user.userType}/dashboard`);
         }
     }, [user])
 

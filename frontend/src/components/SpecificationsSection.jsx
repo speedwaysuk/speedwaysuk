@@ -89,29 +89,29 @@ const formatValue = (field, value) => {
     
     // Handle special field values
     if (field === 'serviceHistory') {
-        if (value === 'Full Service') return <span className="text-green-600">✓ {value}</span>;
-        if (value === 'Part Service') return <span className="text-yellow-600">⚠ {value}</span>;
-        if (value === 'No History') return <span className="text-red-600">✗ {value}</span>;
+        if (value === 'Full Service') return <span className="text-black">✓ {value}</span>;
+        if (value === 'Part Service') return <span className="text-black">⚠ {value}</span>;
+        if (value === 'No History') return <span className="text-black">✗ {value}</span>;
     }
     
     if (field === 'v5Status') {
-        if (value === 'V5 Present') return <span className="text-green-600">✓ {value}</span>;
-        if (value === 'Applied For') return <span className="text-yellow-600">⏳ {value}</span>;
-        if (value === 'Not Available') return <span className="text-red-600">✗ {value}</span>;
+        if (value === 'V5 Present') return <span className="text-black">✓ {value}</span>;
+        if (value === 'Applied For') return <span className="text-black">⏳ {value}</span>;
+        if (value === 'Not Available') return <span className="text-black">✗ {value}</span>;
     }
     
     if (field === 'insuranceCategory') {
-        if (value === 'No Cat') return <span className="text-green-600">✓ {value}</span>;
+        if (value === 'No Cat') return <span className="text-black">✓ {value}</span>;
         return value;
     }
     
     if (field === 'vatStatus') {
         const statusColors = {
-            'Marginal': 'text-purple-600',
-            'Qualifying': 'text-blue-600',
-            'Commercial': 'text-green-600'
+            'Marginal': 'text-black',
+            'Qualifying': 'text-black',
+            'Commercial': 'text-black'
         };
-        const colorClass = statusColors[value] || 'text-gray-800';
+        const colorClass = statusColors[value] || 'text-black';
         return <span className={colorClass}>{value}</span>;
     }
     
@@ -208,7 +208,7 @@ const SpecificationsSection = ({ auction }) => {
             })}
             
             {/* Render any remaining fields not in our groups */}
-            {(() => {
+            {/* {(() => {
                 const allGroupedFields = Object.values(fieldGroups).flat();
                 const ungroupedEntries = entries.filter(([key]) => 
                     !allGroupedFields.includes(key) && 
@@ -246,7 +246,7 @@ const SpecificationsSection = ({ auction }) => {
                         </div>
                     </div>
                 );
-            })()}
+            })()} */}
         </div>
     );
 };

@@ -369,11 +369,11 @@ function SingleAuction() {
                             <span>{watchlistCount || auction?.watchlistCount || 0}</span>
                         </p>
 
-                        <p onClick={() => handleTabClick('comments')}
+                        {/* <p onClick={() => handleTabClick('comments')}
                             className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">
                             <MessageCircle size={18} />
                             <span>{pagination?.totalComments || 0}</span>
-                        </p>
+                        </p> */}
 
                         {/* <p onClick={() => handleTabClick('bids')}
                             className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">

@@ -49,12 +49,12 @@ const TabSection = forwardRef(({ description, bids, offers, auction, activatedTa
 
   // Build tabs array
   const tabs = [
-    {
-      id: "comments",
-      label: "Comments",
-      icon: <MessageSquare size={18} />,
-      component: <CommentSection auctionId={auction._id} />,
-    },
+    // {
+    //   id: "comments",
+    //   label: "Comments",
+    //   icon: <MessageSquare size={18} />,
+    //   component: <CommentSection auctionId={auction._id} />,
+    // },
     // {
     //   id: "bids",
     //   label: "Bid History",

@@ -71,22 +71,22 @@ function Dashboard() {
             icon: <Award size={24} />,
             trend: "up"
         },
-        {
-            title: "Success Rate",
-            value: stats?.successRate,
-            change: "Won % To Offer",
-            icon: <TrendingUp size={24} />,
-            trend: "up",
-            suffix: "%"
-        }, 
-        {
-            title: "Total Spent",
-            value: stats?.totalSpent?.toLocaleString(),
-            change: "Used To Purchase",
-            icon: <PoundSterling size={24} />,
-            trend: "up",
-            currency: "£"
-        },
+        // {
+        //     title: "Success Rate",
+        //     value: stats?.successRate,
+        //     change: "Won % To Offer",
+        //     icon: <TrendingUp size={24} />,
+        //     trend: "up",
+        //     suffix: "%"
+        // }, 
+        // {
+        //     title: "Total Spent",
+        //     value: stats?.totalSpent?.toLocaleString(),
+        //     change: "Used To Purchase",
+        //     icon: <PoundSterling size={24} />,
+        //     trend: "up",
+        //     currency: "£"
+        // },
         // {
         //     title: "Average Bid Amount",
         //     value: stats?.avgBidAmount?.toLocaleString(),
@@ -95,14 +95,14 @@ function Dashboard() {
         //     trend: "up",
         //     currency: "£"
         // },
-        {
-            title: "Avg. Offer £",
-            value: stats?.avgOfferAmount?.toLocaleString(),
-            change: "Bid Amount / No. of Bids",
-            icon: <PoundSterling size={24} />,
-            trend: "up",
-            currency: "£"
-        },
+        // {
+        //     title: "Avg. Offer £",
+        //     value: stats?.avgOfferAmount?.toLocaleString(),
+        //     change: "Bid Amount / No. of Bids",
+        //     icon: <PoundSterling size={24} />,
+        //     trend: "up",
+        //     currency: "£"
+        // },
         {
             title: "Watchlist Items",
             value: stats?.watchlistCount?.toLocaleString(),
@@ -132,7 +132,7 @@ function Dashboard() {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                                 {statsData.map(stat => (
                                     <StatCard key={stat.title} {...stat} />
                                 ))}

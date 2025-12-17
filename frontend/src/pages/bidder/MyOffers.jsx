@@ -355,7 +355,7 @@ function MyOffers() {
                     </div>
 
                     {/* Stats Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -409,7 +409,7 @@ function MyOffers() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Filters and Controls */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

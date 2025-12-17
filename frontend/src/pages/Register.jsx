@@ -99,7 +99,6 @@ const Register = () => {
                 localStorage.setItem('user', JSON.stringify(data.data.user));
 
                 setUser(data.data.user);
-                console.log(data.data.user)
 
                 const redirectPath = data.data.user.userType === 'seller'
                     ? '/seller/dashboard'

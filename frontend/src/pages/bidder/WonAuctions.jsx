@@ -177,13 +177,8 @@ function WonAuctions() {
                                     </h2>
                                 </div>
                                 <p className="text-secondary text-lg">
-                                    Celebrate your winning bids and manage your acquisitions
+                                    Your winning bids and manage your acquisitions
                                 </p>
-                            </div>
-                            <div className="mt-4 md:mt-0">
-                                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                                    {statistics.totalWon} Triumphant Wins!
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -320,7 +315,7 @@ function WonAuctions() {
                                     </div>
 
                                     {/* Congratulations Message */}
-                                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4 mb-4">
+                                    {/* <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4 mb-4">
                                         <div className="flex items-center gap-2">
                                             <Star
                                                 className="text-amber-500"
@@ -331,7 +326,7 @@ function WonAuctions() {
                                                 {auction.congratulatoryMessage}
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     {/* Auction Details */}
                                     <div className="grid grid-cols-2 gap-4 mb-4">
@@ -387,7 +382,7 @@ function WonAuctions() {
                                     </div>
 
                                     {/* Seller Info */}
-                                    <div className="border-t border-gray-200 pt-4 mb-4">
+                                    {/* <div className="border-t border-gray-200 pt-4 mb-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -408,7 +403,7 @@ function WonAuctions() {
                                                 Contact
                                             </button>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     {/* Action Buttons */}
                                     <div className="flex gap-3">
