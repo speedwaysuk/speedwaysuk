@@ -24,13 +24,15 @@ import {
     Fuel,
     Gauge,
     Calendar,
-    User
+    User,
+    Search
 } from "lucide-react";
-import { RTE, AdminContainer, AdminHeader, AdminSidebar } from '../../components';
+import { RTE, AdminContainer, AdminHeader, AdminSidebar, VehicleLookupModal } from '../../components';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance.js';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 // Drag and Drop item types
 const ItemTypes = {
@@ -161,7 +163,7 @@ const categoryFields = {
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: new Date().getFullYear() + 1 },
         { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Hatchback', 'Saloon', 'SUV', 'Estate', 'Coupe', 'Convertible', 'MPV'] },
         { name: 'transmission', label: 'Transmission', type: 'select', required: false, options: ['Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
-        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: false, options: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'] },
+        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: false, options: ['Petrol', 'Diesel', 'Hybrid', 'Electric'] },
         { name: 'colour', label: 'Colour', type: 'text', required: false, placeholder: 'e.g., Red, Blue, Black' },
         { name: 'keys', label: 'Keys', type: 'number', required: false, min: 1, max: 4 },
         { name: 'motExpiry', label: 'MOT Expiry Date', type: 'date', required: false },
@@ -170,6 +172,7 @@ const categoryFields = {
         { name: 'v5Status', label: 'V5 Status', type: 'select', required: false, options: ['V5 Present', 'Applied For', 'Not Available'] },
         { name: 'previousOwners', label: 'Previous Owners', type: 'number', required: false, min: 1 },
         { name: 'vatStatus', label: 'VAT Status', type: 'select', required: false, options: ['Marginal', 'Qualifying', 'Commercial'] },
+        { name: 'euroStatus', label: 'Euro Status', type: 'text', required: false, placeholder: 'e.g., EURO 6' },
         { name: 'capClean', label: 'CAP Clean (£)', type: 'number', required: false, min: 0, placeholder: 'e.g., 15500' },
         { name: 'vendor', label: 'Vendor', type: 'text', required: false, placeholder: 'e.g., City Motors' },
     ]
@@ -184,6 +187,8 @@ const CreateAuction = () => {
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
     const [uploadedServiceRecords, setUploadedServiceRecords] = useState([]);
+    const [showLookupModal, setShowLookupModal] = useState(false);
+
     const {
         register,
         handleSubmit,
@@ -213,6 +218,29 @@ const CreateAuction = () => {
     useEffect(() => {
         fetchCategories();
     }, []);
+
+    // api request to dvla
+    const handleVehicleFound = (vehicleData) => {
+        // Auto-fill the vehicle title
+        // if (vehicleData.title) {
+        //     setValue('title', vehicleData.title);
+        // }
+
+        // Auto-fill the specifications fields that match your categoryFields
+        if (vehicleData.specifications) {
+            Object.keys(vehicleData.specifications).forEach((key) => {
+                // Only set values for fields that exist in your categoryFields
+                const fieldExists = categoryFields['ALL'].some(field => field.name === key);
+
+                if (fieldExists && vehicleData.specifications[key] !== undefined && vehicleData.specifications[key] !== '') {
+                    setValue(`specifications.${key}`, vehicleData.specifications[key]);
+                }
+            });
+        }
+
+        // Show success message
+        toast.success('Vehicle details auto-filled successfully!');
+    };
 
     const fetchCategories = async () => {
         try {
@@ -295,7 +323,7 @@ const CreateAuction = () => {
 
         // Categorize fields for display
         const vehicleInfoFields = [
-            'registration', 'miles', 'year', 'bodyType', 'transmission', 'fuelType', 'colour'
+            'registration', 'miles', 'year', 'bodyType', 'transmission', 'fuelType', 'colour', 'euroStatus'
         ].map(name => allFields.find(f => f.name === name)).filter(Boolean);
 
         const extraInfoFields = [
@@ -728,6 +756,31 @@ const CreateAuction = () => {
                                             </div>
                                         </div>
 
+                                        {/* Vehicle Lookup Feature */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium text-secondary mb-3">Quick Vehicle Lookup</label>
+                                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-sm text-gray-700">
+                                                            Enter UK registration number to auto-fill vehicle details
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            Saves time by pre-filling make, model, year, colour, and fuel type
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowLookupModal(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition-colors whitespace-nowrap"
+                                                    >
+                                                        <Search size={16} />
+                                                        Lookup Vehicle
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
 
@@ -938,8 +991,8 @@ const CreateAuction = () => {
                                             <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 {[
-                                                    // { value: 'standard', label: 'Standard Auction' },
-                                                    // { value: 'reserve', label: 'Reserve Price Auction' },
+                                                    { value: 'standard', label: 'Standard Auction' },
+                                                    { value: 'reserve', label: 'Reserve Price Auction' },
                                                     { value: 'buy_now', label: 'Buy Now Auction' },
                                                 ].map((type) => (
                                                     <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -1348,6 +1401,12 @@ const CreateAuction = () => {
                             </form>
                         </div>
                     </AdminContainer>
+
+                    <VehicleLookupModal
+                        isOpen={showLookupModal}
+                        onClose={() => setShowLookupModal(false)}
+                        onVehicleFound={handleVehicleFound}
+                    />
                 </div>
             </section>
         </DndProvider>

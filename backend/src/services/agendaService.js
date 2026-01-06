@@ -31,26 +31,6 @@ class AgendaService {
 
   defineJobs() {
     // Job to activate an auction at its start time
-    // this.agenda.define('activate auction', async (job) => {
-    //     const { auctionId } = job.attrs.data;
-
-    //     try {
-    //         const auction = await Auction.findById(auctionId);
-    //         if (auction && (auction.status === 'approved')) {
-    //             auction.status = 'active';
-    //             await auction.save();
-    //             await auction.populate('seller', 'email username firstName');
-
-    //             await auctionListedEmail(auction, auction.seller);
-    //             // console.log(`✅ Agenda: Activated auction ${auctionId}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Agenda job error (activate auction):', error);
-    //         // Job will retry based on Agenda's retry logic
-    //     }
-    // });
-
-    // Job to activate an auction at its start time
     this.agenda.define("activate auction", async (job) => {
       const { auctionId } = job.attrs.data;
 
@@ -83,72 +63,114 @@ class AgendaService {
     });
 
     // Job to end an auction at its end time
-    // this.agenda.define('end auction', async (job) => {
-    //     const { auctionId } = job.attrs.data;
-    //     // console.log('Entered the auction end.');
+    // this.agenda.define("end auction", async (job) => {
+    //   const { auctionId } = job.attrs.data;
 
-    //     try {
-    //         const auction = await Auction.findById(auctionId)
-    //             .populate('winner', 'email phone username firstName')
-    //             .populate('seller', 'email phone username firstName');
-    //         // Add safety check - only end if current time is actually past end date
-    //         if (auction && (auction.status === 'active' || auction.status === 'reserve_not_met') && new Date() >= auction.endDate) {
-    //             // if (auction && auction.status === 'active' && new Date() >= auction.endDate) {
-    //             await auction.endAuction();
-    //             // console.log(`✅ Agenda: Ended auction ${auctionId}`);
-    //             // console.log(auction.winner)
+    //   try {
+    //     const auction = await Auction.findById(auctionId).populate(
+    //       "seller",
+    //       "email phone username firstName"
+    //     );
 
-    //             // await auction.populate('winner', 'email username firstName');
-    //             // await auction.populate('seller', 'email username firstName');
-
-    //             if (auction.winner) {
-    //                 // console.log('Calling chargeWinningBidderDirect for winner:', auction.winner._id);
-    //                 await chargeWinningBidderDirect(auctionId);
-    //                 await cancelLosingBidderAuthorizations(auctionId, auction.winner._id);
-
-    //                 const populateAuction = await Auction.findById(auctionId)
-    //                     .populate('winner', 'email phone username firstName')
-    //                     .populate('seller', 'email phone username firstName');
-
-    //                 await sendAuctionWonEmail(populateAuction);
-    //                 await paymentSuccessEmail(populateAuction.winner, populateAuction, populateAuction?.commissionAmount);
-    //                 await sendAuctionEndedSellerEmail(populateAuction);
-
-    //                 const adminUsers = await User.find({ userType: 'admin' });
-    //                 for (const admin of adminUsers) {
-    //                     await auctionWonAdminEmail(admin.email, populateAuction, populateAuction.winner);
-    //                 }
-    //                 return;
-    //             }
-    //             // console.log('Calling cancel all bidder');
-
-    //             await cancelAllBidderAuthorizations(auctionId);
-
-    //             await sendAuctionEndedSellerEmail(auction);
-
-    //             const adminUsers = await User.find({ userType: 'admin' });
-
-    //             for (const admin of adminUsers) {
-    //                 await auctionEndedAdminEmail(admin.email, auction);
-    //             }
-    //         } else if (auction && auction.status === 'active') {
-    //             // Auction was extended, reschedule the job
-    //             await this.scheduleAuctionEnd(auctionId, auction.endDate);
-    //             // console.log(`🔄 Agenda: Rescheduled auction ${auctionId} to ${auction.endDate}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Agenda job error (end auction):', error);
+    //     if (!auction) {
+    //       console.log(`❌ Agenda: Auction ${auctionId} not found`);
+    //       return;
     //     }
-    // });
 
+    //     // Only process if auction is still active and end date has passed
+    //     if (auction.status === "active" && new Date() >= auction.endDate) {
+    //       // CRITICAL CHECK: Skip if auction already has a winner (means offer was accepted or buy now used)
+    //       if (auction.winner) {
+    //         console.log(
+    //           `ℹ️ Agenda: Auction ${auctionId} already has a winner, skipping automated ending`
+    //         );
+    //         return;
+    //       }
+
+    //       // CRITICAL CHECK: Skip if auction status is already sold or similar sold statuses
+    //       const soldStatuses = ["sold", "sold_buy_now"];
+    //       if (soldStatuses.includes(auction.status)) {
+    //         console.log(
+    //           `ℹ️ Agenda: Auction ${auctionId} is already in sold status (${auction.status}), skipping`
+    //         );
+    //         return;
+    //       }
+
+    //       // Check if any offer is accepted (this should already be caught by winner check, but being extra safe)
+    //       const hasAcceptedOffer =
+    //         auction.offers &&
+    //         auction.offers.some(
+    //           (offer) =>
+    //             offer.status === "accepted" || offer.status === "completed"
+    //         );
+
+    //       if (hasAcceptedOffer) {
+    //         console.log(
+    //           `ℹ️ Agenda: Auction ${auctionId} has accepted offer, skipping automated ending`
+    //         );
+    //         return;
+    //       }
+
+    //       // Only end auction if it truly expired without any sales
+    //       console.log(`✅ Agenda: Ending auction ${auctionId} (no winner)`);
+
+    //       // Update auction status to ended
+    //       auction.status = "ended";
+    //       auction.endDate = new Date(); // Set actual end time
+
+    //       // Reject any pending offers
+    //       if (auction.offers && auction.offers.length > 0) {
+    //         auction.offers.forEach((offer) => {
+    //           if (offer.status === "pending") {
+    //             offer.status = "expired";
+    //             offer.sellerResponse =
+    //               "Offer expired - auction ended without a winner";
+    //           }
+    //         });
+    //       }
+
+    //       await auction.save();
+
+    //       // Send seller email (auction ended without sale)
+    //       await sendAuctionEndedSellerEmail(auction);
+
+    //       // Send admin email
+    //       const adminUsers = await User.find({ userType: "admin" });
+    //       for (const admin of adminUsers) {
+    //         await auctionEndedAdminEmail(admin.email, auction);
+    //       }
+
+    //       console.log(
+    //         `✅ Agenda: Sent emails for ended auction ${auctionId} (no winner)`
+    //       );
+    //     } else if (
+    //       auction.status === "active" &&
+    //       new Date() < auction.endDate
+    //     ) {
+    //       // Auction was extended, reschedule the job
+    //       await this.scheduleAuctionEnd(auctionId, auction.endDate);
+    //       console.log(
+    //         `🔄 Agenda: Rescheduled auction ${auctionId} to ${auction.endDate}`
+    //       );
+    //     } else {
+    //       console.log(
+    //         `ℹ️ Agenda: Auction ${auctionId} status is ${auction.status}, skipping`
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.error("Agenda job error (end auction):", error);
+    //   }
+    // });
+    
     this.agenda.define("end auction", async (job) => {
       const { auctionId } = job.attrs.data;
 
       try {
-        const auction = await Auction.findById(auctionId).populate(
+        let auction = await Auction.findById(auctionId).populate(
           "seller",
           "email phone username firstName"
         );
+        // Don't populate winner initially since it might be null
 
         if (!auction) {
           console.log(`❌ Agenda: Auction ${auctionId} not found`);
@@ -165,7 +187,7 @@ class AgendaService {
             return;
           }
 
-          // CRITICAL CHECK: Skip if auction status is already sold or similar sold statuses
+          // CRITICAL CHECK: Skip if auction status is already sold
           const soldStatuses = ["sold", "sold_buy_now"];
           if (soldStatuses.includes(auction.status)) {
             console.log(
@@ -174,7 +196,7 @@ class AgendaService {
             return;
           }
 
-          // Check if any offer is accepted (this should already be caught by winner check, but being extra safe)
+          // Check if any offer is accepted
           const hasAcceptedOffer =
             auction.offers &&
             auction.offers.some(
@@ -189,38 +211,54 @@ class AgendaService {
             return;
           }
 
-          // Only end auction if it truly expired without any sales
-          console.log(`✅ Agenda: Ending auction ${auctionId} (no winner)`);
+          console.log(`✅ Agenda: Ending auction ${auctionId}`);
 
-          // Update auction status to ended
-          auction.status = "ended";
-          auction.endDate = new Date(); // Set actual end time
+          // Use the model's endAuction method to handle the business logic
+          const result = await auction.endAuction();
 
-          // Reject any pending offers
-          if (auction.offers && auction.offers.length > 0) {
-            auction.offers.forEach((offer) => {
-              if (offer.status === "pending") {
-                offer.status = "expired";
-                offer.sellerResponse =
-                  "Offer expired - auction ended without a winner";
-              }
-            });
+          // Re-fetch the auction with populated winner if it was sold
+          if (result.wasSold) {
+            auction = await Auction.findById(auctionId)
+              .populate("seller", "email phone username firstName")
+              .populate("winner", "email phone username firstName address");
           }
 
-          await auction.save();
+          // Send appropriate emails based on the result
+          if (result.wasSold) {
+            console.log(
+              `✅ Agenda: Auction ${auctionId} was SOLD to ${
+                auction.winner ? auction.winner.username : "unknown"
+              }`
+            );
 
-          // Send seller email (auction ended without sale)
-          await sendAuctionEndedSellerEmail(auction);
+            // Send auction won email to buyer
+            await sendAuctionWonEmail(auction);
 
-          // Send admin email
-          const adminUsers = await User.find({ userType: "admin" });
-          for (const admin of adminUsers) {
-            await auctionEndedAdminEmail(admin.email, auction);
+            // Send admin email for sold auction
+            const adminUsers = await User.find({ userType: "admin" });
+            for (const admin of adminUsers) {
+              await auctionWonAdminEmail(admin.email, auction);
+            }
+
+            console.log(`✅ Agenda: Sent SOLD emails for auction ${auctionId}`);
+          } else {
+            console.log(
+              `✅ Agenda: Auction ${auctionId} ended without sale (status: ${result.newStatus})`
+            );
+
+            // Send seller email (auction ended without sale)
+            await sendAuctionEndedSellerEmail(auction);
+
+            // Send admin email for ended auction
+            const adminUsers = await User.find({ userType: "admin" });
+            for (const admin of adminUsers) {
+              await auctionEndedAdminEmail(admin.email, auction);
+            }
+
+            console.log(
+              `✅ Agenda: Sent ENDED emails for auction ${auctionId}`
+            );
           }
-
-          console.log(
-            `✅ Agenda: Sent emails for ended auction ${auctionId} (no winner)`
-          );
         } else if (
           auction.status === "active" &&
           new Date() < auction.endDate
@@ -240,209 +278,7 @@ class AgendaService {
       }
     });
 
-    // this.agenda.define('send ending soon notifications', async (job) => {
-    //     try {
-    //         const now = new Date();
-
-    //         // Define multiple time thresholds
-    //         const thirtyMinutesFromNow = new Date(now.getTime() + (30 * 60 * 1000)); // 30 minutes from now
-    //         const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000)); // 2 hours from now
-    //         const twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from now
-
-    //         // Find auctions ending within our thresholds
-    //         const endingSoonAuctions = await Auction.find({
-    //             status: 'active',
-    //             $or: [
-    //                 {
-    //                     // Ending in next 30 minutes (30-minute notification)
-    //                     endDate: {
-    //                         $lte: thirtyMinutesFromNow,
-    //                         $gt: now
-    //                     }
-    //                 },
-    //                 {
-    //                     // Ending in next 2 hours but after 30 minutes (2-hour notification)
-    //                     endDate: {
-    //                         $lte: twoHoursFromNow,
-    //                         $gt: thirtyMinutesFromNow
-    //                     }
-    //                 },
-    //                 {
-    //                     // Ending in next 24 hours but after 2 hours (24-hour notification)
-    //                     endDate: {
-    //                         $lte: twentyFourHoursFromNow,
-    //                         $gt: twoHoursFromNow
-    //                     }
-    //                 }
-    //             ]
-    //         }).populate('bids.bidder', 'email username preferences');
-
-    //         // Track which notifications we've sent to avoid duplicates
-    //         const sentNotifications = new Set();
-
-    //         for (const auction of endingSoonAuctions) {
-    //             // Calculate exact time remaining for this auction
-    //             const timeRemaining = auction.endDate - now;
-    //             const minutesRemaining = Math.ceil(timeRemaining / (60 * 1000));
-    //             const hoursRemaining = Math.ceil(timeRemaining / (60 * 60 * 1000));
-
-    //             // Determine which notification threshold this auction falls into
-    //             let timeLabel;
-    //             if (timeRemaining <= 30 * 60 * 1000) {
-    //                 // 30 minutes or less
-    //                 timeLabel = minutesRemaining <= 1 ? 'Less than 1 minute' :
-    //                     minutesRemaining <= 5 ? 'Less than 5 minutes' :
-    //                         minutesRemaining <= 30 ? `${minutesRemaining} minutes` : '30 minutes';
-    //             } else if (timeRemaining <= 2 * 60 * 60 * 1000) {
-    //                 // 2 hours or less (but more than 30 minutes)
-    //                 timeLabel = hoursRemaining <= 1 ? '1 hour' : '2 hours';
-    //             } else {
-    //                 // 24 hours or less (but more than 2 hours)
-    //                 const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
-    //                 timeLabel = daysRemaining === 1 ? '24 hours' : `${daysRemaining} days`;
-    //             }
-
-    //             // Get unique bidders who want notifications
-    //             const bidders = auction.bids
-    //                 .map(bid => bid.bidder)
-    //                 .filter((bidder, index, array) =>
-    //                     bidder &&
-    //                     array.findIndex(b => b._id.toString() === bidder._id.toString()) === index &&
-    //                     bidder.preferences?.bidAlerts !== false
-    //                 );
-
-    //             // Send to each bidder
-    //             for (const bidder of bidders) {
-    //                 try {
-    //                     // Create a unique key to prevent duplicate notifications for the same time threshold
-    //                     const notificationKey = `${auction._id}-${bidder._id}-${timeLabel}`;
-
-    //                     if (!sentNotifications.has(notificationKey)) {
-    //                         await auctionEndingSoonEmail(
-    //                             bidder.email,
-    //                             bidder.username,
-    //                             auction,
-    //                             timeLabel
-    //                         );
-    //                         sentNotifications.add(notificationKey);
-    //                         console.log(`✅ Sent ${timeLabel} notification to ${bidder.email} for auction ${auction.title}`);
-    //                     }
-    //                 } catch (error) {
-    //                     console.error(`Failed to send ending soon email to ${bidder.email}:`, error);
-    //                 }
-    //             }
-    //         }
-
-    //         console.log(`📧 Sent ending soon notifications for ${endingSoonAuctions.length} auctions`);
-    //     } catch (error) {
-    //         console.error('Agenda job error (ending soon notifications):', error);
-    //     }
-    // });
-
-    // this.agenda.define('send ending soon notifications', async (job) => {
-    //     try {
-    //         const now = new Date();
-
-    //         // Define multiple time thresholds
-    //         const thirtyMinutesFromNow = new Date(now.getTime() + (30 * 60 * 1000));
-    //         const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000));
-    //         const twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
-
-    //         // Find auctions ending within our thresholds that haven't had notifications sent yet
-    //         const endingSoonAuctions = await Auction.find({
-    //             status: 'active',
-    //             $or: [
-    //                 {
-    //                     // Ending in exactly 30 minutes (±15 minutes window)
-    //                     endDate: {
-    //                         $lte: thirtyMinutesFromNow,
-    //                         $gte: new Date(now.getTime() + (15 * 60 * 1000)) // 15 minutes from now
-    //                     },
-    //                     'notifications.ending30min': { $ne: true } // Not sent yet
-    //                 },
-    //                 {
-    //                     // Ending in exactly 2 hours (±15 minutes window)
-    //                     endDate: {
-    //                         $lte: twoHoursFromNow,
-    //                         $gte: new Date(now.getTime() + (105 * 60 * 1000)) // 1 hour 45 minutes from now
-    //                     },
-    //                     'notifications.ending2hour': { $ne: true } // Not sent yet
-    //                 },
-    //                 {
-    //                     // Ending in exactly 24 hours (±15 minutes window)
-    //                     endDate: {
-    //                         $lte: twentyFourHoursFromNow,
-    //                         $gte: new Date(now.getTime() + (1425 * 60 * 1000)) // 23 hours 45 minutes from now
-    //                     },
-    //                     'notifications.ending24hour': { $ne: true } // Not sent yet
-    //                 }
-    //             ]
-    //         }).populate('bids.bidder', 'email username preferences');
-
-    //         for (const auction of endingSoonAuctions) {
-    //             // Calculate exact time remaining for this auction
-    //             const timeRemaining = auction.endDate - now;
-    //             const minutesRemaining = Math.ceil(timeRemaining / (60 * 1000));
-
-    //             // Determine which notification threshold this auction falls into
-    //             let notificationType, timeLabel;
-
-    //             if (minutesRemaining <= 45 && minutesRemaining >= 15) {
-    //                 // 30-minute notification window (30 minutes ±15 minutes)
-    //                 notificationType = 'ending30min';
-    //                 timeLabel = '30 minutes';
-    //             } else if (minutesRemaining <= 135 && minutesRemaining >= 105) {
-    //                 // 2-hour notification window (2 hours ±15 minutes)
-    //                 notificationType = 'ending2hour';
-    //                 timeLabel = '2 hours';
-    //             } else if (minutesRemaining <= 1455 && minutesRemaining >= 1425) {
-    //                 // 24-hour notification window (24 hours ±15 minutes)
-    //                 notificationType = 'ending24hour';
-    //                 timeLabel = '24 hours';
-    //             } else {
-    //                 // Skip if not in any precise notification window
-    //                 continue;
-    //             }
-
-    //             // Get unique bidders who want notifications
-    //             const bidders = auction.bids
-    //                 .map(bid => bid.bidder)
-    //                 .filter((bidder, index, array) =>
-    //                     bidder &&
-    //                     array.findIndex(b => b._id.toString() === bidder._id.toString()) === index &&
-    //                     bidder.preferences?.bidAlerts !== false
-    //                 );
-
-    //             // Send to each bidder
-    //             for (const bidder of bidders) {
-    //                 try {
-    //                     await auctionEndingSoonEmail(
-    //                         bidder.email,
-    //                         bidder.username,
-    //                         auction,
-    //                         timeLabel
-    //                     );
-    //                     console.log(`✅ Sent ${timeLabel} notification to ${bidder.email} for auction ${auction.title}`);
-    //                 } catch (error) {
-    //                     console.error(`Failed to send ending soon email to ${bidder.email}:`, error);
-    //                 }
-    //             }
-
-    //             // Mark this notification as sent in the auction document
-    //             await Auction.findByIdAndUpdate(auction._id, {
-    //                 $set: {
-    //                     [`notifications.${notificationType}`]: true,
-    //                     [`notifications.${notificationType}SentAt`]: new Date()
-    //                 }
-    //             });
-    //         }
-
-    //         console.log(`📧 Sent ending soon notifications for ${endingSoonAuctions.length} auctions`);
-    //     } catch (error) {
-    //         console.error('Agenda job error (ending soon notifications):', error);
-    //     }
-    // });
-
+    // Job to send notifications for auctions ending soon
     this.agenda.define("send ending soon notifications", async (job) => {
       try {
         const now = new Date();

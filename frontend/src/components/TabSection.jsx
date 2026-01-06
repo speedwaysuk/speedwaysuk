@@ -61,12 +61,12 @@ const TabSection = forwardRef(({ description, bids, offers, auction, activatedTa
     //   icon: <Gavel size={18} />,
     //   component: <BidHistory bids={bids} auction={auction} />,
     // },
-    {
-      id: "description",
-      label: "Description",
-      icon: <Notebook size={18} />,
-      component: <Description description={description} />,
-    },
+    // {
+    //   id: "description",
+    //   label: "Description",
+    //   icon: <Notebook size={18} />,
+    //   component: <Description description={description} />,
+    // },
   ];
 
   // Add offers tab only if user has made offers
@@ -88,29 +88,48 @@ const TabSection = forwardRef(({ description, bids, offers, auction, activatedTa
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="flex flex-wrap -mb-px">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
+              <button
+                key={`description`}
+                onClick={() => setActiveTab('description')}
+                className={`
                 flex items-center px-6 py-4 text-base md:text-lg font-medium border-b-2 transition-colors
-                ${activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-secondary hover:text-primary hover:border-gray-300"
-                }
+                ${activeTab === 'description'
+                    ? "border-primary text-primary"
+                    : "border-transparent text-secondary hover:text-primary hover:border-gray-300"
+                  }
               `}
-            >
-              {tab.icon}
-              <span className="ml-2">{tab.label}</span>
-            </button>
-          ))}
+              >
+                <Notebook size={18} />
+                <span className="ml-2">Description</span>
+              </button>
+
+              {
+                (auction.auctionType === 'standard' || auction.auctionType === 'reserve') && (
+                  <button
+                    key={`bids`}
+                    onClick={() => setActiveTab('bids')}
+                    className={`
+                flex items-center px-6 py-4 text-base md:text-lg font-medium border-b-2 transition-colors
+                ${activeTab === 'bids'
+                        ? "border-primary text-primary"
+                        : "border-transparent text-secondary hover:text-primary hover:border-gray-300"
+                      }
+              `}
+                  >
+                    <Gavel size={18} />
+                    <span className="ml-2">Bid History</span>
+                  </button>
+                )
+              }
         </nav>
       </div>
 
       {/* Tab Content */}
       <div ref={ref} className="p-4 sm:p-6">
         <Suspense fallback={<LoadingSpinner />}>
-          {tabs.find((tab) => tab.id === activeTab)?.component}
+          {/* {tabs.find((tab) => tab.id === activeTab)?.component} */}
+          {activeTab === 'bids' && <BidHistory bids={bids} auction={auction} />}
+          {activeTab === 'description' && <Description description={description} />}
         </Suspense>
       </div>
     </div>

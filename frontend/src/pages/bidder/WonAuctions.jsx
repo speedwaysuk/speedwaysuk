@@ -355,9 +355,12 @@ function WonAuctions() {
                                             )
                                         }
                                         <div>
-                                            {/* <p className="text-sm text-gray-500">Total Bids</p> */}
                                             <p className="text-sm text-gray-500">Total Offers</p>
                                             <p className="font-semibold">{auction?.offersCount} offers</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Total Bids</p>
+                                            <p className="font-semibold">{auction?.bidsCount} bids</p>
                                         </div>
                                         {
                                             auction?.paymentStatus && (

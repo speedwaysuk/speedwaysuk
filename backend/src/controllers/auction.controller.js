@@ -1607,6 +1607,7 @@ export const getWonAuctions = async (req, res) => {
       // Offers Info
       allowsOffers: auction.allowOffers,
       offersCount: auction.offers ? auction.offers.length : 0,
+      bidsCount: auction.bids ? auction.bids.length : 0,
       pendingOffersCount: auction.offers
         ? auction.offers.filter((o) => o.status === "pending").length
         : 0,
@@ -2115,7 +2116,7 @@ export const buyNow = async (req, res) => {
     // Populate updated auction
     const updatedAuction = await Auction.findById(id)
       .populate("seller", "username firstName lastName email")
-      .populate("winner", "username firstName lastName email")
+      .populate("winner", "username firstName lastName email address")
       .populate("bids.bidder", "username firstName lastName");
 
     res.status(200).json({

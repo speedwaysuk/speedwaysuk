@@ -66,7 +66,7 @@ const auctionSchema = new Schema(
       required: true,
       trim: true,
     },
-    subTitle: { 
+    subTitle: {
       type: String,
       trim: true,
     },
@@ -720,22 +720,77 @@ auctionSchema.methods.isReserveMet = function () {
 };
 
 // Method to end auction
-auctionSchema.methods.endAuction = function () {
-  if (this.status !== "active") return;
+// auctionSchema.methods.endAuction = function () {
+//   if (this.status !== "active") return;
 
-  this.status = "ended";
+//   this.status = "ended";
+
+//   // For standard auctions OR reserve auctions that met reserve
+//   if (
+//     this.bidCount > 0 &&
+//     (this.auctionType === "standard" || this.isReserveMet())
+//   ) {
+//     this.status = "sold";
+//     this.winner = this.currentBidder;
+//     this.finalPrice = this.currentPrice;
+//   } else if (this.auctionType === "reserve" && !this.isReserveMet()) {
+//     this.status = "reserve_not_met";
+//   }
+
+//   // Also reject any pending offers when auction ends
+//   this.offers.forEach((offer) => {
+//     if (offer.status === "pending") {
+//       offer.status = "expired";
+//       offer.sellerResponse = "Offer expired - auction ended";
+//     }
+//   });
+
+//   return this.save();
+// };
+
+// Update the endAuction method in auction.model.js
+auctionSchema.methods.endAuction = async function () {
+  if (this.status !== "active") return this;
+
+  const now = new Date();
+  let wasSold = false;
 
   // For standard auctions OR reserve auctions that met reserve
-  if (
-    this.bidCount > 0 &&
-    (this.auctionType === "standard" || this.isReserveMet())
-  ) {
-    this.status = "sold";
-    this.winner = this.currentBidder;
-    this.finalPrice = this.currentPrice;
-  } else if (this.auctionType === "reserve" && !this.isReserveMet()) {
-    this.status = "reserve_not_met";
+  if (this.bidCount > 0) {
+    if (this.auctionType === "standard") {
+      // Standard auction with bids - sold
+      this.status = "sold";
+      this.winner = this.currentBidder;
+      this.finalPrice = this.currentPrice;
+      wasSold = true;
+    } else if (this.auctionType === "reserve") {
+      // Reserve auction - check if reserve is met
+      if (this.isReserveMet()) {
+        this.status = "sold";
+        this.winner = this.currentBidder;
+        this.finalPrice = this.currentPrice;
+        wasSold = true;
+      } else {
+        this.status = "reserve_not_met";
+      }
+    } else if (this.auctionType === "buy_now") {
+      // Buy Now auction that ended normally (not via Buy Now)
+      if (this.bidCount > 0) {
+        this.status = "sold";
+        this.winner = this.currentBidder;
+        this.finalPrice = this.currentPrice;
+        wasSold = true;
+      } else {
+        this.status = "ended";
+      }
+    }
+  } else {
+    // No bids - just end it
+    this.status = "ended";
   }
+
+  // Set actual end time
+  this.endDate = now;
 
   // Also reject any pending offers when auction ends
   this.offers.forEach((offer) => {
@@ -745,7 +800,15 @@ auctionSchema.methods.endAuction = function () {
     }
   });
 
-  return this.save();
+  await this.save();
+
+  // Return result object
+  return {
+    wasSold,
+    winner: this.winner,
+    finalPrice: this.finalPrice,
+    newStatus: this.status,
+  };
 };
 
 // Static method to get active auctions

@@ -61,10 +61,6 @@ function BidConfirmationModal ({
                 {/* Information Text */}
                 <div className="py-3 px-6 md:p-6 border-b border-gray-200 space-y-4">
                     <p className="text-sm text-gray-600">
-                        5% will get charged to the card on file at the close of the auction to the winning bidder, with a maximum commission of $10,000 for all sales under $500,000 and 3% for all sales over $500,000. 
-                    </p>
-
-                    <p className="text-sm text-gray-600">
                         For more info,{' '}
                         <a href="/faqs" className="text-blue-600 hover:text-blue-800 underline">
                             read about FAQs

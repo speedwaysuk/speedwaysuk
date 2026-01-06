@@ -8,10 +8,10 @@ import //   offerMadeEmail,
 "../utils/nodemailer.js";
 import {
   auctionWonAdminEmail,
-  bidConfirmationEmail,
   newOfferNotificationEmail,
   offerAcceptedEmail,
   offerCanceledEmail,
+  offerConfirmationEmail,
   offerRejectedEmail,
   sendAuctionEndedSellerEmail,
   sendAuctionWonEmail,
@@ -143,7 +143,7 @@ export const makeOffer = async (req, res) => {
       },
     });
 
-    bidConfirmationEmail(
+    offerConfirmationEmail(
       buyer?.email,
       buyer?.firstName || buyer?.username,
       updatedAuction?.title,

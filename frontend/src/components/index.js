@@ -53,6 +53,7 @@ import PaymentStatusDropdown from "./admin/PaymentStatusDropdown";
 import CategoryIconsSection from "./CategoryIconsSection";
 import AccountInactiveBanner from "./bidder/AccountInactiveBanner";
 import AuctionListItem from "./AuctionListItem";
+import VehicleLookupModal from "./VehicleLookupModal";
 
 export {
     Container,
@@ -110,4 +111,5 @@ export {
     CategoryIconsSection,
     AccountInactiveBanner,
     AuctionListItem,
+    VehicleLookupModal,
 }

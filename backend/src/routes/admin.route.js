@@ -13,7 +13,8 @@ import {
     endAuction,
     deleteAuction,
     updateAuction,
-    updatePaymentStatus
+    updatePaymentStatus,
+    fetchDVLAData
 } from '../controllers/admin.controller.js';
 import { authAdmin } from '../middlewares/auth.middleware.js';
 import upload from '../middlewares/multer.middleware.js';
@@ -27,6 +28,10 @@ AdminRouter.get('/users/:userId', authAdmin, getUserDetails);
 AdminRouter.patch('/users/:userId/status', authAdmin, updateUserStatus);
 AdminRouter.patch('/users/:userId/type', authAdmin, updateUserType);
 AdminRouter.delete('/users/:userId', authAdmin, deleteUser);
+
+//dvla api route
+AdminRouter.post('/dvla', authAdmin, fetchDVLAData);
+
 // Auction management routes
 AdminRouter.get('/auctions', authAdmin, getAllAuctions);
 AdminRouter.get('/auctions/:auctionId', authAdmin, getAuctionDetails);

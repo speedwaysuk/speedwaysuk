@@ -14,7 +14,8 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    Tag
+    Tag,
+    PaintBucket
 } from "lucide-react";
 
 // Icon mapping for specification fields - UPDATED
@@ -26,7 +27,7 @@ const specificationIcons = {
     bodyType: Car,
     transmission: Settings,
     fuelType: Fuel,
-    colour: Car,
+    colour: PaintBucket,
     
     // Extra Information
     keys: Key,
@@ -34,6 +35,7 @@ const specificationIcons = {
     serviceHistory: Wrench,
     insuranceCategory: Shield,
     v5Status: FileText,
+    euroStatus: Car,
     previousOwners: Users,
     vatStatus: Tag,
     capClean: PoundSterling,
@@ -57,6 +59,7 @@ const fieldLabels = {
     serviceHistory: 'Service History',
     insuranceCategory: 'Insurance Category',
     v5Status: 'V5 Status',
+    euroStatus: 'Euro Status',
     previousOwners: 'Previous Owners',
     vatStatus: 'VAT Status',
     capClean: 'CAP Clean (£)',
@@ -99,6 +102,10 @@ const formatValue = (field, value) => {
         if (value === 'Applied For') return <span className="text-black">⏳ {value}</span>;
         if (value === 'Not Available') return <span className="text-black">✗ {value}</span>;
     }
+
+    if (field === 'euroStatus') {
+        return <span className="text-black">✓ {value}</span>;
+    }
     
     if (field === 'insuranceCategory') {
         if (value === 'No Cat') return <span className="text-black">✓ {value}</span>;
@@ -121,7 +128,7 @@ const formatValue = (field, value) => {
 // Field groupings matching the create/edit forms
 const fieldGroups = {
     'Vehicle Information': [
-        'registration', 'miles', 'year', 'bodyType', 'transmission', 'fuelType', 'colour'
+        'registration', 'miles', 'year', 'bodyType', 'transmission', 'fuelType', 'colour', 'euroStatus'
     ],
     'Extra Information': [
         'keys', 'motExpiry', 'serviceHistory', 'insuranceCategory', 

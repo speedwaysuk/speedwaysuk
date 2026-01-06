@@ -1348,8 +1348,8 @@ const EditAuction = () => {
                                             <label className="block text-sm font-medium text-secondary mb-1">Auction Type *</label>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 {[
-                                                    // { value: 'standard', label: 'Standard Auction' },
-                                                    // { value: 'reserve', label: 'Reserve Price Auction' },
+                                                    { value: 'standard', label: 'Standard Auction' },
+                                                    { value: 'reserve', label: 'Reserve Price Auction' },
                                                     { value: 'buy_now', label: 'Buy Now Auction' },
                                                 ].map((type) => (
                                                     <label key={type.value} className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">

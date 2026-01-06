@@ -1,4 +1,3 @@
-// utils/backendAxios.js
 import axios from 'axios';
 
 const backendAxios = axios.create({

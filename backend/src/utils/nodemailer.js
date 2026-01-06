@@ -240,75 +240,233 @@ const contactConfirmationEmail = async (name, email) => {
   }
 };
 
-// const bidConfirmationEmail = async (
-//   userEmail,
-//   userName,
-//   itemName,
-//   amount,
-//   currentBid,
-//   auctionEnd
-// ) => {
-//   try {
-//     const info = await transporter.sendMail({
-//       from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
-//       to: userEmail,
-//       subject: `Bid Confirmation - ${itemName}`,
-//       html: `
-//                 <!DOCTYPE html>
-//                 <html>
-//                 <head>
-//                     <style>
-//                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-//                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-//                         .logo { width: auto; height: 48px; margin-bottom: 15px; }
-//                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
-//                         .bid-info { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; }
-//                         .amount { font-size: 24px; font-weight: bold; color: #2e7d32; }
-//                         .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
-//                     </style>
-//                 </head>
-//                 <body>
-//                     <div class="container">
-//                         <div class="header">
-//                             <img src="${
-//                               process.env.FRONTEND_URL
-//                             }/logo.png" alt="PlaneVault Logo" class="logo">
-//                             <h2>Bid Confirmation</h2>
-//                         </div>
-//                         <p>Dear <strong>${userName}</strong>,</p>
-
-//                         <div class="bid-info">
-//                             <p>Your bid has been successfully placed!</p>
-//                             <p class="amount">$${amount.toLocaleString()}</p>
-//                             <p>on <strong>${itemName}</strong></p>
-//                         </div>
-
-//                         <p><strong>Current Highest Bid:</strong> $${currentBid.toLocaleString()}</p>
-//                         <p><strong>Auction Ends:</strong> ${new Date(
-//                           auctionEnd
-//                         ).toLocaleString()}</p>
-
-//                         <p>You will be notified if you are outbid or when the auction ends.</p>
-
-//                         <div class="footer">
-//                             <p>Happy Bidding!<br>The PlaneVault Team</p>
-//                         </div>
-//                     </div>
-//                 </body>
-//                 </html>
-//             `,
-//     });
-
-//     return !!info;
-//   } catch (error) {
-//     throw new Error(`Failed to send bid confirmation: ${error.message}`);
-//   }
-// };
-
-
-// For offer and bid
-
+// For bid
 const bidConfirmationEmail = async (
+  userEmail,
+  userName,
+  itemName,
+  amount,
+  currentBid,
+  auctionEnd,
+  auctionId
+) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Speed Ways UK" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: `Bid Confirmation - ${itemName}`,
+      html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+                        .header { background: #1e2d3b; padding: 25px 20px; text-align: center; }
+                        .logo-container { margin-bottom: 15px; }
+                        .tagline { color: #ffffff; font-size: 16px; margin: 5px 0 0 0; opacity: 0.9; }
+                        .content { padding: 25px; }
+                        .title { color: #1e2d3b; font-size: 20px; margin: 0 0 20px 0; padding-bottom: 15px; border-bottom: 2px solid #edcd1f; }
+                        .bid-box { background: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #edcd1f; }
+                        .bid-amount { font-size: 32px; font-weight: bold; color: #1e2d3b; margin: 15px 0; }
+                        .bid-amount span { color: #28a745; }
+                        .item-name { font-size: 22px; color: #1e2d3b; margin-bottom: 10px; }
+                        .details-box { background: #ffffff; padding: 20px; border-radius: 6px; border: 1px solid #e9ecef; margin: 20px 0; }
+                        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+                        .detail-row:last-child { border-bottom: none; }
+                        .detail-label { color: #666; font-size: 15px; }
+                        .detail-value { font-weight: bold; color: #1e2d3b; font-size: 15px; }
+                        .auction-id { background: #1e2d3b; color: #ffffff; padding: 8px 15px; border-radius: 20px; display: inline-block; font-size: 14px; margin: 10px 0; }
+                        .status-indicator { 
+                            display: inline-block; 
+                            padding: 6px 15px; 
+                            border-radius: 20px; 
+                            font-size: 14px; 
+                            font-weight: bold; 
+                            margin: 5px 0;
+                        }
+                        .active { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+                        .winning { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+                        .outbid { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+                        .next-steps { background: #edcd1f; color: #1e2d3b; padding: 20px; border-radius: 8px; margin: 25px 0; font-weight: bold; text-align: center; }
+                        .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 13px; border-top: 1px solid #e9ecef; margin-top: 25px; }
+                        .footer-text { margin: 5px 0; }
+                        .highlight { color: #edcd1f; font-weight: bold; }
+                        .cta-button { 
+                            background: #1e2d3b; 
+                            color: #ffffff !important; 
+                            padding: 12px 25px; 
+                            text-decoration: none; 
+                            border-radius: 6px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            font-size: 14px;
+                            margin: 10px 0;
+                        }
+                        .time-remaining { 
+                            background: #fff3cd; 
+                            padding: 15px; 
+                            border-radius: 6px; 
+                            margin: 15px 0; 
+                            border: 1px solid #ffeaa7;
+                            text-align: center;
+                        }
+                        .time-value { 
+                            font-size: 20px; 
+                            font-weight: bold; 
+                            color: #856404;
+                            margin: 5px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <div class="logo-container">
+                                <img src="${
+                                  process.env.FRONTEND_URL
+                                }/logo.png" alt="Speed Ways UK Logo" class="logo">
+                            </div>
+                            <div class="tagline">Premium Vehicle Auctions</div>
+                        </div>
+                        
+                        <div class="content">
+                            <h2 class="title">Your Bid Has Been Confirmed</h2>
+                            
+                            <div class="bid-box">
+                                <div class="item-name">${itemName}</div>
+                                
+                                <div class="bid-amount">
+                                    Bid Amount: <span>£${amount?.toLocaleString()}</span>
+                                </div>
+                                
+                                <div class="auction-id">
+                                    Auction ID: ${auctionId || "N/A"}
+                                </div>
+                                
+                                <div class="status-indicator ${
+                                  amount >= currentBid ? "winning" : "outbid"
+                                }">
+                                    ${
+                                      amount >= currentBid
+                                        ? "🏆 CURRENT WINNING BID"
+                                        : "⚠️ YOU HAVE BEEN OUTBID"
+                                    }
+                                </div>
+                                
+                                <div class="details-box">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Your Bid Amount:</span>
+                                        <span class="detail-value">£${amount?.toLocaleString()}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Current Highest Bid:</span>
+                                        <span class="detail-value">£${currentBid?.toLocaleString()}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Your Position:</span>
+                                        <span class="detail-value">${
+                                          amount >= currentBid
+                                            ? "Leading"
+                                            : "Not Leading"
+                                        }</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Auction End Date:</span>
+                                        <span class="detail-value">${new Date(
+                                          auctionEnd
+                                        ).toLocaleDateString("en-GB", {
+                                          weekday: "long",
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                        })}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Auction End Time:</span>
+                                        <span class="detail-value">${new Date(
+                                          auctionEnd
+                                        ).toLocaleTimeString("en-GB", {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="time-remaining">
+                                    <div>Time Remaining:</div>
+                                    <div class="time-value">
+                                        ${(() => {
+                                          const remaining =
+                                            new Date(auctionEnd) - new Date();
+                                          const days = Math.floor(
+                                            remaining / (1000 * 60 * 60 * 24)
+                                          );
+                                          const hours = Math.floor(
+                                            (remaining %
+                                              (1000 * 60 * 60 * 24)) /
+                                              (1000 * 60 * 60)
+                                          );
+                                          const minutes = Math.floor(
+                                            (remaining % (1000 * 60 * 60)) /
+                                              (1000 * 60)
+                                          );
+
+                                          if (days > 0)
+                                            return `${days}d ${hours}h`;
+                                          if (hours > 0)
+                                            return `${hours}h ${minutes}m`;
+                                          return `${minutes}m`;
+                                        })()}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="next-steps">
+                                🚗 What Happens Next?<br>
+                                <div style="font-size: 14px; margin-top: 10px; font-weight: normal;">
+                                    ${
+                                      amount >= currentBid
+                                        ? "You are currently the highest bidder! Monitor the auction to maintain your position."
+                                        : "Your bid is below the current highest bid. Consider placing a higher bid to become the leader."
+                                    }
+                                </div>
+                            </div>
+                            
+                            <p>Dear <span class="highlight">${userName}</span>,</p>
+                            <p>Thank you for placing your bid on <strong>${itemName}</strong> on Speed Ways UK.</p>
+                            <p>We'll notify you immediately if you are outbid or when the auction ends.</p>
+                            
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="${
+                                  process.env.FRONTEND_URL
+                                }/auction/${auctionId}" class="cta-button">
+                                    VIEW AUCTION DETAILS
+                                </a>
+                            </div>
+                            
+                            <p><strong>Important:</strong> Remember that auctions on Speed Ways UK use automatic extension. If a bid is placed in the last 2 minutes, the auction extends by 2 minutes to ensure fair bidding.</p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p class="footer-text">This is an automated confirmation from Speed Ways UK.</p>
+                            <p class="footer-text">© ${new Date().getFullYear()} Speed Ways UK. All rights reserved.</p>
+                            <p class="footer-text">Happy Bidding! Your dream vehicle awaits.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+    });
+
+    return !!info;
+  } catch (error) {
+    throw new Error(`Failed to send bid confirmation: ${error.message}`);
+  }
+};
+
+// For offer
+const offerConfirmationEmail = async (
   userEmail,
   userName,
   carName,
@@ -428,51 +586,174 @@ const outbidNotificationEmail = async (
   userName,
   itemName,
   newBid,
-  auctionUrl
+  auctionUrl,
+  auctionEnd,
+  yourPreviousBid
 ) => {
   try {
     const info = await transporter.sendMail({
-      from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+      from: `"Speed Ways UK" <${process.env.EMAIL_USER}>`,
       to: userEmail,
-      subject: `You've been outbid on ${itemName}`,
+      subject: `🚨 You've Been Outbid - ${itemName}`,
       html: `
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
-                        .alert { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
-                        .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
-                        .bid-amount { font-size: 20px; font-weight: bold; color: #dc3545; margin: 10px 0; }
-                        .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+                        .header { background: #1e2d3b; padding: 25px 20px; text-align: center; }
+                        .logo-container { margin-bottom: 15px; }
+                        .tagline { color: #ffffff; font-size: 16px; margin: 5px 0 0 0; opacity: 0.9; }
+                        .content { padding: 25px; }
+                        .alert-banner { background: #f8d7da; padding: 25px; border-radius: 8px; margin: 20px 0; border: 2px solid #f5c6cb; text-align: center; }
+                        .alert-title { color: #721c24; font-size: 24px; font-weight: bold; margin: 0 0 15px 0; }
+                        .alert-subtitle { color: #721c24; font-size: 16px; margin: 0; }
+                        .bid-box { background: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545; }
+                        .bid-amount { font-size: 32px; font-weight: bold; color: #1e2d3b; margin: 15px 0; }
+                        .bid-amount span { color: #dc3545; }
+                        .item-name { font-size: 22px; color: #1e2d3b; margin-bottom: 10px; text-align: center; }
+                        .comparison-box { background: #ffffff; padding: 20px; border-radius: 6px; border: 1px solid #e9ecef; margin: 20px 0; }
+                        .comparison-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+                        .comparison-row:last-child { border-bottom: none; }
+                        .comparison-label { color: #666; font-size: 15px; }
+                        .comparison-value { font-weight: bold; font-size: 15px; }
+                        .your-bid { color: #6c757d; }
+                        .new-bid { color: #dc3545; }
+                        .difference { color: #721c24; }
+                        .time-box { background: #fff3cd; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #ffeaa7; text-align: center; }
+                        .time-label { color: #856404; font-size: 14px; margin-bottom: 5px; }
+                        .time-value { color: #856404; font-size: 18px; font-weight: bold; }
+                        .cta-section { text-align: center; padding: 25px; background: #f8f9fa; border-radius: 8px; margin: 25px 0; }
+                        .cta-title { color: #1e2d3b; font-size: 20px; margin-bottom: 15px; font-weight: bold; }
+                        .cta-button { 
+                            background: #dc3545; 
+                            color: #ffffff !important; 
+                            padding: 15px 35px; 
+                            text-decoration: none; 
+                            border-radius: 6px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            font-size: 16px;
+                            margin: 10px 0;
+                        }
+                        .cta-button:hover { 
+                            background: #c82333; 
+                        }
+                        .secondary-button { 
+                            background: #1e2d3b; 
+                            color: #ffffff !important; 
+                            padding: 12px 25px; 
+                            text-decoration: none; 
+                            border-radius: 6px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            font-size: 14px;
+                            margin: 5px;
+                        }
+                        .tip-box { background: #d1ecf1; padding: 20px; border-radius: 6px; margin: 25px 0; border: 1px solid #bee5eb; }
+                        .tip-title { color: #0c5460; font-size: 16px; margin-bottom: 10px; font-weight: bold; }
+                        .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 13px; border-top: 1px solid #e9ecef; margin-top: 25px; }
+                        .footer-text { margin: 5px 0; }
+                        .highlight { color: #dc3545; font-weight: bold; }
                     </style>
                 </head>
                 <body>
                     <div class="container">
-                        <div class="alert">
-                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
-                            <h2>🚨 You've Been Outbid!</h2>
-                            <p>Another bidder has placed a higher bid on an item you were bidding on.</p>
+                        <div class="header">
+                            <div class="logo-container">
+                                <img src="${process.env.FRONTEND_URL}/logo.png" alt="Speed Ways UK Logo" class="logo">
+                            </div>
+                            <div class="tagline">Premium Vehicle Auctions</div>
                         </div>
-
-                        <p>Dear <strong>${userName}</strong>,</p>
-
-                        <p>You've been outbid on: <strong>${itemName}</strong></p>
-
-                        <div class="bid-amount">New Highest Bid: $${newBid}</div>
-
-                        <p>Don't let this one get away! Place a new bid to regain your position in the auction.</p>
-
-                        <p style="text-align: center; margin: 30px 0;">
-                            <a href="${auctionUrl}" class="cta-button">Place New Bid Now</a>
-                        </p>
-
-                        <p><em>This auction is getting competitive! Act fast to secure your chance to win.</em></p>
-
+                        
+                        <div class="content">
+                            <div class="alert-banner">
+                                <div class="alert-title">🚨 YOU'VE BEEN OUTBID!</div>
+                                <div class="alert-subtitle">Another bidder has placed a higher bid on an item you were bidding on.</div>
+                            </div>
+                            
+                            <div class="bid-box">
+                                <div class="item-name">${itemName}</div>
+                                
+                                <div class="bid-amount">
+                                    New Highest Bid: <span>£${newBid?.toLocaleString()}</span>
+                                </div>
+                                
+                                <div class="comparison-box">
+                                    <div class="comparison-row">
+                                        <span class="comparison-label">Your Previous Bid:</span>
+                                        <span class="comparison-value your-bid">£${yourPreviousBid?.toLocaleString() || 'N/A'}</span>
+                                    </div>
+                                    <div class="comparison-row">
+                                        <span class="comparison-label">New Highest Bid:</span>
+                                        <span class="comparison-value new-bid">£${newBid?.toLocaleString()}</span>
+                                    </div>
+                                    <div class="comparison-row">
+                                        <span class="comparison-label">Difference:</span>
+                                        <span class="comparison-value difference">£${(newBid - (yourPreviousBid || 0)).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="time-box">
+                                    <div class="time-label">Auction Ends In:</div>
+                                    <div class="time-value">
+                                        ${(() => {
+                                            if (!auctionEnd) return 'Time not available';
+                                            const remaining = new Date(auctionEnd) - new Date();
+                                            if (remaining <= 0) return 'Auction Ended';
+                                            
+                                            const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+                                            const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                                            
+                                            if (days > 0) return `${days}d ${hours}h`;
+                                            if (hours > 0) return `${hours}h ${minutes}m`;
+                                            return `${minutes}m`;
+                                        })()}
+                                    </div>
+                                    <div class="time-label">
+                                        ${auctionEnd ? new Date(auctionEnd).toLocaleDateString('en-GB', { 
+                                            weekday: 'long', 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="cta-section">
+                                <div class="cta-title">Don't Let This One Get Away!</div>
+                                <p>Place a new bid to regain your position in the auction.</p>
+                                
+                                <div style="margin: 20px 0;">
+                                    <a href="${auctionUrl}" class="cta-button">PLACE NEW BID NOW</a>
+                                </div>
+                                
+                                <div>
+                                    <a href="${process.env.FRONTEND_URL}/dashboard/bids" class="secondary-button">VIEW ALL YOUR BIDS</a>
+                                    <a href="${process.env.FRONTEND_URL}/auctions" class="secondary-button">BROWSE OTHER AUCTIONS</a>
+                                </div>
+                            </div>
+                            
+                            <div class="tip-box">
+                                <div class="tip-title">💡 Quick Tip:</div>
+                                <p>For a better chance to win, consider placing a bid that's significantly higher than the current bid. Remember, auctions on Speed Ways UK use automatic extension - if a bid is placed in the last 2 minutes, the auction extends by 2 minutes.</p>
+                            </div>
+                            
+                            <p>Dear <span class="highlight">${userName}</span>,</p>
+                            <p>This is an automated notification to let you know that another bidder has placed a higher bid on <strong>${itemName}</strong>.</p>
+                            <p><strong>Act quickly!</strong> This auction is getting competitive. The sooner you place your next bid, the better your chances of winning.</p>
+                        </div>
+                        
                         <div class="footer">
-                            <p>You're receiving this email because you placed a bid on this item.</p>
+                            <p class="footer-text">You're receiving this email because you placed a bid on ${itemName}.</p>
+                            <p class="footer-text">This is an automated notification from Speed Ways UK.</p>
+                            <p class="footer-text">© ${new Date().getFullYear()} Speed Ways UK. All rights reserved.</p>
+                            <p class="footer-text">Need help? Contact support at ${process.env.EMAIL_USER || 'info@speedwaysuk.com'}</p>
                         </div>
                     </div>
                 </body>
@@ -1035,27 +1316,28 @@ const sendAuctionWonEmail = async (auction) => {
                                         <strong>Reg No:</strong> ${
                                           specs?.registration || "Not Provided"
                                         }<br>
-                                        <strong>Make:</strong> ${
-                                          specs?.make || "Not Provided"
-                                        }<br>
-                                        <strong>Model:</strong> ${
-                                          specs?.model || "Not Provided"
+                                        <strong>Miles:</strong> ${
+                                          specs?.miles || "Not Provided"
                                         }<br>
                                         <strong>Year:</strong> ${
                                           specs?.year || "Not Provided"
                                         }<br>
                                         <strong>Colour:</strong> ${
-                                          specs?.color || "Not Provided"
+                                          specs?.colour || "Not Provided"
                                         }<br>
-                                        <strong>Mileage:</strong> ${
-                                          specs?.mileage || "0"
+                                        <strong>Body Type:</strong> ${
+                                          specs?.bodyType || "0"
                                         }<br>
-                                        <strong>1st Reg:</strong> ${
-                                          specs?.firstRegistration ||
+                                        <strong>Fuel Type:</strong> ${
+                                          specs?.fuelType ||
                                           "Not Provided"
                                         }<br>
-                                        <strong>V5 Document:</strong> ${
-                                          specs?.v5Document || "Not Provided"
+                                        <strong>Previous Owners:</strong> ${
+                                          specs?.previousOwners ||
+                                          "Not Provided"
+                                        }<br>
+                                        <strong>Cap Clean Value:</strong> ${
+                                          specs?.capClean || "Not Provided"
                                         }<br>
                                     </td>
                                     <td class="amount">£${(
@@ -1303,8 +1585,8 @@ const sendAuctionEndedSellerEmail = async (car) => {
                                 <div class="detail-item">
                                     <div class="detail-label">Original Price</div>
                                     <div class="detail-value">£${
-                                      car?.buyNowPrice.toLocaleString() ||
-                                      car?.startPrice.toLocaleString()
+                                      car?.buyNowPrice?.toLocaleString() ||
+                                      car?.startPrice?.toLocaleString()
                                     }</div>
                                 </div>
                                 <div class="detail-item">
@@ -1491,15 +1773,15 @@ const auctionListedEmail = async (car, seller) => {
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Make</div>
+                                        <div class="spec-label">Registration</div>
                                         <div class="spec-value">${
-                                          specs?.make
+                                          specs?.registration || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Model</div>
+                                        <div class="spec-label">Miles</div>
                                         <div class="spec-value">${
-                                          specs?.model
+                                          specs?.miles || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
@@ -1509,19 +1791,31 @@ const auctionListedEmail = async (car, seller) => {
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Condition</div>
+                                        <div class="spec-label">Body Type</div>
                                         <div class="spec-value">${
-                                          specs?.condition
+                                          specs?.bodyTpe || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Mileage</div>
-                                        <div class="spec-value">${specs?.mileage.toLocaleString()} miles</div>
+                                        <div class="spec-label">Fuel Type</div>
+                                        <div class="spec-value">${specs?.fuelType || 'N/A'}</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Transmission</div>
+                                        <div class="spec-label">Colour</div>
                                         <div class="spec-value">${
-                                          specs?.transmission
+                                          specs?.colour || 'N/A'
+                                        }</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Cap Clean</div>
+                                        <div class="spec-value">${
+                                          specs?.capClean || 'N/A'
+                                        }</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Previous Owners</div>
+                                        <div class="spec-value">${
+                                          specs?.previousOwners || 'N/A'
                                         }</div>
                                     </div>
                                 </div>
@@ -1693,11 +1987,14 @@ const auctionEndingSoonEmail = async (
                             
                             <div class="car-info">
                                 <div class="car-title">${specs?.year} ${
-                                  car?.title
-                                }</div>
+        car?.title
+      }</div>
                                 
                                 <div class="price-tag">
-                                    <span>£${car?.startPrice?.toLocaleString() || car?.buyNowPrice?.toLocaleString()}</span>
+                                    <span>£${
+                                      car?.startPrice?.toLocaleString() ||
+                                      car?.buyNowPrice?.toLocaleString()
+                                    }</span>
                                 </div>
                                 
                                 <div class="listing-details">
@@ -1730,8 +2027,8 @@ const auctionEndingSoonEmail = async (
                             
                             <p>Dear <span class="highlight">${userName}</span>,</p>
                             <p>The listing for the <strong>${specs?.year} ${
-                              car?.title
-                            }</strong> is about to expire. Once the timer runs out, this vehicle will no longer be available for purchase.</p>
+        car?.title
+      }</strong> is about to expire. Once the timer runs out, this vehicle will no longer be available for purchase.</p>
                             
                             <div class="urgency-box">
                                 <div class="urgency-title">⚠️ ACT NOW BEFORE IT'S GONE</div>
@@ -1751,7 +2048,9 @@ const auctionEndingSoonEmail = async (
                                 <div class="buy-now-price">£${car?.buyNowPrice?.toLocaleString()}</div>
                                 <p>Secure this vehicle immediately with Buy Now before the listing expires.</p>
                                 <p style="margin: 15px 0;">
-                                    <a href="${process.env.FRONTEND_URL}/auction/${
+                                    <a href="${
+                                      process.env.FRONTEND_URL
+                                    }/auction/${
                                     car._id
                                   }" class="cta-button">BUY NOW</a>
                                 </p>
@@ -1764,16 +2063,18 @@ const auctionEndingSoonEmail = async (
                                 <div class="offer-title">💰 MAKE AN OFFER</div>
                                 <p>Submit your best offer before the listing expires. The seller has limited time to respond.</p>
                                 <p style="margin: 15px 0;">
-                                    <a href="${process.env.FRONTEND_URL}/auction/${
-                                  car._id
-                                }" class="cta-button">MAKE AN OFFER</a>
+                                    <a href="${
+                                      process.env.FRONTEND_URL
+                                    }/auction/${
+        car._id
+      }" class="cta-button">MAKE AN OFFER</a>
                                 </p>
                             </div>
                             
                             <p style="text-align: center; margin: 25px 0;">
                                 <a href="${process.env.FRONTEND_URL}/auction/${
-                                  car._id
-                                }" class="cta-button">VIEW LISTING NOW</a>
+        car._id
+      }" class="cta-button">VIEW LISTING NOW</a>
                             </p>
                             
                             <p><em>This is your final chance to secure this vehicle before it's gone forever!</em></p>
@@ -2083,8 +2384,7 @@ const paymentCompletedEmail = async (user, car, paymentAmount) => {
                             <p class="footer-text">This payment confirmation was sent after the seller marked your payment as completed.</p>
                             <p class="footer-text">© ${new Date().getFullYear()} Speed Ways UK. All rights reserved.</p>
                             <p class="footer-text">Need assistance? Contact support at ${
-                              process.env.EMAIL_USER ||
-                              "indo@speedwaysuk.com"
+                              process.env.EMAIL_USER || "indo@speedwaysuk.com"
                             }</p>
                         </div>
                     </div>
@@ -2732,14 +3032,14 @@ const auctionWonAdminEmail = async (adminEmail, car, buyer) => {
                             
                             <div class="vehicle-card">
                                 <div class="vehicle-title">${specs?.year} ${
-                                  car?.title
-                                }</div>
+        car?.title
+      }</div>
                                 
                                 <div class="sale-amount">
                                     <span>£${
                                       car?.finalPrice?.toLocaleString() ||
                                       car?.startPrice.toLocaleString() ||
-                                      car?.buyNowPrice.toLocaleString() 
+                                      car?.buyNowPrice.toLocaleString()
                                     }</span>
                                 </div>
                                 
@@ -2751,46 +3051,50 @@ const auctionWonAdminEmail = async (adminEmail, car, buyer) => {
                                             <span class="sale-type-badge">${car?.auctionType?.toUpperCase()}</span>
                                         </div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Make</div>
-                                        <div class="detail-value">${
-                                          specs?.make || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Registration</div>
+                                        <div class="spec-value">${
+                                          specs?.registration || 'N/A'
                                         }</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Model</div>
-                                        <div class="detail-value">${
-                                          specs?.model || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Miles</div>
+                                        <div class="spec-value">${
+                                          specs?.miles || 'N/A'
                                         }</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Year</div>
-                                        <div class="detail-value">${
-                                          specs?.year || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Year</div>
+                                        <div class="spec-value">${
+                                          specs?.year
                                         }</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Condition</div>
-                                        <div class="detail-value">${
-                                          specs?.condition || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Body Type</div>
+                                        <div class="spec-value">${
+                                          specs?.bodyTpe || 'N/A'
                                         }</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Mileage</div>
-                                        <div class="detail-value">${
-                                          specs?.mileage?.toLocaleString() || "N/A"
-                                        } miles</div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Fuel Type</div>
+                                        <div class="spec-value">${specs?.fuelType || 'N/A'}</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Engine</div>
-                                        <div class="detail-value">${
-                                          specs?.engine || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Colour</div>
+                                        <div class="spec-value">${
+                                          specs?.colour || 'N/A'
                                         }</div>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Color</div>
-                                        <div class="detail-value">${
-                                          specs?.color || "N/A"
+                                    <div class="spec-item">
+                                        <div class="spec-label">Cap Clean</div>
+                                        <div class="spec-value">${
+                                          specs?.capClean || 'N/A'
+                                        }</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Previous Owners</div>
+                                        <div class="spec-value">${
+                                          specs?.previousOwners || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="detail-item">
@@ -3048,8 +3352,8 @@ const auctionEndedAdminEmail = async (adminEmail, car) => {
                             
                             <div class="vehicle-card">
                                 <div class="vehicle-title">${specs?.year} ${
-                                  car.title
-                                }</div>
+        car.title
+      }</div>
                                 
                                 ${
                                   car?.finalPrice
@@ -3076,7 +3380,10 @@ const auctionEndedAdminEmail = async (adminEmail, car) => {
                                     </div>
                                     <div class="detail-item">
                                         <div class="detail-label">Original Price</div>
-                                        <div class="detail-value">£${car?.startPrice?.toLocaleString() || car?.buyNowPrice?.toLocaleString()}</div>
+                                        <div class="detail-value">£${
+                                          car?.startPrice?.toLocaleString() ||
+                                          car?.buyNowPrice?.toLocaleString()
+                                        }</div>
                                     </div>
                                     <div class="detail-item">
                                         <div class="detail-label">Mileage</div>
@@ -3108,7 +3415,9 @@ const auctionEndedAdminEmail = async (adminEmail, car) => {
                                     : 0) /
                                     (1000 * 60 * 60 * 24)
                                 )} days</p>
-                                <p>• <strong>Listing ID:</strong> ${car?._id}</p>
+                                <p>• <strong>Listing ID:</strong> ${
+                                  car?._id
+                                }</p>
                             </div>
                             
                             ${
@@ -3117,7 +3426,8 @@ const auctionEndedAdminEmail = async (adminEmail, car) => {
                             <div class="seller-card">
                                 <div class="seller-title">🏪 SELLER INFORMATION</div>
                                 <p><strong>Seller:</strong> ${
-                                  car?.seller?.firstName || car?.seller?.username
+                                  car?.seller?.firstName ||
+                                  car?.seller?.username
                                 }</p>
                                 <p><strong>Email:</strong> ${
                                   car?.seller?.email
@@ -3138,7 +3448,8 @@ const auctionEndedAdminEmail = async (adminEmail, car) => {
                             <div class="buyer-card">
                                 <div class="buyer-title">👤 BUYER INFORMATION</div>
                                 <p><strong>Buyer:</strong> ${
-                                  car?.winner?.firstName || car?.winner?.username
+                                  car?.winner?.firstName ||
+                                  car?.winner?.username
                                 }</p>
                                 <p><strong>Email:</strong> ${
                                   car?.winner?.email
@@ -3315,11 +3626,14 @@ const flaggedCommentAdminEmail = async (
                             
                             <div class="vehicle-card">
                                 <div class="vehicle-title">${specs?.year} ${
-                                  car?.title
-                                }</div>
+        car?.title
+      }</div>
                                 <div class="detail-item" style="text-align: center; background: transparent; border: none;">
                                     <div class="detail-label">Vehicle Listing</div>
-                                    <div class="detail-value">£${car?.startPrice?.toLocaleString() || car?.startPrice?.toLocaleString()}</div>
+                                    <div class="detail-value">£${
+                                      car?.startPrice?.toLocaleString() ||
+                                      car?.startPrice?.toLocaleString()
+                                    }</div>
                                 </div>
                             </div>
                             
@@ -3990,60 +4304,49 @@ const auctionSubmittedForApprovalEmail = async (adminEmail, car, seller) => {
                                 
                                 <div class="vehicle-specs">
                                     <div class="spec-item">
-                                        <div class="spec-label">Make</div>
+                                        <div class="spec-label">Registration</div>
                                         <div class="spec-value">${
-                                          specs.make || "N/A"
+                                          specs?.registration || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Model</div>
+                                        <div class="spec-label">Miles</div>
                                         <div class="spec-value">${
-                                          specs.model || "N/A"
+                                          specs?.miles || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
                                         <div class="spec-label">Year</div>
                                         <div class="spec-value">${
-                                          specs.year || "N/A"
+                                          specs?.year
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Condition</div>
+                                        <div class="spec-label">Body Type</div>
                                         <div class="spec-value">${
-                                          specs.condition || "N/A"
-                                        }</div>
-                                    </div>
-                                    <div class="spec-item">
-                                        <div class="spec-label">Mileage</div>
-                                        <div class="spec-value">${
-                                          specs.mileage
-                                            ? specs.mileage.toLocaleString() +
-                                              " miles"
-                                            : "N/A"
-                                        }</div>
-                                    </div>
-                                    <div class="spec-item">
-                                        <div class="spec-label">Transmission</div>
-                                        <div class="spec-value">${
-                                          specs.transmission || "N/A"
+                                          specs?.bodyTpe || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
                                         <div class="spec-label">Fuel Type</div>
+                                        <div class="spec-value">${specs?.fuelType || 'N/A'}</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Colour</div>
                                         <div class="spec-value">${
-                                          specs.fuelType || "N/A"
+                                          specs?.colour || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Engine Size</div>
+                                        <div class="spec-label">Cap Clean</div>
                                         <div class="spec-value">${
-                                          specs.engineSize || "N/A"
+                                          specs?.capClean || 'N/A'
                                         }</div>
                                     </div>
                                     <div class="spec-item">
-                                        <div class="spec-label">Color</div>
+                                        <div class="spec-label">Previous Owners</div>
                                         <div class="spec-value">${
-                                          specs.color || "N/A"
+                                          specs?.previousOwners || 'N/A'
                                         }</div>
                                     </div>
                                 </div>
@@ -4583,45 +4886,51 @@ const newAuctionNotificationEmail = async (buyer, car, seller) => {
                                 </div>
                                 
                                 <div class="vehicle-details">
-                                    <div class="detail-box">
-                                          <span class="detail-label">Make</span>
-                                          <span class="detail-value">${
-                                            specs?.make
-                                          }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Registration</div>
+                                        <div class="spec-value">${
+                                          specs?.registration || 'N/A'
+                                        }</div>
                                     </div>
-                                    <div class="detail-box">
-                                          <span class="detail-label">Model</span>
-                                          <span class="detail-value">${
-                                            specs?.model
-                                          }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Miles</div>
+                                        <div class="spec-value">${
+                                          specs?.miles || 'N/A'
+                                        }</div>
                                     </div>
-                                    <div class="detail-box">
-                                          <span class="detail-label">Year</span>
-                                          <span class="detail-value">${
-                                            specs?.year
-                                          }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Year</div>
+                                        <div class="spec-value">${
+                                          specs?.year
+                                        }</div>
                                     </div>
-                                    <div class="detail-box">
-                                        <span class="detail-label">Condition</span>
-                                        <span class="detail-value">${
-                                          specs?.condition
-                                        }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Body Type</div>
+                                        <div class="spec-value">${
+                                          specs?.bodyTpe || 'N/A'
+                                        }</div>
                                     </div>
-                                    <div class="detail-box">
-                                        <span class="detail-label">Mileage</span>
-                                        <span class="detail-value">${specs?.mileage?.toLocaleString()} miles</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Fuel Type</div>
+                                        <div class="spec-value">${specs?.fuelType || 'N/A'}</div>
                                     </div>
-                                    <div class="detail-box">
-                                        <span class="detail-label">Transmission</span>
-                                        <span class="detail-value">${
-                                          specs?.transmission
-                                        }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Colour</div>
+                                        <div class="spec-value">${
+                                          specs?.colour || 'N/A'
+                                        }</div>
                                     </div>
-                                    <div class="detail-box">
-                                        <span class="detail-label">Fuel Type</span>
-                                        <span class="detail-value">${
-                                          specs?.fuelType
-                                        }</span>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Cap Clean</div>
+                                        <div class="spec-value">${
+                                          specs?.capClean || 'N/A'
+                                        }</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">Previous Owners</div>
+                                        <div class="spec-value">${
+                                          specs?.previousOwners || 'N/A'
+                                        }</div>
                                     </div>
                                 </div>
                             </div>
@@ -5794,9 +6103,10 @@ export {
   contactEmail, //tested
   contactConfirmationEmail, //tested
   resetPasswordEmail, //tested
-  bidConfirmationEmail, // Not need to test now
-  outbidNotificationEmail, // Not tested, we do not need it I think because offers can not be outbid
-  sendOutbidNotifications, // Not tested, we do not need it I think because offers can not be outbid
+  bidConfirmationEmail, // Not tested properly
+  offerConfirmationEmail, // tested
+  outbidNotificationEmail, // Not tested
+  sendOutbidNotifications, // tested
   sendAuctionWonEmail, // tested
   sendAuctionEndedSellerEmail, // tested
   auctionListedEmail, // tested
@@ -5804,14 +6114,14 @@ export {
   welcomeEmail, // tested
   newUserRegistrationEmail, // tested
   auctionWonAdminEmail, // tested
-  auctionEndedAdminEmail,  // tested
+  auctionEndedAdminEmail, // tested
   flaggedCommentAdminEmail, // tested
   newCommentSellerEmail, // tested
   newCommentBidderEmail, // tested
   auctionSubmittedForApprovalEmail, // tested
   auctionApprovedEmail, // tested
   sendBulkAuctionNotifications, // tested
-  newBidNotificationEmail, // No need to test now
+  newBidNotificationEmail, // Not tested
   newOfferNotificationEmail, // tested
   newAuctionNotificationEmail, // tested
   sendOfferOutbidNotifications, // Not tested, we do not need it I think because offers can not be outbid

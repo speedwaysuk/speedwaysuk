@@ -136,39 +136,6 @@ function SingleAuction() {
         try {
             setBidding(true);
 
-            // Check if user needs to make payment intent (first bid by this user)
-            const { data: userBidPayments } = await axiosInstance.get(`/api/v1/bid-payments/auction/${id}`);
-            const activePayments = userBidPayments.data.bidPayments.filter(
-                payment => payment.status !== 'canceled' && payment.type === 'bid_authorization'
-            );
-
-            const hasExistingPayment = activePayments.length > 0;
-
-            if (!hasExistingPayment) {
-                // Get commission amount from backend
-                const { data: commissionData } = await axiosInstance.get(`/api/v1/admin/commissions`);
-                const commission = commissionData.data.commissions.find(c => c.category === auction.category);
-                const commissionAmount = commission ? commission.commissionAmount : 0;
-
-                if (commissionAmount > 0) {
-                    const userConfirmed = window.confirm(
-                        `A £${commissionAmount} temporary hold will be placed on your credit card for bidding. This amount will be released after the auction ends if you are not the winning bidder. Continue?`
-                    );
-
-                    if (!userConfirmed) {
-                        toast.error('Payment is required to place bid');
-                        setBidding(false);
-                        return;
-                    }
-
-                    // Create payment intent only after user confirms
-                    await axiosInstance.post('/api/v1/bid-payments/create-intent', {
-                        auctionId: id,
-                        bidAmount: parseFloat(bidAmount)
-                    });
-                }
-            }
-
             // Place the bid after payment is handled
             const { data } = await axiosInstance.post(`/api/v1/auctions/bid/${id}`, {
                 amount: parseFloat(bidAmount)
@@ -375,18 +342,23 @@ function SingleAuction() {
                             <span>{pagination?.totalComments || 0}</span>
                         </p> */}
 
-                        {/* <p onClick={() => handleTabClick('bids')}
-                            className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">
-                            <Gavel size={20} />
-                            <span>{auction.bids?.length || 0}</span>
-                        </p> */}
+                        {
+                            (auction.auctionType === 'standard' || auction.auctionType === 'reserve') && (
+                                <p onClick={() => handleTabClick('bids')}
+                                    className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">
+                                    <Gavel size={20} />
+                                    <span>{auction.bids?.length || 0}</span>
+                                </p>
+                            )
+                        }
 
                         {/* Offers Count */}
                         {auction.offers && auction.offers.length > 0 && (
                             <p onClick={() => handleTabClick('offers')}
                                 className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">
                                 <PoundSterling size={18} />
-                                <span>{auction.offers.filter(o => o.status === 'pending').length}</span>
+                                {/* <span>{auction.offers.filter(o => o.status === 'pending').length}</span> */}
+                                <span>{auction.offers?.length}</span>
                             </p>
                         )}
                     </div>
@@ -523,25 +495,33 @@ function SingleAuction() {
 
                 {/* Current bid section */}
                 <div className="p-4 flex flex-col gap-3">
-                    {/* <div className="flex flex-col gap-2">
-                        <p className="font-light">{auction.bidCount > 0 ? 'Current Bid' : 'Start Bidding At'}</p>
-                        <p className="flex items-center gap-1 text-3xl sm:text-4xl font-medium">
-                            <span>£ </span>
-                            <span> {auction.currentPrice.toLocaleString()}</span>
-                        </p>
-                    </div> */}
-
                     {
-                        auction.allowOffers && (
+                        (auction.auctionType === 'standard' || auction.auctionType === 'reserve') && (
                             <>
-                                {/* <div className="flex flex-col gap-2">
-                                    <p className="font-light">{auction.bidCount > 0 ? 'Current Offer' : 'Offer Starting At'}</p>
+                                <div className="flex flex-col gap-2">
+                                    <p className="font-light">{auction.bidCount > 0 ? 'Current Bid' : 'Start Bidding At'}</p>
                                     <p className="flex items-center gap-1 text-3xl sm:text-4xl font-medium">
                                         <span>£ </span>
                                         <span> {auction.currentPrice.toLocaleString()}</span>
                                     </p>
-                                </div> */}
+                                </div>
 
+                                <p className="flex w-full justify-between border-b pb-2">
+                                    <span className="text-secondary">Starting Bid</span>
+                                    <span className="font-medium">£ {auction.startPrice.toLocaleString()}</span>
+                                </p>
+
+                                <p className="flex w-full justify-between border-b pb-2">
+                                    <span className="text-secondary">No. of Bids</span>
+                                    <span className="font-medium">{auction?.bidCount}</span>
+                                </p>
+                            </>
+                        )
+                    }
+
+                    {
+                        auction.allowOffers && (auction.auctionType !== 'standard' && auction.auctionType !== 'reserve') && (
+                            <>
                                 <div className="flex flex-col gap-2">
                                     <p className="font-light">{auction.status === 'sold' ? 'Final Offer' : 'Offer Starting At'}</p>
                                     <p className="flex items-center gap-1 text-3xl sm:text-4xl font-medium">
@@ -549,11 +529,6 @@ function SingleAuction() {
                                         <span> {auction.currentPrice.toLocaleString()}</span>
                                     </p>
                                 </div>
-
-                                {/* <p className="flex w-full justify-between border-b pb-2">
-                                    <span className="text-secondary">Starting Offer</span>
-                                    <span className="font-medium">£ {auction.startPrice.toLocaleString()}</span>
-                                </p> */}
 
                                 <p className="flex w-full justify-between border-b pb-2">
                                     <span className="text-secondary">No. of Offers</span>
@@ -563,23 +538,29 @@ function SingleAuction() {
                         )
                     }
 
-                    {/* {auction.auctionType === 'reserve' && (
-                        <p className={`${auction.currentPrice >= auction.reservePrice ? 'text-green-600' : 'text-secondary'}`}>
+                    {
+                        auction.allowOffers && (
+                            <p className="flex w-full justify-between border-b pb-2">
+                                <span className="text-secondary">No. of Offers</span>
+                                <span className="font-medium">{auction?.offers?.length}</span>
+                            </p>
+                        )
+                    }
+
+                    {
+                        (auction.auctionType === 'reserve' || auction.auctionType === 'standard') && (
+                            <p className="flex w-full justify-between border-b pb-2">
+                                <span className="text-secondary">Min. Bid Increment</span>
+                                <span className="font-medium">${auction?.bidIncrement?.toLocaleString()}</span>
+                            </p>
+                        )
+                    }
+
+                    {auction.auctionType === 'reserve' && (
+                        <p className={`${auction.currentPrice >= auction.reservePrice ? 'text-green-600' : 'text-orange-600'}`}>
                             {auction.currentPrice >= auction.reservePrice ? 'Reserve Met' : 'Reserve Not Met'}
                         </p>
-                    )} */}
-
-
-
-                    {/* <p className="flex w-full justify-between border-b pb-2">
-                        <span className="text-secondary">No. of Bids</span>
-                        <span className="font-medium">{auction.bidCount}</span>
-                    </p> */}
-
-                    {/* <p className="flex w-full justify-between border-b pb-2">
-                        <span className="text-secondary">Min. Bid Increment</span>
-                        <span className="font-medium">${auction?.bidIncrement?.toLocaleString()}</span>
-                    </p> */}
+                    )}
 
                     {/* Buy Now Price Display */}
                     {auction.buyNowPrice && (
@@ -598,7 +579,7 @@ function SingleAuction() {
                     {countdown.status === 'counting-down' ? (
                         <>
                             {/* Bid Form */}
-                            {/* <form ref={formRef} onSubmit={handleBid} className="flex flex-col gap-4">
+                            <form ref={formRef} onSubmit={handleBid} className="flex flex-col gap-4">
                                 <input
                                     type="number"
                                     value={bidAmount}
@@ -631,7 +612,7 @@ function SingleAuction() {
                                     auction={auction}
                                     ref={formRef}
                                 />
-                            </form> */}
+                            </form>
 
                             {/* Buy Now Button */}
                             {isBuyNowAvailable && (

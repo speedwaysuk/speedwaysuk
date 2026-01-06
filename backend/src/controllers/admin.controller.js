@@ -3,11 +3,14 @@ import Auction from "../models/auction.model.js";
 import Comment from "../models/comment.model.js";
 import Watchlist from "../models/watchlist.model.js";
 import agendaService from "../services/agendaService.js";
+import axios from 'axios';
+
 import {
   deleteFromCloudinary,
   uploadDocumentToCloudinary,
   uploadImageToCloudinary,
 } from "../utils/cloudinary.js";
+
 import {
   auctionApprovedEmail,
   auctionListedEmail,
@@ -1842,6 +1845,118 @@ export const updatePaymentStatus = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update payment status",
+    });
+  }
+};
+
+// export const fetchDVLAData = async (req, res) => {
+//   try {
+//     const { registrationNumber } = req.params;
+
+//     // Make sure registrationNumber exists
+//     if (!registrationNumber) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Registration number is required",
+//       });
+//     }
+
+//     // Call DVLA API with correct structure
+//     const dvlaResponse = await backendAxios.post(
+//       `https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles`,
+//       {
+//         registrationNumber: registrationNumber
+//       },
+//       {
+//         headers: {
+//           "x-api-key": "kkrJPemNwS7mTx65GqRBH4njJd1fyz5h23k8udHD",
+//           "Content-Type": "application/json",
+//           // Optional: Add Accept header for good practice
+//           "Accept": "application/json"
+//         }
+//       }
+//     );
+
+//     // DVLA API typically returns 200 for successful requests
+//     // But let's check for any 2xx status code
+//     if (dvlaResponse.status < 200 || dvlaResponse.status >= 300) {
+//       return res.status(dvlaResponse.status).json({
+//         success: false,
+//         message: "Failed to fetch data from DVLA",
+//         error: dvlaResponse.data
+//       });
+//     }
+
+//     const vehicleData = dvlaResponse.data;
+
+//     console.log("DVLA vehicle data:", vehicleData);
+
+//     res.status(200).json({
+//       success: true,
+//       data: vehicleData,
+//     });
+//   } catch (error) {
+//     console.error("Fetch DVLA data error:", error);
+
+//     // Provide more specific error messages
+//     if (error.response) {
+//       // The request was made and the server responded with a status code
+//       // that falls out of the range of 2xx
+//       console.error("Error response data:", error.response.data);
+//       console.error("Error status:", error.response.status);
+//       console.error("Error headers:", error.response.headers);
+
+//       return res.status(error.response.status).json({
+//         success: false,
+//         message: `DVLA API error: ${error.response.status} - ${error.response.statusText}`,
+//         error: error.response.data
+//       });
+//     } else if (error.request) {
+//       // The request was made but no response was received
+//       console.error("No response received:", error.request);
+//       return res.status(503).json({
+//         success: false,
+//         message: "No response from DVLA API. Please try again later.",
+//       });
+//     } else {
+//       // Something happened in setting up the request that triggered an Error
+//       console.error("Request setup error:", error.message);
+//       return res.status(500).json({
+//         success: false,
+//         message: "Internal server error while fetching DVLA data",
+//       });
+//     }
+//   }
+// };
+
+export const fetchDVLAData = async (req, res) => {
+  try {
+    const { registrationNumber } = req.body;
+
+    if (!registrationNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "registrationNumber is required",
+      });
+    }
+
+    const response = await axios.post(
+      process.env.DVLA_WORKER_URL,
+      { registrationNumber },
+      { timeout: 10000 }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle details fetched successfully",
+      data: response.data,
+    });
+  } catch (error) {
+    console.error("DVLA Worker error:", error?.response?.data || error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch vehicle details",
     });
   }
 };
