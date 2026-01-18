@@ -123,7 +123,7 @@ function Contact() {
                             <input
                                 id="phone"
                                 type="tel"
-                                placeholder="(+1) 917-XXX-XXXX"
+                                placeholder="+44 xxx xxxxxxx"
                                 className="text-black border-b border-b-gray-200 py-1.5 px-2 rounded my-2 focus-within:outline-2 focus-within:outline-primary"
                                 onInput={(e) => {
                                     e.target.value = e.target.value.replace(/[^0-9+\s()\-]/g, '');
@@ -147,29 +147,71 @@ function Contact() {
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium leading-none text-primary flex items-center gap-2" htmlFor="userType">
+                            <label className="text-sm font-medium leading-none text-primary flex items-center gap-2 mb-3" htmlFor="userType">
                                 <User size={20} />
-                                <span>User Type</span>
+                                <span>I am a*</span>
                             </label>
 
-                            <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch gap-3 my-2">
-                                <label className={`flex items-center gap-5 border  py-3 px-5 rounded cursor-pointer ${userType === 'bidder' ? 'border-[#edcd1f]' : 'border-gray-200'}`}>
-                                    <input type="radio" value="bidder" hidden {...register('userType', { required: false })} />
-                                    <Gavel size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'bidder' ? 'bg-[#edcd1f] text-black' : 'bg-gray-200 text-primary'}`} />
-                                    <div>
-                                        <p className="text-sm font-semibold">I'm a buyer</p>
-                                        <p className="text-sm text-gray-600">I need help related to buying on the platform.</p>
+                            <div className="flex flex-wrap gap-4 my-2">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <div className="relative">
+                                        <input
+                                            type="radio"
+                                            value="buyer"
+                                            className="sr-only"
+                                            {...register('userType', { required: false })}
+                                        />
+                                        <div className={`w-5 h-5 border-2 rounded flex items-center justify-center ${userType === 'buyer'
+                                                ? 'border-primary bg-primary'
+                                                : 'border-gray-300'
+                                            }`}>
+                                            {userType === 'buyer' && (
+                                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                            )}
+                                        </div>
                                     </div>
+                                    <span className="text-sm font-medium">Buyer</span>
                                 </label>
 
-                                {/* <label className={`flex items-center gap-5 border py-3 px-5 rounded cursor-pointer ${userType === 'seller' ? 'border-primary' : 'border-gray-200'}`}>
-                                    <input type="radio" value="seller" hidden {...register('userType', { required: false })} />
-                                    <Store size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'seller' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} />
-                                    <div>
-                                        <p className="text-sm font-semibold">I'm a seller</p>
-                                        <p className="text-sm text-gray-600">I need help related to listing on the platform.</p>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <div className="relative">
+                                        <input
+                                            type="radio"
+                                            value="seller"
+                                            className="sr-only"
+                                            {...register('userType', { required: false })}
+                                        />
+                                        <div className={`w-5 h-5 border-2 rounded flex items-center justify-center ${userType === 'seller'
+                                                ? 'border-primary bg-primary'
+                                                : 'border-gray-300'
+                                            }`}>
+                                            {userType === 'seller' && (
+                                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                            )}
+                                        </div>
                                     </div>
-                                </label> */}
+                                    <span className="text-sm font-medium">Seller</span>
+                                </label>
+
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <div className="relative">
+                                        <input
+                                            type="radio"
+                                            value="both"
+                                            className="sr-only"
+                                            {...register('userType', { required: false })}
+                                        />
+                                        <div className={`w-5 h-5 border-2 rounded flex items-center justify-center ${userType === 'both'
+                                                ? 'border-primary bg-primary'
+                                                : 'border-gray-300'
+                                            }`}>
+                                            {userType === 'both' && (
+                                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-medium">Both</span>
+                                </label>
                             </div>
                         </div>
 
@@ -205,21 +247,8 @@ function Contact() {
                     <img src={logo} alt="Logo" className="absolute top-7 left-7 h-10" loading="lazy" />
 
                     <div className="text-white absolute bottom-7 right-7 left-7">
-                        <p className="text-base md:text-lg">The customer support team was outstanding! They were friendly, responsive, and resolved my queries quickly. Highly impressed.</p>
-
-                        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-                            <div>
-                                <p className="font-semibold">Jake Frazer</p>
-                                <p className="text-sm">SpeedWays Auto's Buyer</p>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                {
-                                    Array(5).fill('').map((_, i) => (
-                                        <Star key={i} />
-                                    ))
-                                }
-                            </div>
-                        </div>
+                        <p className="md:text-lg font-semibold mb-2">Buying or Selling Trade Vehicles?</p>
+                        <p className="text-base">Speak to our team about auctions, direct sales, or bespoke remarketing services tailored to the motor trade.</p>
                     </div>
 
                     <img className="w-full min-h-full sm:max-h-[600px] md:max-h-[750px] lg:max-h-full xl:max-h-[760px] object-cover" loading="lazy" src={contactUs} alt="Contact Us" />
@@ -244,9 +273,6 @@ function Contact() {
                                     Phone
                                 </h3>
                                 <Link to={`tel:${otherData.phone}`} className="text-primary hover:underline">+44 (0)161 883 2737</Link>
-                                <p className="text-sm text-gray-500">
-                                    We respond within 24 hours
-                                </p>
                             </div>
                         </div>
 
@@ -259,9 +285,6 @@ function Contact() {
                                     Email
                                 </h3>
                                 <Link to={`mailto:${otherData.email}`} className="text-primary break-all hover:underline">{otherData.email}</Link>
-                                <p className="text-sm text-gray-500">
-                                    We respond within 24 hours
-                                </p>
                             </div>
                         </div>
 
@@ -274,9 +297,6 @@ function Contact() {
                                     Location
                                 </h3>
                                 <p className="text-primary break-all hover:underline">{otherData.address}</p>
-                                <p className="text-sm text-gray-500">
-                                    We respond within 24 hours
-                                </p>
                             </div>
                         </div>
 
@@ -291,9 +311,6 @@ function Contact() {
                                 <p className="text-primary">
                                     Mon - Fri: 9:00 AM - 5:00 PM <br />
                                     Saturday: 9:00 AM – 2:30 PM <br />
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    Emergency Support Available
                                 </p>
                             </div>
                         </div>

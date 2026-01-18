@@ -59,7 +59,7 @@ function CTA() {
                                 <Shield className="h-4 w-4 text-white" />
                             </div>
                             <span className="text-sm font-medium text-white">
-                                Trusted by 500+ Car Buyers Across the UK
+                                A Professional Platform for Trade Vehicle Remarketing
                             </span>
                         </div>
                     </div>
@@ -71,7 +71,8 @@ function CTA() {
                             <span className="text-[#edcd1f]">For Car Auctions</span>
                         </h2>
                         <p className="text-lg text-white/90 max-w-3xl mx-auto mb-8">
-                            Conduct secure, transparent, and fast automotive transactions—built for UK car enthusiasts.
+                            Secure, transparent, and efficient vehicle transactions designed for the motor trade.
+                            Built to support auctions, direct sales, and bespoke remarketing services.
                         </p>
                     </div>
 
@@ -123,8 +124,8 @@ function CTA() {
                             <div className="flex items-center gap-3">
                                 <CheckCircle className="h-5 w-5 text-[#edcd1f]" />
                                 <div className="text-left">
-                                    <p className="text-2xl font-bold">98%</p>
-                                    <p className="text-sm text-white/70">Satisfaction</p>
+                                    <p className="text-base font-bold">Active Trade Network</p>
+                                    <p className="text-sm text-white/70">Verified motor traders only</p>
                                 </div>
                             </div>
                             <div className="hidden md:block w-px h-10 bg-white/20"></div>
@@ -132,8 +133,8 @@ function CTA() {
                             <div className="flex items-center gap-3">
                                 <CheckCircle className="h-5 w-5 text-[#edcd1f]" />
                                 <div className="text-left">
-                                    <p className="text-2xl font-bold">24/7</p>
-                                    <p className="text-sm text-white/70">UK Support</p>
+                                    <p className="text-base font-bold">Expert Support</p>
+                                    <p className="text-sm text-white/70">Industry-focused team</p>
                                 </div>
                             </div>
                             <div className="hidden md:block w-px h-10 bg-white/20"></div>
@@ -141,8 +142,8 @@ function CTA() {
                             <div className="flex items-center gap-3">
                                 <CheckCircle className="h-5 w-5 text-[#edcd1f]" />
                                 <div className="text-left">
-                                    <p className="text-2xl font-bold">1000+</p>
-                                    <p className="text-sm text-white/70">Cars Sold</p>
+                                    <p className="text-base font-bold">Ongoing Trade Listings</p>
+                                    <p className="text-sm text-white/70">Regularly updated wholesale vehicles</p>
                                 </div>
                             </div>
                         </div>
@@ -151,7 +152,7 @@ function CTA() {
                     {/* Bottom tagline */}
                     <div className="text-center mt-8">
                         <p className="text-white/60 text-sm">
-                            Trusted by UK drivers • transparent listings • fast deals
+                            Trade-Only • No Buyer Fees • Sold As Seen
                         </p>
                     </div>
                 </div>

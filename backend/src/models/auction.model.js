@@ -3,60 +3,6 @@ import mongoose from "mongoose";
 import agendaService from "../services/agendaService.js";
 
 // Create a separate schema for offers
-// const offerSchema = new Schema(
-//   {
-//     buyer: {
-//       type: Schema.Types.ObjectId,
-//       ref: "User",
-//       required: true,
-//     },
-//     buyerUsername: {
-//       type: String,
-//       required: true,
-//     },
-//     amount: {
-//       type: Number,
-//       required: true,
-//       min: 0,
-//     },
-//     message: {
-//       type: String,
-//       trim: true,
-//     },
-//     status: {
-//       type: String,
-//       enum: [
-//         "pending",
-//         "accepted",
-//         "rejected",
-//         "countered",
-//         "expired",
-//         "withdrawn",
-//       ],
-//       default: "pending",
-//     },
-//     sellerResponse: {
-//       type: String,
-//       trim: true,
-//     },
-//     counterOffer: {
-//       amount: Number,
-//       message: String,
-//     },
-//     expiresAt: {
-//       type: Date,
-//       default: function () {
-//         // Offers expire after 48 hours by default
-//         const expiryDate = new Date();
-//         expiryDate.setHours(expiryDate.getHours() + 48);
-//         return expiryDate;
-//       },
-//     },
-//   },
-//   {
-//     timestamps: true,
-//   }
-// );
 
 const offerSchema = new Schema(
   {
@@ -227,6 +173,7 @@ const auctionSchema = new Schema(
         publicId: String,
         filename: String,
         order: { type: Number, default: 0 },
+        caption: { type: String, default: "" },
       },
     ],
     documents: [
@@ -236,6 +183,7 @@ const auctionSchema = new Schema(
         filename: String,
         originalName: String,
         documentType: { type: String, default: "general" },
+        caption: { type: String, default: "" },
       },
     ],
     serviceRecords: [
@@ -245,6 +193,7 @@ const auctionSchema = new Schema(
         filename: String,
         originalName: String,
         order: { type: Number, default: 0 },
+        caption: { type: String, default: "" },
       },
     ],
 

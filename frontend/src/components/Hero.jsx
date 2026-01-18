@@ -198,8 +198,8 @@ function Hero() {
                                     <Car size={20} className="text-[#edcd1f]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-white font-medium">Premium Collection</h4>
-                                    <p className="text-white/70 text-sm">Exclusive vehicles only</p>
+                                    <h4 className="text-white font-medium">Trade-Only Platform</h4>
+                                    <p className="text-white/70 text-sm">Verified motor traders only</p>
                                 </div>
                             </div>
 
@@ -208,8 +208,8 @@ function Hero() {
                                     <Shield size={20} className="text-[#edcd1f]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-white font-medium">Verified Listings</h4>
-                                    <p className="text-white/70 text-sm">100% authentic vehicles</p>
+                                    <h4 className="text-white font-medium">Regular Stock Flow</h4>
+                                    <p className="text-white/70 text-sm">Ongoing vehicle listings</p>
                                 </div>
                             </div>
                         </div>

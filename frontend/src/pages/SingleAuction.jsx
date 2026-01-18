@@ -387,7 +387,7 @@ function SingleAuction() {
                 )}
 
                 {/* Image section */}
-                <ImageLightBox images={auction.photos} auctionType={auction?.auctionType} isReserveMet={auction.currentPrice >= auction.reservePrice} />
+                <ImageLightBox images={auction.photos} captions={auction.photos.map(photo => photo.caption || '')} auctionType={auction?.auctionType} isReserveMet={auction.currentPrice >= auction.reservePrice} />
 
                 <hr className="my-8" />
 
@@ -428,17 +428,24 @@ function SingleAuction() {
                         <h3 className="my-5 text-primary text-xl font-semibold">Document(s)</h3>
                         <div className="flex gap-5 max-w-full flex-wrap">
                             {auction.documents.map((doc, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleDocumentDownload(doc.url, doc.originalName || doc.filename)}
-                                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer border border-gray-200 py-3 px-5 rounded-md text-secondary group hover:text-primary"
-                                >
-                                    <File size={20} className="flex-shrink-0" />
-                                    <span className="group-hover:underline max-w-[125px] truncate">
-                                        {doc.originalName || doc.filename}
-                                    </span>
-                                    <Download size={20} className="flex-shrink-0" />
-                                </button>
+                                <div key={index} className="flex flex-col items-center">
+                                    <button
+                                        onClick={() => handleDocumentDownload(doc.url, doc.originalName || doc.filename)}
+                                        className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer border border-gray-200 py-3 px-5 rounded-md text-secondary group hover:text-primary"
+                                    >
+                                        <File size={20} className="flex-shrink-0" />
+                                        <span className="group-hover:underline max-w-[125px] truncate">
+                                            {doc.originalName || doc.filename}
+                                        </span>
+                                        <Download size={20} className="flex-shrink-0" />
+                                    </button>
+                                    {/* Add caption display for documents */}
+                                    {doc.caption && (
+                                        <p className="text-xs text-gray-600 mt-1 max-w-[150px] text-center truncate" title={doc.caption}>
+                                            {doc.caption}
+                                        </p>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -451,6 +458,7 @@ function SingleAuction() {
                             <h3 className="my-5 text-primary text-xl font-semibold">Service Records</h3>
                             <ImageLightBox
                                 images={auction.serviceRecords}
+                                captions={auction.serviceRecords.map(record => record.caption || '')} // ADD THIS LINE
                                 type="logbooks"
                             />
                         </div>

@@ -40,7 +40,7 @@ const ItemTypes = {
 };
 
 // Draggable Photo Component
-const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
+const DraggablePhoto = ({ photo, index, movePhoto, removePhoto, caption, onCaptionChange }) => {
     const [, ref] = useDrag({
         type: ItemTypes.PHOTO,
         item: { index },
@@ -57,31 +57,43 @@ const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
     });
 
     return (
-        <div ref={(node) => ref(drop(node))} className="relative group">
-            <img
-                src={URL.createObjectURL(photo)}
-                alt={`Upload ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg cursor-move"
+        <div className="space-y-2">
+            {/* Image with drag/drop */}
+            <div ref={(node) => ref(drop(node))} className="relative group">
+                <img
+                    src={URL.createObjectURL(photo)}
+                    alt={`Upload ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg cursor-move"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                    <Move size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </div>
+                <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full z-10">
+                    {index + 1}
+                </div>
+                <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors z-20"
+                >
+                    <X size={14} />
+                </button>
+            </div>
+
+            {/* Caption input - moved outside the draggable area */}
+            <input
+                type="text"
+                placeholder="Add caption..."
+                value={caption || ''}
+                onChange={(e) => onCaptionChange(index, e.target.value)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
-                <Move size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-            </div>
-            <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
-                {index + 1}
-            </div>
-            <button
-                type="button"
-                onClick={() => removePhoto(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-            >
-                <X size={14} />
-            </button>
         </div>
     );
 };
 
 // Photo Gallery Component
-const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
+const PhotoGallery = ({ photos, movePhoto, removePhoto, captions, onCaptionChange }) => {
     return (
         <div className="mt-4">
             <p className="text-sm text-secondary mb-3">
@@ -95,6 +107,8 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
                         index={index}
                         movePhoto={movePhoto}
                         removePhoto={removePhoto}
+                        caption={captions[index] || ''} // Pass caption
+                        onCaptionChange={onCaptionChange} // Pass caption change handler
                     />
                 ))}
             </div>
@@ -103,7 +117,7 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
 };
 
 // Service History Gallery Component
-const ServiceHistoryGallery = ({ serviceRecords, moveServiceRecord, removeServiceRecord }) => {
+const ServiceHistoryGallery = ({ serviceRecords, moveServiceRecord, removeServiceRecord, captions, onCaptionChange }) => {
     return (
         <div className="mt-4">
             <p className="text-sm text-secondary mb-3">
@@ -117,9 +131,40 @@ const ServiceHistoryGallery = ({ serviceRecords, moveServiceRecord, removeServic
                         index={index}
                         movePhoto={moveServiceRecord}
                         removePhoto={removeServiceRecord}
+                        caption={captions[index] || ''}
+                        onCaptionChange={onCaptionChange}
                     />
                 ))}
             </div>
+        </div>
+    );
+};
+
+const DocumentGallery = ({ documents, removeDocument, captions, onCaptionChange }) => {
+    return (
+        <div className="mt-4 space-y-2">
+            {documents.map((doc, index) => (
+                <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                    <div className="flex-1">
+                        <span className="text-sm truncate">{doc.name}</span>
+                        {/* Add caption input for documents */}
+                        <input
+                            type="text"
+                            placeholder="Add document caption..."
+                            value={captions[index] || ''}
+                            onChange={(e) => onCaptionChange(index, e.target.value)}
+                            className="w-full mt-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-black"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => removeDocument(index)}
+                        className="text-red-500 ml-2"
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+            ))}
         </div>
     );
 };
@@ -161,7 +206,7 @@ const categoryFields = {
         { name: 'registration', label: 'Registration Number', type: 'text', required: false, placeholder: 'e.g., AB12 CDE' },
         { name: 'miles', label: 'Miles', type: 'number', required: false, min: 0, placeholder: 'e.g., 15000' },
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: new Date().getFullYear() + 1 },
-        { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Hatchback', 'Saloon', 'SUV', 'Estate', 'Coupe', 'Convertible', 'MPV'] },
+        { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Hatchback', 'Saloon', 'SUV', 'Estate', 'Coupe', 'Convertible', 'MPV', 'Van'] },
         { name: 'transmission', label: 'Transmission', type: 'select', required: false, options: ['Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
         { name: 'fuelType', label: 'Fuel Type', type: 'select', required: false, options: ['Petrol', 'Diesel', 'Hybrid', 'Electric'] },
         { name: 'colour', label: 'Colour', type: 'text', required: false, placeholder: 'e.g., Red, Blue, Black' },
@@ -170,7 +215,7 @@ const categoryFields = {
         { name: 'serviceHistory', label: 'Service History', type: 'select', required: false, options: ['Full Service', 'Part Service', 'No History'] },
         { name: 'insuranceCategory', label: 'Insurance Category', type: 'select', required: false, options: ['No Cat', 'CAT D', 'CAT S', 'CAT N'] },
         { name: 'v5Status', label: 'V5 Status', type: 'select', required: false, options: ['V5 Present', 'Applied For', 'Not Available'] },
-        { name: 'previousOwners', label: 'Previous Owners', type: 'number', required: false, min: 1 },
+        { name: 'previousOwners', label: 'Previous Owners', type: 'number', required: false, min: 0 },
         { name: 'vatStatus', label: 'VAT Status', type: 'select', required: false, options: ['Marginal', 'Qualifying', 'Commercial'] },
         { name: 'euroStatus', label: 'Euro Status', type: 'text', required: false, placeholder: 'e.g., EURO 6' },
         { name: 'capClean', label: 'CAP Clean (£)', type: 'number', required: false, min: 0, placeholder: 'e.g., 15500' },
@@ -188,6 +233,9 @@ const CreateAuction = () => {
     const navigate = useNavigate();
     const [uploadedServiceRecords, setUploadedServiceRecords] = useState([]);
     const [showLookupModal, setShowLookupModal] = useState(false);
+    const [photoCaptions, setPhotoCaptions] = useState([]);
+    const [serviceRecordCaptions, setServiceRecordCaptions] = useState([]);
+    const [documentCaptions, setDocumentCaptions] = useState([]);
 
     const {
         register,
@@ -298,17 +346,31 @@ const CreateAuction = () => {
     // Move photo function for drag and drop
     const movePhoto = (fromIndex, toIndex) => {
         const updatedPhotos = [...uploadedPhotos];
+        const updatedCaptions = [...photoCaptions];
+
         const [movedPhoto] = updatedPhotos.splice(fromIndex, 1);
+        const [movedCaption] = updatedCaptions.splice(fromIndex, 1);
+
         updatedPhotos.splice(toIndex, 0, movedPhoto);
+        updatedCaptions.splice(toIndex, 0, movedCaption);
+
         setUploadedPhotos(updatedPhotos);
+        setPhotoCaptions(updatedCaptions);
     };
 
     // Move service record function for drag and drop
     const moveServiceRecord = (fromIndex, toIndex) => {
         const updatedRecords = [...uploadedServiceRecords];
+        const updatedCaptions = [...serviceRecordCaptions];
+
         const [movedRecord] = updatedRecords.splice(fromIndex, 1);
+        const [movedCaption] = updatedCaptions.splice(fromIndex, 1);
+
         updatedRecords.splice(toIndex, 0, movedRecord);
+        updatedCaptions.splice(toIndex, 0, movedCaption);
+
         setUploadedServiceRecords(updatedRecords);
+        setServiceRecordCaptions(updatedCaptions);
     };
 
     const getCategoryFields = () => {
@@ -449,7 +511,7 @@ const CreateAuction = () => {
                 id={field.name}
                 type={field.type}
                 placeholder={field.placeholder}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full p-3 capitalize border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
         );
     };
@@ -528,28 +590,68 @@ const CreateAuction = () => {
 
     const handlePhotoUpload = (e) => {
         const files = Array.from(e.target.files);
-        // Add new photos to the beginning of the array so they appear first
         setUploadedPhotos([...files, ...uploadedPhotos]);
+        // Initialize captions for new photos
+        const newCaptions = [...photoCaptions];
+        files.forEach(() => newCaptions.unshift('')); // Add empty captions for new photos
+        setPhotoCaptions(newCaptions);
         clearErrors('photos');
+    };
+
+    const handleCaptionChange = (index, value) => {
+        const newCaptions = [...photoCaptions];
+        newCaptions[index] = value;
+        setPhotoCaptions(newCaptions);
+    };
+
+    const handleServiceRecordCaptionChange = (index, value) => {
+        const newCaptions = [...serviceRecordCaptions];
+        newCaptions[index] = value;
+        setServiceRecordCaptions(newCaptions);
+    };
+
+    const handleDocumentCaptionChange = (index, value) => {
+        const newCaptions = [...documentCaptions];
+        newCaptions[index] = value;
+        setDocumentCaptions(newCaptions);
     };
 
     const handleDocumentUpload = (e) => {
         const files = Array.from(e.target.files);
         setUploadedDocuments([...uploadedDocuments, ...files]);
+        // Initialize captions for new documents
+        const newCaptions = [...documentCaptions];
+        files.forEach(() => newCaptions.push(''));
+        setDocumentCaptions(newCaptions);
     };
 
     const handleServiceRecordUpload = (e) => {
         const files = Array.from(e.target.files);
         setUploadedServiceRecords([...uploadedServiceRecords, ...files]);
+        // Initialize captions for new records
+        const newCaptions = [...serviceRecordCaptions];
+        files.forEach(() => newCaptions.push(''));
+        setServiceRecordCaptions(newCaptions);
     };
 
     const removeServiceRecord = (index) => {
-        setUploadedServiceRecords(uploadedServiceRecords.filter((_, i) => i !== index));
+        const newRecords = uploadedServiceRecords.filter((_, i) => i !== index);
+        setUploadedServiceRecords(newRecords);
+
+        // Remove corresponding caption
+        const newCaptions = [...serviceRecordCaptions];
+        newCaptions.splice(index, 1);
+        setServiceRecordCaptions(newCaptions);
     };
 
     const removePhoto = (index) => {
         const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
         setUploadedPhotos(newPhotos);
+
+        // Remove corresponding caption
+        const newCaptions = [...photoCaptions];
+        newCaptions.splice(index, 1);
+        setPhotoCaptions(newCaptions);
 
         if (newPhotos.length === 0) {
             setError('photos', {
@@ -562,7 +664,13 @@ const CreateAuction = () => {
     };
 
     const removeDocument = (index) => {
-        setUploadedDocuments(uploadedDocuments.filter((_, i) => i !== index));
+        const newDocs = uploadedDocuments.filter((_, i) => i !== index);
+        setUploadedDocuments(newDocs);
+
+        // Remove corresponding caption
+        const newCaptions = [...documentCaptions];
+        newCaptions.splice(index, 1);
+        setDocumentCaptions(newCaptions);
     };
 
     const createAuctionHandler = async (auctionData) => {
@@ -615,16 +723,26 @@ const CreateAuction = () => {
             // Append photos as files (in the order they appear in the array)
             uploadedPhotos.forEach((photo, index) => {
                 formData.append('photos', photo);
+                // Add caption if exists
+                if (photoCaptions[index]) {
+                    formData.append(`photoCaptions[${index}]`, photoCaptions[index]);
+                }
             });
 
             // Append documents as files
             uploadedDocuments.forEach((doc, index) => {
                 formData.append('documents', doc);
+                if (documentCaptions[index]) {
+                    formData.append(`documentCaptions[${index}]`, documentCaptions[index]);
+                }
             });
 
             // Append service record images as files
             uploadedServiceRecords.forEach((record, index) => {
                 formData.append('serviceRecords', record);
+                if (serviceRecordCaptions[index]) {
+                    formData.append(`serviceRecordCaptions[${index}]`, serviceRecordCaptions[index]);
+                }
             });
 
             const { data } = await axiosInstance.post(
@@ -909,6 +1027,8 @@ const CreateAuction = () => {
                                                     photos={uploadedPhotos}
                                                     movePhoto={movePhoto}
                                                     removePhoto={removePhoto}
+                                                    captions={photoCaptions}
+                                                    onCaptionChange={handleCaptionChange}
                                                 />
                                             )}
                                         </div>
@@ -930,7 +1050,7 @@ const CreateAuction = () => {
                                                 </label>
                                             </div>
 
-                                            {uploadedDocuments.length > 0 && (
+                                            {/* {uploadedDocuments.length > 0 && (
                                                 <div className="mt-4 space-y-2">
                                                     {uploadedDocuments.map((doc, index) => (
                                                         <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
@@ -945,6 +1065,15 @@ const CreateAuction = () => {
                                                         </div>
                                                     ))}
                                                 </div>
+                                            )} */}
+
+                                            {uploadedDocuments.length > 0 && (
+                                                <DocumentGallery
+                                                    documents={uploadedDocuments}
+                                                    removeDocument={removeDocument}
+                                                    captions={documentCaptions}
+                                                    onCaptionChange={handleDocumentCaptionChange}
+                                                />
                                             )}
                                         </div>
 
@@ -973,6 +1102,8 @@ const CreateAuction = () => {
                                                     serviceRecords={uploadedServiceRecords}
                                                     moveServiceRecord={moveServiceRecord}
                                                     removeServiceRecord={removeServiceRecord}
+                                                    captions={serviceRecordCaptions}
+                                                    onCaptionChange={handleServiceRecordCaptionChange}
                                                 />
                                             )}
                                         </div>

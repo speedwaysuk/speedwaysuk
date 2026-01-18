@@ -35,7 +35,7 @@ const ItemTypes = {
 };
 
 // Fixed Draggable Photo Component
-const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
+const DraggablePhoto = ({ photo, index, movePhoto, removePhoto, caption, onCaptionChange }) => {
     const ref = useRef(null);
 
     const [{ isDragging }, drag] = useDrag({
@@ -99,41 +99,53 @@ const DraggablePhoto = ({ photo, index, movePhoto, removePhoto }) => {
     drag(drop(ref));
 
     return (
-        <div
-            ref={ref}
-            style={{
-                opacity: isDragging ? 0.5 : 1,
-                cursor: isDragging ? 'grabbing' : 'grab',
-            }}
-            className="relative group transition-all duration-200"
-        >
-            <img
-                src={photo.isExisting ? photo.url : URL.createObjectURL(photo.file)}
-                alt={`Photo ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg border-2 border-transparent hover:border-blue-500"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
-                <Move size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-            </div>
-            <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
-                {index + 1}
-            </div>
-            <div className="absolute top-2 right-2 bg-blue-500 bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
-                {photo.isExisting ? 'Existing' : 'New'}
-            </div>
-            <button
-                type="button"
-                onClick={() => removePhoto(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors z-10"
+        <div className="space-y-2">
+            {/* Image with drag/drop */}
+            <div
+                ref={ref}
+                style={{
+                    opacity: isDragging ? 0.5 : 1,
+                    cursor: isDragging ? 'grabbing' : 'grab',
+                }}
+                className="relative group transition-all duration-200"
             >
-                <X size={14} />
-            </button>
+                <img
+                    src={photo.isExisting ? photo.url : URL.createObjectURL(photo.file)}
+                    alt={`Photo ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg border-2 border-transparent hover:border-blue-500"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                    <Move size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </div>
+                <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
+                    {index + 1}
+                </div>
+                <div className="absolute top-2 right-2 bg-blue-500 bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
+                    {photo.isExisting ? 'Existing' : 'New'}
+                </div>
+                <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors z-10"
+                >
+                    <X size={14} />
+                </button>
+            </div>
+
+            {/* Add caption input */}
+            <input
+                type="text"
+                placeholder="Add caption..."
+                value={caption || ''}
+                onChange={(e) => onCaptionChange(index, e.target.value)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-black"
+            />
         </div>
     );
 };
 
 // Photo Gallery Component
-const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
+const PhotoGallery = ({ photos, movePhoto, removePhoto, captions, onCaptionChange }) => {
     return (
         <div className="mt-4">
             <p className="text-sm text-secondary mb-3">
@@ -150,9 +162,78 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
                         index={index}
                         movePhoto={movePhoto}
                         removePhoto={removePhoto}
+                        caption={captions[index] || ''} // Add this
+                        onCaptionChange={onCaptionChange} // Add this
                     />
                 ))}
             </div>
+        </div>
+    );
+};
+
+// document gallery component
+const DocumentGallery = ({ existingDocs, newDocs, removeDoc, existingCaptions, newCaptions, onCaptionChange }) => {
+    return (
+        <div className="space-y-4">
+            {/* Existing documents */}
+            {existingDocs.length > 0 && (
+                <div>
+                    <p className="text-sm text-secondary mb-2">Existing Documents:</p>
+                    <div className="space-y-2">
+                        {existingDocs.map((doc, index) => (
+                            <div key={`existing-doc-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                <div className="flex-1">
+                                    <span className="text-sm truncate">{doc.filename || doc.originalName}</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Add caption..."
+                                        value={existingCaptions[index] || ''}
+                                        onChange={(e) => onCaptionChange('existing', index, e.target.value)}
+                                        className="w-full mt-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-black"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeDoc(index, true)}
+                                    className="text-red-500 ml-2"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* New documents */}
+            {newDocs.length > 0 && (
+                <div>
+                    <p className="text-sm text-secondary mb-2">New Documents:</p>
+                    <div className="space-y-2">
+                        {newDocs.map((doc, index) => (
+                            <div key={`new-doc-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                <div className="flex-1">
+                                    <span className="text-sm truncate">{doc.name}</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Add caption..."
+                                        value={newCaptions[index] || ''}
+                                        onChange={(e) => onCaptionChange('new', index, e.target.value)}
+                                        className="w-full mt-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-black"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeDoc(index, false)}
+                                    className="text-red-500 ml-2"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -202,7 +283,7 @@ const categoryFields = {
         { name: 'registration', label: 'Registration Number', type: 'text', required: false, placeholder: 'e.g., AB12 CDE' },
         { name: 'miles', label: 'Miles', type: 'number', required: false, min: 0, placeholder: 'e.g., 15000' },
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: new Date().getFullYear() + 1 },
-        { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Hatchback', 'Saloon', 'SUV', 'Estate', 'Coupe', 'Convertible', 'MPV'] },
+        { name: 'bodyType', label: 'Body Type', type: 'select', required: false, options: ['Hatchback', 'Saloon', 'SUV', 'Estate', 'Coupe', 'Convertible', 'MPV', 'Van'] },
         { name: 'transmission', label: 'Transmission', type: 'select', required: false, options: ['Manual', 'Automatic', 'Dual-Clutch', 'CVT', 'Semi-Automatic'] },
         { name: 'fuelType', label: 'Fuel Type', type: 'select', required: false, options: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'] },
         { name: 'colour', label: 'Colour', type: 'text', required: false, placeholder: 'e.g., Red, Blue, Black' },
@@ -211,7 +292,7 @@ const categoryFields = {
         { name: 'serviceHistory', label: 'Service History', type: 'select', required: false, options: ['Full Service', 'Part Service', 'No History'] },
         { name: 'insuranceCategory', label: 'Insurance Category', type: 'select', required: false, options: ['No Cat', 'CAT D', 'CAT S', 'CAT N'] },
         { name: 'v5Status', label: 'V5 Status', type: 'select', required: false, options: ['V5 Present', 'Applied For', 'Not Available'] },
-        { name: 'previousOwners', label: 'Previous Owners', type: 'number', required: false, min: 1 },
+        { name: 'previousOwners', label: 'Previous Owners', type: 'number', required: false, min: 0 },
         { name: 'vatStatus', label: 'VAT Status', type: 'select', required: false, options: ['Marginal', 'Qualifying', 'Commercial'] },
         { name: 'capClean', label: 'CAP Clean (£)', type: 'number', required: false, min: 0, placeholder: 'e.g., 15500' },
         { name: 'vendor', label: 'Vendor', type: 'text', required: false, placeholder: 'e.g., City Motors' },
@@ -239,6 +320,12 @@ const EditAuction = () => {
     const newPhotos = allPhotos.filter(photo => !photo.isExisting);
     const hasNewUploads = newPhotos.length > 0 || uploadedDocuments.length > 0;
     const totalNewFiles = newPhotos.length + uploadedDocuments.length;
+
+    // caption states
+    const [photoCaptions, setPhotoCaptions] = useState([]);
+    const [documentCaptions, setDocumentCaptions] = useState([]);
+    const [serviceRecordCaptions, setServiceRecordCaptions] = useState([]);
+    const [uploadedDocumentCaptions, setUploadedDocumentCaptions] = useState([]);
 
     const { auctionId } = useParams();
     const navigate = useNavigate();
@@ -348,6 +435,14 @@ const EditAuction = () => {
             updatedPhotos.splice(hoverIndex, 0, movedPhoto);
             return updatedPhotos;
         });
+
+        // Also move corresponding captions
+        setPhotoCaptions(prevCaptions => {
+            const updatedCaptions = [...prevCaptions];
+            const [movedCaption] = updatedCaptions.splice(dragIndex, 1);
+            updatedCaptions.splice(hoverIndex, 0, movedCaption);
+            return updatedCaptions;
+        });
     }, []);
 
     const moveServiceRecord = useCallback((dragIndex, hoverIndex) => {
@@ -356,6 +451,14 @@ const EditAuction = () => {
             const [movedServiceRecord] = updatedServiceRecords.splice(dragIndex, 1);
             updatedServiceRecords.splice(hoverIndex, 0, movedServiceRecord);
             return updatedServiceRecords;
+        });
+
+        // Also move corresponding captions
+        setServiceRecordCaptions(prevCaptions => {
+            const updatedCaptions = [...prevCaptions];
+            const [movedCaption] = updatedCaptions.splice(dragIndex, 1);
+            updatedCaptions.splice(hoverIndex, 0, movedCaption);
+            return updatedCaptions;
         });
     }, []);
 
@@ -438,6 +541,18 @@ const EditAuction = () => {
                         id: serviceRecord.publicId || serviceRecord._id
                     }));
                     setAllServiceRecords(existingServiceRecordsWithFlag);
+
+                    // Initialize photo captions
+                    const initialPhotoCaptions = (auction.photos || []).map(photo => photo.caption || '');
+                    setPhotoCaptions(initialPhotoCaptions);
+
+                    // Initialize document captions
+                    const initialDocCaptions = (auction.documents || []).map(doc => doc.caption || '');
+                    setDocumentCaptions(initialDocCaptions);
+
+                    // Initialize service record captions
+                    const initialServiceRecordCaptions = (auction.serviceRecords || []).map(record => record.caption || '');
+                    setServiceRecordCaptions(initialServiceRecordCaptions);
 
                     toast.success('Auction data loaded successfully');
                 }
@@ -584,7 +699,7 @@ const EditAuction = () => {
                 id={field.name}
                 type={field.type}
                 placeholder={field.placeholder}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full p-3 capitalize border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
         );
     };
@@ -708,6 +823,11 @@ const EditAuction = () => {
             return [...filteredNewPhotos, ...prev];
         });
 
+        // Initialize captions for new photos
+        const newCaptions = [...photoCaptions];
+        files.forEach(() => newCaptions.unshift('')); // Add empty captions at beginning
+        setPhotoCaptions(newCaptions);
+
         clearErrors('photos');
 
         // Reset the file input
@@ -775,12 +895,16 @@ const EditAuction = () => {
         const photoToRemove = allPhotos[index];
 
         if (photoToRemove.isExisting) {
-            // Add to removed photos list for backend
             setRemovedPhotos(prev => [...prev, photoToRemove.id]);
         }
 
         // Remove from all photos
         setAllPhotos(prev => prev.filter((_, i) => i !== index));
+
+        // Remove corresponding caption
+        const newCaptions = [...photoCaptions];
+        newCaptions.splice(index, 1);
+        setPhotoCaptions(newCaptions);
 
         if (allPhotos.length === 1) {
             setError('photos', {
@@ -793,6 +917,11 @@ const EditAuction = () => {
     const handleDocumentUpload = (e) => {
         const files = Array.from(e.target.files);
         setUploadedDocuments([...uploadedDocuments, ...files]);
+
+        // Initialize captions for new documents
+        const newCaptions = [...uploadedDocumentCaptions];
+        files.forEach(() => newCaptions.push(''));
+        setUploadedDocumentCaptions(newCaptions);
     };
 
     const removeDocument = (index, isExisting = false) => {
@@ -800,9 +929,45 @@ const EditAuction = () => {
             const removedDoc = existingDocuments[index];
             setRemovedDocuments(prev => [...prev, removedDoc.publicId || removedDoc._id]);
             setExistingDocuments(existingDocuments.filter((_, i) => i !== index));
+
+            // Remove caption
+            const newCaptions = [...documentCaptions];
+            newCaptions.splice(index, 1);
+            setDocumentCaptions(newCaptions);
         } else {
             setUploadedDocuments(uploadedDocuments.filter((_, i) => i !== index));
+
+            // Remove caption
+            const newCaptions = [...uploadedDocumentCaptions];
+            newCaptions.splice(index, 1);
+            setUploadedDocumentCaptions(newCaptions);
         }
+    };
+
+    // Add these handler functions
+    const handlePhotoCaptionChange = (index, value) => {
+        const newCaptions = [...photoCaptions];
+        newCaptions[index] = value;
+        setPhotoCaptions(newCaptions);
+    };
+
+    // Update the handler to handle both existing and new documents
+    const handleDocumentCaptionChange = (type, index, value) => {
+        if (type === 'existing') {
+            const newCaptions = [...documentCaptions];
+            newCaptions[index] = value;
+            setDocumentCaptions(newCaptions);
+        } else {
+            const newCaptions = [...uploadedDocumentCaptions];
+            newCaptions[index] = value;
+            setUploadedDocumentCaptions(newCaptions);
+        }
+    };
+
+    const handleServiceRecordCaptionChange = (index, value) => {
+        const newCaptions = [...serviceRecordCaptions];
+        newCaptions[index] = value;
+        setServiceRecordCaptions(newCaptions);
     };
 
     // Update auction handler with fixed photo handling
@@ -822,7 +987,7 @@ const EditAuction = () => {
             formDataToSend.append('videoLink', formData.video || '');
             formDataToSend.append('startPrice', formData.startPrice);
             formDataToSend.append('auctionType', formData.auctionType);
-            formDataToSend.append('allowOffers', formData.allowOffers || false); // Add this
+            formDataToSend.append('allowOffers', formData.allowOffers || false);
             formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
             formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
 
@@ -837,28 +1002,53 @@ const EditAuction = () => {
                 formDataToSend.append('removedPhotos', JSON.stringify(removedPhotos));
             }
 
-            // Send the complete logbook order
+            // Send the complete photo order
+            const photoOrder = allPhotos.map(photo => ({
+                id: photo.id,
+                isExisting: photo.isExisting
+            }));
+            formDataToSend.append('photoOrder', JSON.stringify(photoOrder));
+
+            // Send the complete service record order
             const serviceRecordOrder = allServiceRecords.map(serviceRecord => ({
                 id: serviceRecord.id,
                 isExisting: serviceRecord.isExisting
             }));
             formDataToSend.append('serviceRecordOrder', JSON.stringify(serviceRecordOrder));
 
-            // Append new ServiceRecords
-            const newServiceRecordsToUpload = allServiceRecords.filter(serviceRecord =>
-                !serviceRecord.isExisting && serviceRecord.file && !serviceRecord._uploaded
-            );
+            // 1. SEND CAPTIONS FOR ALL PHOTOS (BOTH EXISTING AND NEW)
+            allPhotos.forEach((photo, index) => {
+                // Send caption for this photo
+                formDataToSend.append('photoCaptions', photoCaptions[index] || '');
 
-            newServiceRecordsToUpload.forEach((serviceRecord) => {
-                if (serviceRecord.file) {
-                    formDataToSend.append('serviceRecords', serviceRecord.file);
+                // Only send file if it's a new photo
+                if (!photo.isExisting && photo.file) {
+                    formDataToSend.append('photos', photo.file);
                 }
             });
 
-            // Append removed ServiceRecords
-            if (removedServiceRecords.length > 0) {
-                formDataToSend.append('removedServiceRecords', JSON.stringify(removedServiceRecords));
-            }
+            // 2. SEND CAPTIONS AND FILES FOR DOCUMENTS
+            // Existing documents
+            documentCaptions.forEach((caption, index) => {
+                formDataToSend.append('existingDocumentCaptions', caption || '');
+            });
+
+            // New documents
+            uploadedDocuments.forEach((doc, index) => {
+                formDataToSend.append('documents', doc);
+                formDataToSend.append('newDocumentCaptions', uploadedDocumentCaptions[index] || '');
+            });
+
+            // 3. SEND CAPTIONS FOR ALL SERVICE RECORDS (BOTH EXISTING AND NEW)
+            allServiceRecords.forEach((record, index) => {
+                // Send caption for this service record
+                formDataToSend.append('serviceRecordCaptions', serviceRecordCaptions[index] || '');
+
+                // Only send file if it's a new service record
+                if (!record.isExisting && record.file) {
+                    formDataToSend.append('serviceRecords', record.file);
+                }
+            });
 
             if (formData.auctionType === 'standard' || formData.auctionType === 'reserve') {
                 formDataToSend.append('bidIncrement', formData.bidIncrement);
@@ -878,29 +1068,17 @@ const EditAuction = () => {
                 formDataToSend.append('removedDocuments', JSON.stringify(removedDocuments));
             }
 
-            // Send the complete photo order (both existing and new)
-            const photoOrder = allPhotos.map(photo => ({
-                id: photo.id,
-                isExisting: photo.isExisting
-            }));
-            formDataToSend.append('photoOrder', JSON.stringify(photoOrder));
+            if (removedServiceRecords.length > 0) {
+                formDataToSend.append('removedServiceRecords', JSON.stringify(removedServiceRecords));
+            }
 
-            // FIX: Only append new photos that haven't been uploaded before
-            const newPhotosToUpload = allPhotos.filter(photo =>
-                !photo.isExisting && photo.file && !photo._uploaded
-            );
-
-            // Append new photos (files) in the order they appear in allPhotos
-            newPhotosToUpload.forEach((photo) => {
-                if (photo.file) {
-                    formDataToSend.append('photos', photo.file);
-                }
-            });
-
-            // Append new documents
-            uploadedDocuments.forEach((doc) => {
-                formDataToSend.append('documents', doc);
-            });
+            // Remove or fix the debug logging
+            // console.log('FormData entries:');
+            // for (let pair of formDataToSend.entries()) {
+            //     const value = pair[1];
+            //     const isFile = value && typeof value === 'object' && value.name;
+            //     console.log(pair[0] + ': ' + (isFile ? '[FILE]' : value));
+            // }
 
             // Use admin-specific endpoint
             const { data } = await axiosInstance.put(
@@ -1225,6 +1403,8 @@ const EditAuction = () => {
                                                     photos={allPhotos}
                                                     movePhoto={movePhoto}
                                                     removePhoto={removePhoto}
+                                                    captions={photoCaptions} // Add this
+                                                    onCaptionChange={handlePhotoCaptionChange} // Add this
                                                 />
                                             )}
                                         </div>
@@ -1246,42 +1426,62 @@ const EditAuction = () => {
                                                 </label>
                                             </div>
 
-                                            {/* Display existing documents */}
+                                            {/* Display existing documents with captions */}
                                             {existingDocuments.length > 0 && (
                                                 <div className="mt-4">
                                                     <p className="text-sm text-secondary mb-2">Existing Documents:</p>
                                                     <div className="space-y-2">
                                                         {existingDocuments.map((doc, index) => (
-                                                            <div key={`existing-doc-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                                                <span className="text-sm truncate">{doc.filename || doc.originalName}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeDocument(index, true)}
-                                                                    className="text-red-500"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                            <div key={`existing-doc-${index}`} className="bg-gray-50 p-3 rounded-lg">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <span className="text-sm font-medium truncate">{doc.filename || doc.originalName}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeDocument(index, true)}
+                                                                        className="text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        <X size={16} />
+                                                                    </button>
+                                                                </div>
+                                                                {/* Caption input for existing documents */}
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Add document caption..."
+                                                                    value={documentCaptions[index] || ''}
+                                                                    onChange={(e) => handleDocumentCaptionChange('existing', index, e.target.value)}
+                                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                                />
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
                                             )}
 
-                                            {/* Display newly uploaded documents */}
+                                            {/* Display newly uploaded documents with captions */}
                                             {uploadedDocuments.length > 0 && (
                                                 <div className="mt-4">
                                                     <p className="text-sm text-secondary mb-2">New Documents:</p>
                                                     <div className="space-y-2">
                                                         {uploadedDocuments.map((doc, index) => (
-                                                            <div key={`new-doc-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                                                <span className="text-sm truncate">{doc.name}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeDocument(index, false)}
-                                                                    className="text-red-500"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                            <div key={`new-doc-${index}`} className="bg-gray-50 p-3 rounded-lg">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <span className="text-sm font-medium truncate">{doc.name}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeDocument(index, false)}
+                                                                        className="text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        <X size={16} />
+                                                                    </button>
+                                                                </div>
+                                                                {/* Caption input for new documents */}
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Add document caption..."
+                                                                    value={uploadedDocumentCaptions[index] || ''}
+                                                                    onChange={(e) => handleDocumentCaptionChange('new', index, e.target.value)}
+                                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                                />
                                                             </div>
                                                         ))}
                                                     </div>
@@ -1327,6 +1527,8 @@ const EditAuction = () => {
                                                                 index={index}
                                                                 movePhoto={moveServiceRecord}
                                                                 removePhoto={removeServiceRecord}
+                                                                caption={serviceRecordCaptions[index] || ''} // Add this
+                                                                onCaptionChange={handleServiceRecordCaptionChange} // Add this
                                                             />
                                                         ))}
                                                     </div>

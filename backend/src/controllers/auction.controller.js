@@ -122,6 +122,13 @@ export const createAuction = async (req, res) => {
       const photos = Array.isArray(req.files.photos)
         ? req.files.photos
         : [req.files.photos];
+
+      // Get captions from request body
+      // const photoCaptions = req.body.photoCaptions || [];
+      const photoCaptions = Array.isArray(req.body.photoCaptions)
+        ? req.body.photoCaptions
+        : [];
+
       for (const [index, photo] of photos.entries()) {
         try {
           const result = await uploadImageToCloudinary(
@@ -133,6 +140,7 @@ export const createAuction = async (req, res) => {
             publicId: result.public_id,
             filename: photo.originalname,
             order: index,
+            caption: photoCaptions[index] || "", // ADD THIS LINE
           });
         } catch (uploadError) {
           console.error("Photo upload error:", uploadError);
@@ -144,12 +152,19 @@ export const createAuction = async (req, res) => {
       }
     }
 
-    // Upload documents
+    // For documents:
     if (req.files && req.files.documents) {
       const documents = Array.isArray(req.files.documents)
         ? req.files.documents
         : [req.files.documents];
-      for (const doc of documents) {
+
+      // Get document captions
+      // const documentCaptions = req.body.documentCaptions || [];
+      const newDocumentCaptions = Array.isArray(req.body.newDocumentCaptions)
+        ? req.body.newDocumentCaptions
+        : [];
+
+      for (const [index, doc] of documents.entries()) {
         try {
           const result = await uploadDocumentToCloudinary(
             doc.buffer,
@@ -162,22 +177,28 @@ export const createAuction = async (req, res) => {
             filename: doc.originalname,
             originalName: doc.originalname,
             resourceType: "raw",
+            caption: documentCaptions[index] || "", // ADD THIS
           });
         } catch (uploadError) {
           console.error("Document upload error:", uploadError);
-          return res.status(400).json({
-            success: false,
-            message: `Failed to upload document: ${doc.originalname}`,
-          });
         }
       }
     }
 
-    // Upload service records
+    // For service records:
     if (req.files && req.files.serviceRecords) {
       const serviceRecords = Array.isArray(req.files.serviceRecords)
         ? req.files.serviceRecords
         : [req.files.serviceRecords];
+
+      // Get service record captions
+      // const serviceRecordCaptions = req.body.serviceRecordCaptions || [];
+      const serviceRecordCaptions = Array.isArray(
+        req.body.serviceRecordCaptions
+      )
+        ? req.body.serviceRecordCaptions
+        : [];
+
       for (const [index, record] of serviceRecords.entries()) {
         try {
           const result = await uploadImageToCloudinary(
@@ -190,17 +211,13 @@ export const createAuction = async (req, res) => {
             filename: record.originalname,
             originalName: record.originalname,
             order: index,
+            caption: serviceRecordCaptions[index] || "", // ADD THIS
           });
         } catch (uploadError) {
           console.error("Service record upload error:", uploadError);
-          return res.status(400).json({
-            success: false,
-            message: `Failed to upload service record: ${record.originalname}`,
-          });
         }
       }
     }
-
     // Validate dates
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -664,8 +681,572 @@ export const getAuction = async (req, res) => {
   }
 };
 
+// export const updateAuction = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const seller = req.user;
+
+//     const auction = await Auction.findById(id);
+
+//     if (!auction) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Auction not found",
+//       });
+//     }
+
+//     // Check if user owns the auction
+//     if (auction.seller.toString() !== seller._id.toString()) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "You can only update your own auctions",
+//       });
+//     }
+
+//     // Check if auction can be modified (only draft auctions can be modified)
+//     if (auction.status === "active") {
+//       return res.status(401).json({
+//         success: false,
+//         message: `Active auction can't be updated.`,
+//       });
+//     }
+
+//     const {
+//       title,
+//       category,
+//       features,
+//       description,
+//       specifications,
+//       location,
+//       videoLink,
+//       startPrice,
+//       bidIncrement,
+//       auctionType,
+//       reservePrice,
+//       buyNowPrice,
+//       allowOffers,
+//       startDate,
+//       endDate,
+//       removedPhotos,
+//       removedDocuments,
+//       removedServiceRecords,
+//       photoOrder,
+//       serviceRecordOrder,
+//     } = req.body;
+
+//     // Basic validation
+//     if (
+//       !title ||
+//       !category ||
+//       !description ||
+//       !auctionType ||
+//       !startDate ||
+//       !endDate
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All required fields must be provided",
+//       });
+//     }
+
+//     // Validate start price for all auction types
+//     if (!startPrice || parseFloat(startPrice) < 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Start price is required and must be positive",
+//       });
+//     }
+
+//     // Validate bid increment for standard and reserve auctions
+//     if (
+//       (auctionType === "standard" || auctionType === "reserve") &&
+//       (!bidIncrement || parseFloat(bidIncrement) <= 0)
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Bid increment is required for standard and reserve auctions",
+//       });
+//     }
+
+//     // Validate buy now price for buy_now auctions
+//     if (auctionType === "buy_now") {
+//       if (!buyNowPrice || parseFloat(buyNowPrice) < parseFloat(startPrice)) {
+//         return res.status(400).json({
+//           success: false,
+//           message:
+//             "Buy Now price must be provided and greater than or equal to start price",
+//         });
+//       }
+//     }
+
+//     // Validate reserve price for reserve auctions
+//     if (auctionType === "reserve") {
+//       if (!reservePrice || parseFloat(reservePrice) < parseFloat(startPrice)) {
+//         return res.status(400).json({
+//           success: false,
+//           message:
+//             "Reserve price must be provided and greater than or equal to start price",
+//         });
+//       }
+//     }
+
+//     // Handle specifications
+//     let finalSpecifications = new Map();
+
+//     // Convert existing specifications to Map if they exist
+//     if (auction.specifications && auction.specifications instanceof Map) {
+//       auction.specifications.forEach((value, key) => {
+//         if (value !== null && value !== undefined && value !== "") {
+//           finalSpecifications.set(key, value);
+//         }
+//       });
+//     } else if (
+//       auction.specifications &&
+//       typeof auction.specifications === "object"
+//     ) {
+//       Object.entries(auction.specifications).forEach(([key, value]) => {
+//         if (value !== null && value !== undefined && value !== "") {
+//           finalSpecifications.set(key, value);
+//         }
+//       });
+//     }
+
+//     // Parse and merge new specifications
+//     if (specifications) {
+//       try {
+//         let newSpecs;
+//         if (typeof specifications === "string") {
+//           newSpecs = JSON.parse(specifications);
+//         } else {
+//           newSpecs = specifications;
+//         }
+
+//         if (typeof newSpecs === "object" && newSpecs !== null) {
+//           Object.entries(newSpecs).forEach(([key, value]) => {
+//             if (value !== null && value !== undefined && value !== "") {
+//               finalSpecifications.set(key, value.toString());
+//             } else {
+//               finalSpecifications.delete(key);
+//             }
+//           });
+//         }
+//       } catch (parseError) {
+//         console.error("Error parsing specifications:", parseError);
+//         return res.status(400).json({
+//           success: false,
+//           message: "Invalid specifications format",
+//         });
+//       }
+//     }
+
+//     // Handle removed photos
+//     let finalPhotos = [...auction.photos];
+//     if (removedPhotos) {
+//       try {
+//         const removedPhotoIds =
+//           typeof removedPhotos === "string"
+//             ? JSON.parse(removedPhotos)
+//             : removedPhotos;
+
+//         if (Array.isArray(removedPhotoIds)) {
+//           // Remove photos from the array and delete from Cloudinary
+//           for (const photoId of removedPhotoIds) {
+//             const photoIndex = finalPhotos.findIndex(
+//               (photo) =>
+//                 photo.publicId === photoId || photo._id?.toString() === photoId
+//             );
+
+//             if (photoIndex > -1) {
+//               const removedPhoto = finalPhotos[photoIndex];
+//               // Delete from Cloudinary
+//               if (removedPhoto.publicId) {
+//                 await deleteFromCloudinary(removedPhoto.publicId);
+//               }
+//               finalPhotos.splice(photoIndex, 1);
+//             }
+//           }
+//         }
+//       } catch (error) {
+//         console.error("Error processing removed photos:", error);
+//       }
+//     }
+
+//     // Handle removed documents
+//     let finalDocuments = [...auction.documents];
+//     if (removedDocuments) {
+//       try {
+//         const removedDocIds =
+//           typeof removedDocuments === "string"
+//             ? JSON.parse(removedDocuments)
+//             : removedDocuments;
+
+//         if (Array.isArray(removedDocIds)) {
+//           for (const docId of removedDocIds) {
+//             const docIndex = finalDocuments.findIndex(
+//               (doc) => doc.publicId === docId || doc._id?.toString() === docId
+//             );
+
+//             if (docIndex > -1) {
+//               const removedDoc = finalDocuments[docIndex];
+//               // Delete from Cloudinary
+//               if (removedDoc.publicId) {
+//                 await deleteFromCloudinary(removedDoc.publicId);
+//               }
+//               finalDocuments.splice(docIndex, 1);
+//             }
+//           }
+//         }
+//       } catch (error) {
+//         console.error("Error processing removed documents:", error);
+//       }
+//     }
+
+//     // Handle new photo uploads
+//     const newPhotos = [];
+//     if (req.files && req.files.photos) {
+//       const photos = Array.isArray(req.files.photos)
+//         ? req.files.photos
+//         : [req.files.photos];
+//       for (const photo of photos) {
+//         try {
+//           const result = await uploadImageToCloudinary(
+//             photo.buffer,
+//             "auction-photos"
+//           );
+//           newPhotos.push({
+//             url: result.secure_url,
+//             publicId: result.public_id,
+//             filename: photo.originalname,
+//             order: finalPhotos.length + newPhotos.length, // Maintain order
+//           });
+//         } catch (uploadError) {
+//           console.error("Photo upload error:", uploadError);
+//           return res.status(400).json({
+//             success: false,
+//             message: `Failed to upload photo: ${photo.originalname}`,
+//           });
+//         }
+//       }
+//     }
+
+//     // Handle photo ordering
+//     if (photoOrder) {
+//       try {
+//         const parsedPhotoOrder =
+//           typeof photoOrder === "string" ? JSON.parse(photoOrder) : photoOrder;
+
+//         if (Array.isArray(parsedPhotoOrder)) {
+//           // Create a map of existing photos by their ID for quick lookup
+//           const existingPhotosMap = new Map();
+//           finalPhotos.forEach((photo) => {
+//             const photoId = photo.publicId || photo._id?.toString();
+//             if (photoId) {
+//               existingPhotosMap.set(photoId, photo);
+//             }
+//           });
+
+//           // Track used new photos to prevent duplicates
+//           const usedNewPhotos = new Set();
+//           const reorderedPhotos = [];
+
+//           for (const orderItem of parsedPhotoOrder) {
+//             if (orderItem.isExisting) {
+//               // Find existing photo by ID
+//               const existingPhoto = existingPhotosMap.get(orderItem.id);
+//               if (existingPhoto) {
+//                 reorderedPhotos.push(existingPhoto);
+//                 // Remove from map to avoid duplicates
+//                 existingPhotosMap.delete(orderItem.id);
+//               }
+//             } else {
+//               // For new photos, find by the temporary ID from frontend
+//               let foundNewPhoto = null;
+//               for (let i = 0; i < newPhotos.length; i++) {
+//                 if (!usedNewPhotos.has(i)) {
+//                   foundNewPhoto = newPhotos[i];
+//                   usedNewPhotos.add(i);
+//                   break;
+//                 }
+//               }
+
+//               if (foundNewPhoto) {
+//                 reorderedPhotos.push(foundNewPhoto);
+//               }
+//             }
+//           }
+
+//           // Add any remaining existing photos that weren't in the photoOrder
+//           existingPhotosMap.forEach((photo) => reorderedPhotos.push(photo));
+
+//           // Add any remaining new photos that weren't used
+//           newPhotos.forEach((photo, index) => {
+//             if (!usedNewPhotos.has(index)) {
+//               reorderedPhotos.push(photo);
+//             }
+//           });
+
+//           finalPhotos = reorderedPhotos;
+//         }
+//       } catch (error) {
+//         console.error("Error processing photo order:", error);
+//         // Fallback: append new photos at the end
+//         finalPhotos = [...finalPhotos, ...newPhotos];
+//       }
+//     } else {
+//       // If no photoOrder is provided, just append new photos at the end
+//       finalPhotos = [...finalPhotos, ...newPhotos];
+//     }
+
+//     // Handle new document uploads
+//     if (req.files && req.files.documents) {
+//       const documents = Array.isArray(req.files.documents)
+//         ? req.files.documents
+//         : [req.files.documents];
+//       for (const doc of documents) {
+//         try {
+//           const result = await uploadDocumentToCloudinary(
+//             doc.buffer,
+//             doc.originalname,
+//             "auction-documents"
+//           );
+//           finalDocuments.push({
+//             url: result.secure_url,
+//             publicId: result.public_id,
+//             filename: doc.originalname,
+//             originalName: doc.originalname,
+//             resourceType: "raw",
+//           });
+//         } catch (uploadError) {
+//           console.error("Document upload error:", uploadError);
+//           return res.status(400).json({
+//             success: false,
+//             message: `Failed to upload document: ${doc.originalname}`,
+//           });
+//         }
+//       }
+//     }
+
+//     // Handle removed service records
+//     let finalServiceRecords = [...(auction.serviceRecords || [])];
+//     if (removedServiceRecords) {
+//       try {
+//         const removedServiceRecordIds =
+//           typeof removedServiceRecords === "string"
+//             ? JSON.parse(removedServiceRecords)
+//             : removedServiceRecords;
+
+//         if (Array.isArray(removedServiceRecordIds)) {
+//           for (const recordId of removedServiceRecordIds) {
+//             const recordIndex = finalServiceRecords.findIndex(
+//               (record) =>
+//                 record.publicId === recordId ||
+//                 record._id?.toString() === recordId
+//             );
+
+//             if (recordIndex > -1) {
+//               const removedRecord = finalServiceRecords[recordIndex];
+//               // Delete from Cloudinary
+//               if (removedRecord.publicId) {
+//                 await deleteFromCloudinary(removedRecord.publicId);
+//               }
+//               finalServiceRecords.splice(recordIndex, 1);
+//             }
+//           }
+//         }
+//       } catch (error) {
+//         console.error("Error processing removed service records:", error);
+//       }
+//     }
+
+//     // Handle new service record uploads
+//     const newServiceRecords = [];
+//     if (req.files && req.files.serviceRecords) {
+//       const serviceRecords = Array.isArray(req.files.serviceRecords)
+//         ? req.files.serviceRecords
+//         : [req.files.serviceRecords];
+//       for (const record of serviceRecords) {
+//         try {
+//           const result = await uploadImageToCloudinary(
+//             record.buffer,
+//             "auction-service-records"
+//           );
+//           newServiceRecords.push({
+//             url: result.secure_url,
+//             publicId: result.public_id,
+//             filename: record.originalname,
+//             originalName: record.originalname,
+//             order: finalServiceRecords.length + newServiceRecords.length,
+//           });
+//         } catch (uploadError) {
+//           console.error("Service record upload error:", uploadError);
+//           return res.status(400).json({
+//             success: false,
+//             message: `Failed to upload service record: ${record.originalname}`,
+//           });
+//         }
+//       }
+//     }
+
+//     // Handle service record ordering
+//     if (serviceRecordOrder) {
+//       try {
+//         const parsedServiceRecordOrder =
+//           typeof serviceRecordOrder === "string"
+//             ? JSON.parse(serviceRecordOrder)
+//             : serviceRecordOrder;
+
+//         if (Array.isArray(parsedServiceRecordOrder)) {
+//           // Create a map of existing service records by their ID for quick lookup
+//           const existingServiceRecordsMap = new Map();
+//           finalServiceRecords.forEach((record) => {
+//             const recordId = record.publicId || record._id?.toString();
+//             if (recordId) {
+//               existingServiceRecordsMap.set(recordId, record);
+//             }
+//           });
+
+//           // Track used new service records to prevent duplicates
+//           const usedNewServiceRecords = new Set();
+//           const reorderedServiceRecords = [];
+
+//           for (const orderItem of parsedServiceRecordOrder) {
+//             if (orderItem.isExisting) {
+//               // Find existing service record by ID
+//               const existingRecord = existingServiceRecordsMap.get(
+//                 orderItem.id
+//               );
+//               if (existingRecord) {
+//                 reorderedServiceRecords.push(existingRecord);
+//                 // Remove from map to avoid duplicates
+//                 existingServiceRecordsMap.delete(orderItem.id);
+//               }
+//             } else {
+//               // For new service records, find by the temporary ID from frontend
+//               let foundNewRecord = null;
+//               for (let i = 0; i < newServiceRecords.length; i++) {
+//                 if (!usedNewServiceRecords.has(i)) {
+//                   foundNewRecord = newServiceRecords[i];
+//                   usedNewServiceRecords.add(i);
+//                   break;
+//                 }
+//               }
+
+//               if (foundNewRecord) {
+//                 reorderedServiceRecords.push(foundNewRecord);
+//               }
+//             }
+//           }
+
+//           // Add any remaining existing service records that weren't in the order
+//           existingServiceRecordsMap.forEach((record) =>
+//             reorderedServiceRecords.push(record)
+//           );
+
+//           // Add any remaining new service records that weren't used
+//           newServiceRecords.forEach((record, index) => {
+//             if (!usedNewServiceRecords.has(index)) {
+//               reorderedServiceRecords.push(record);
+//             }
+//           });
+
+//           finalServiceRecords = reorderedServiceRecords;
+//         }
+//       } catch (error) {
+//         console.error("Error processing service record order:", error);
+//         // Fallback: append new service records at the end
+//         finalServiceRecords = [...finalServiceRecords, ...newServiceRecords];
+//       }
+//     } else {
+//       // If no serviceRecordOrder is provided, just append new service records at the end
+//       finalServiceRecords = [...finalServiceRecords, ...newServiceRecords];
+//     }
+
+//     // Validate dates
+//     const start = new Date(startDate);
+//     const end = new Date(endDate);
+
+//     if (end <= start) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "End date must be after start date",
+//       });
+//     }
+
+//     // Prepare update data
+//     const updateData = {
+//       title,
+//       category,
+//       features: features || "",
+//       description,
+//       specifications: finalSpecifications,
+//       location,
+//       videoLink,
+//       startPrice: parseFloat(startPrice),
+//       auctionType,
+//       allowOffers: allowOffers === "true" || allowOffers === true,
+//       startDate: start,
+//       endDate: end,
+//       photos: finalPhotos,
+//       documents: finalDocuments,
+//       serviceRecords: finalServiceRecords,
+//       status: "draft",
+//     };
+
+//     // Add bid increment only for standard and reserve auctions
+//     if (auctionType === "standard" || auctionType === "reserve") {
+//       updateData.bidIncrement = parseFloat(bidIncrement);
+//     } else {
+//       // Clear bid increment for other auction types
+//       updateData.bidIncrement = undefined;
+//     }
+
+//     // Add reserve price if applicable
+//     if (auctionType === "reserve") {
+//       updateData.reservePrice = parseFloat(reservePrice);
+//     } else {
+//       updateData.reservePrice = undefined;
+//     }
+
+//     // Add buy now price if applicable
+//     if (auctionType === "buy_now") {
+//       updateData.buyNowPrice = parseFloat(buyNowPrice);
+//     } else {
+//       updateData.buyNowPrice = undefined;
+//     }
+
+//     const updatedAuction = await Auction.findByIdAndUpdate(id, updateData, {
+//       new: true,
+//       runValidators: true,
+//     }).populate("seller", "username firstName lastName");
+
+//     // Reschedule jobs if dates changed
+//     if (
+//       start.getTime() !== new Date(auction.startDate).getTime() ||
+//       end.getTime() !== new Date(auction.endDate).getTime()
+//     ) {
+//       await agendaService.cancelAuctionJobs(auction._id);
+//       await agendaService.scheduleAuctionActivation(auction._id, start);
+//       await agendaService.scheduleAuctionEnd(auction._id, end);
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Auction updated successfully",
+//       data: { auction: updatedAuction },
+//     });
+//   } catch (error) {
+//     console.error("Update auction error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal server error while updating auction",
+//     });
+//   }
+// };
+
 export const updateAuction = async (req, res) => {
   try {
+    console.log("=== DEBUG UPDATE AUCTION START ===");
+
     const { id } = req.params;
     const seller = req.user;
 
@@ -677,6 +1258,32 @@ export const updateAuction = async (req, res) => {
         message: "Auction not found",
       });
     }
+
+    // DEBUG: Log what we're receiving
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("Request files keys:", Object.keys(req.files || {}));
+
+    // Specifically check for photoCaptions
+    console.log("req.body.photoCaptions:", req.body.photoCaptions);
+    console.log("req.body.photoCaptions type:", typeof req.body.photoCaptions);
+    console.log(
+      "req.body.photoCaptions is array?",
+      Array.isArray(req.body.photoCaptions)
+    );
+
+    // Check service record captions
+    console.log(
+      "req.body.serviceRecordCaptions:",
+      req.body.serviceRecordCaptions
+    );
+    console.log(
+      "req.body.serviceRecordCaptions type:",
+      typeof req.body.serviceRecordCaptions
+    );
+
+    // Check if files are being received
+    console.log("req.files.photos exists?", !!req.files?.photos);
+    console.log("req.files.photos count:", req.files?.photos?.length || 0);
 
     // Check if user owns the auction
     if (auction.seller.toString() !== seller._id.toString()) {
@@ -884,13 +1491,111 @@ export const updateAuction = async (req, res) => {
       }
     }
 
+    // Handle removed service records
+    let finalServiceRecords = [...(auction.serviceRecords || [])];
+    if (removedServiceRecords) {
+      try {
+        const removedServiceRecordIds =
+          typeof removedServiceRecords === "string"
+            ? JSON.parse(removedServiceRecords)
+            : removedServiceRecords;
+
+        if (Array.isArray(removedServiceRecordIds)) {
+          for (const recordId of removedServiceRecordIds) {
+            const recordIndex = finalServiceRecords.findIndex(
+              (record) =>
+                record.publicId === recordId ||
+                record._id?.toString() === recordId
+            );
+
+            if (recordIndex > -1) {
+              const removedRecord = finalServiceRecords[recordIndex];
+              // Delete from Cloudinary
+              if (removedRecord.publicId) {
+                await deleteFromCloudinary(removedRecord.publicId);
+              }
+              finalServiceRecords.splice(recordIndex, 1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error processing removed service records:", error);
+      }
+    }
+
+    // ========== CAPTION HANDLING ==========
+
+    // 1. Get photo captions from request body
+    const photoCaptionsArray = [];
+    if (req.body.photoCaptions) {
+      if (Array.isArray(req.body.photoCaptions)) {
+        photoCaptionsArray.push(...req.body.photoCaptions);
+      } else if (typeof req.body.photoCaptions === "string") {
+        photoCaptionsArray.push(req.body.photoCaptions);
+      }
+    }
+
+    // 2. Get existing document captions from request body
+    const existingDocumentCaptions = [];
+    if (req.body.existingDocumentCaptions) {
+      if (Array.isArray(req.body.existingDocumentCaptions)) {
+        existingDocumentCaptions.push(...req.body.existingDocumentCaptions);
+      } else if (typeof req.body.existingDocumentCaptions === "string") {
+        existingDocumentCaptions.push(req.body.existingDocumentCaptions);
+      }
+    }
+
+    // 3. Get new document captions from request body
+    const newDocumentCaptions = [];
+    if (req.body.newDocumentCaptions) {
+      if (Array.isArray(req.body.newDocumentCaptions)) {
+        newDocumentCaptions.push(...req.body.newDocumentCaptions);
+      } else if (typeof req.body.newDocumentCaptions === "string") {
+        newDocumentCaptions.push(req.body.newDocumentCaptions);
+      }
+    }
+
+    // 4. Get service record captions from request body
+    const serviceRecordCaptionsArray = [];
+    if (req.body.serviceRecordCaptions) {
+      if (Array.isArray(req.body.serviceRecordCaptions)) {
+        serviceRecordCaptionsArray.push(...req.body.serviceRecordCaptions);
+      } else if (typeof req.body.serviceRecordCaptions === "string") {
+        serviceRecordCaptionsArray.push(req.body.serviceRecordCaptions);
+      }
+    }
+
+    // ========== PHOTO UPDATES ==========
+
+    // Update captions for ALL photos
+    finalPhotos.forEach((photo, index) => {
+      if (index < photoCaptionsArray.length) {
+        photo.caption = photoCaptionsArray[index] || "";
+      }
+    });
+
+    // Handle new photo uploads
     // Handle new photo uploads
     const newPhotos = [];
     if (req.files && req.files.photos) {
       const photos = Array.isArray(req.files.photos)
         ? req.files.photos
         : [req.files.photos];
-      for (const photo of photos) {
+
+      console.log("DEBUG: Processing", photos.length, "new photos");
+      console.log(
+        "DEBUG: photoCaptionsArray has",
+        photoCaptionsArray.length,
+        "captions"
+      );
+      console.log("DEBUG: photoCaptionsArray:", photoCaptionsArray);
+
+      for (const [index, photo] of photos.entries()) {
+        console.log(
+          `DEBUG: Photo ${index} - caption will be:`,
+          photoCaptionsArray[index] || "(empty)"
+        );
+
         try {
           const result = await uploadImageToCloudinary(
             photo.buffer,
@@ -900,8 +1605,15 @@ export const updateAuction = async (req, res) => {
             url: result.secure_url,
             publicId: result.public_id,
             filename: photo.originalname,
-            order: finalPhotos.length + newPhotos.length, // Maintain order
+            order: finalPhotos.length + newPhotos.length,
+            caption: photoCaptionsArray[index] || "", // Use caption from array
           });
+
+          console.log(
+            `DEBUG: Photo ${index} uploaded with caption: "${
+              photoCaptionsArray[index] || ""
+            }"`
+          );
         } catch (uploadError) {
           console.error("Photo upload error:", uploadError);
           return res.status(400).json({
@@ -980,12 +1692,22 @@ export const updateAuction = async (req, res) => {
       finalPhotos = [...finalPhotos, ...newPhotos];
     }
 
+    // ========== DOCUMENT UPDATES ==========
+
+    // Update captions for existing documents
+    finalDocuments.forEach((doc, index) => {
+      if (index < existingDocumentCaptions.length) {
+        doc.caption = existingDocumentCaptions[index] || "";
+      }
+    });
+
     // Handle new document uploads
     if (req.files && req.files.documents) {
       const documents = Array.isArray(req.files.documents)
         ? req.files.documents
         : [req.files.documents];
-      for (const doc of documents) {
+
+      for (const [index, doc] of documents.entries()) {
         try {
           const result = await uploadDocumentToCloudinary(
             doc.buffer,
@@ -998,6 +1720,7 @@ export const updateAuction = async (req, res) => {
             filename: doc.originalname,
             originalName: doc.originalname,
             resourceType: "raw",
+            caption: newDocumentCaptions[index] || "", // Use new document caption
           });
         } catch (uploadError) {
           console.error("Document upload error:", uploadError);
@@ -1009,45 +1732,40 @@ export const updateAuction = async (req, res) => {
       }
     }
 
-    // Handle removed service records
-    let finalServiceRecords = [...(auction.serviceRecords || [])];
-    if (removedServiceRecords) {
-      try {
-        const removedServiceRecordIds =
-          typeof removedServiceRecords === "string"
-            ? JSON.parse(removedServiceRecords)
-            : removedServiceRecords;
+    // ========== SERVICE RECORD UPDATES ==========
 
-        if (Array.isArray(removedServiceRecordIds)) {
-          for (const recordId of removedServiceRecordIds) {
-            const recordIndex = finalServiceRecords.findIndex(
-              (record) =>
-                record.publicId === recordId ||
-                record._id?.toString() === recordId
-            );
-
-            if (recordIndex > -1) {
-              const removedRecord = finalServiceRecords[recordIndex];
-              // Delete from Cloudinary
-              if (removedRecord.publicId) {
-                await deleteFromCloudinary(removedRecord.publicId);
-              }
-              finalServiceRecords.splice(recordIndex, 1);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing removed service records:", error);
+    // Update captions for ALL service records
+    finalServiceRecords.forEach((record, index) => {
+      if (index < serviceRecordCaptionsArray.length) {
+        record.caption = serviceRecordCaptionsArray[index] || "";
       }
-    }
+    });
 
+    // Handle new service record uploads
     // Handle new service record uploads
     const newServiceRecords = [];
     if (req.files && req.files.serviceRecords) {
       const serviceRecords = Array.isArray(req.files.serviceRecords)
         ? req.files.serviceRecords
         : [req.files.serviceRecords];
-      for (const record of serviceRecords) {
+
+      console.log(
+        "DEBUG: Processing",
+        serviceRecords.length,
+        "new service records"
+      );
+      console.log(
+        "DEBUG: serviceRecordCaptionsArray has",
+        serviceRecordCaptionsArray.length,
+        "captions"
+      );
+
+      for (const [index, record] of serviceRecords.entries()) {
+        console.log(
+          `DEBUG: Service Record ${index} - caption will be:`,
+          serviceRecordCaptionsArray[index] || "(empty)"
+        );
+
         try {
           const result = await uploadImageToCloudinary(
             record.buffer,
@@ -1059,7 +1777,14 @@ export const updateAuction = async (req, res) => {
             filename: record.originalname,
             originalName: record.originalname,
             order: finalServiceRecords.length + newServiceRecords.length,
+            caption: serviceRecordCaptionsArray[index] || "", // Use service record caption
           });
+
+          console.log(
+            `DEBUG: Service Record ${index} uploaded with caption: "${
+              serviceRecordCaptionsArray[index] || ""
+            }"`
+          );
         } catch (uploadError) {
           console.error("Service record upload error:", uploadError);
           return res.status(400).json({
@@ -1144,6 +1869,8 @@ export const updateAuction = async (req, res) => {
       finalServiceRecords = [...finalServiceRecords, ...newServiceRecords];
     }
 
+    // ========== DATE VALIDATION ==========
+
     // Validate dates
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -1154,6 +1881,8 @@ export const updateAuction = async (req, res) => {
         message: "End date must be after start date",
       });
     }
+
+    // ========== PREPARE UPDATE DATA ==========
 
     // Prepare update data
     const updateData = {
@@ -1211,6 +1940,24 @@ export const updateAuction = async (req, res) => {
       await agendaService.scheduleAuctionActivation(auction._id, start);
       await agendaService.scheduleAuctionEnd(auction._id, end);
     }
+
+    // Add debug before returning
+    console.log("=== DEBUG FINAL DATA ===");
+    console.log("Total photos:", finalPhotos.length);
+    finalPhotos.forEach((photo, index) => {
+      console.log(
+        `Photo ${index}: ${photo.filename} - Caption: "${photo.caption}"`
+      );
+    });
+
+    console.log("Total service records:", finalServiceRecords.length);
+    finalServiceRecords.forEach((record, index) => {
+      console.log(
+        `Service Record ${index}: ${record.filename} - Caption: "${record.caption}"`
+      );
+    });
+
+    console.log("=== DEBUG UPDATE AUCTION END ===");
 
     res.status(200).json({
       success: true,

@@ -207,35 +207,6 @@ function FAQsPage() {
                     ))}
                 </div>
 
-                {/* Category Summary Cards (Optional) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-                    {faqs.map((category) => (
-                        <div key={category.category} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    {category.icon}
-                                </div>
-                                <h3 className="text-lg font-bold text-primary">{category.category}</h3>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">
-                                {category.questions.length} questions
-                            </p>
-                            <ul className="space-y-2">
-                                {category.questions.slice(0, 2).map((q, idx) => (
-                                    <li key={idx} className="text-sm font-medium text-gray-900 truncate">
-                                        • {q.question}
-                                    </li>
-                                ))}
-                                {category.questions.length > 2 && (
-                                    <li className="text-sm text-gray-500">
-                                        + {category.questions.length - 2} more questions
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-
                 {/* Detailed FAQ Accordion */}
                 <div className="max-w-5xl mx-auto">
                     <h2 className="text-3xl font-bold text-primary mb-8 text-center">Detailed Questions & Answers</h2>

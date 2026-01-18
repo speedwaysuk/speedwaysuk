@@ -144,7 +144,7 @@ function ActiveAuctions() {
                     </div>
 
                     {/* Stats Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {auctionStats.map(stat => (
                             <div key={stat.title} className={`bg-white rounded-xl p-5 shadow-sm border ${stat.highlight ? 'border-amber-200 bg-amber-50' : 'border-gray-100'}`}>
                                 <div className="flex justify-between items-start">
@@ -163,7 +163,7 @@ function ActiveAuctions() {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
 
                     {/* Enhanced Search and Filters */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

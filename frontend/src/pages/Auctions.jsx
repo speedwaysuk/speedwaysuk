@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Filter, ChevronDown, Search, SlidersHorizontal, X, Loader } from "lucide-react";
-import { Container } from "../components";
+import { Filter, ChevronDown, Search, SlidersHorizontal, X, Loader, Grid, List } from "lucide-react";
+import { AuctionListItem, Container } from "../components";
 import AuctionCard from "../components/AuctionCard";
 import { useAuctions } from "../hooks/useAuctions";
 import { useLocation } from "react-router-dom";
@@ -308,6 +308,7 @@ function Auctions() {
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [activeFilterSections, setActiveFilterSections] = useState({});
     const [debounceTimer, setDebounceTimer] = useState(null);
+    const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
 
     // Fetch categories on component mount
     useEffect(() => {
@@ -491,52 +492,119 @@ function Auctions() {
                             </div>
 
                             {/* Results Count and Sort */}
+                            {/* Results Count and Sort */}
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-3">
                                 <p className="text-gray-600">
                                     {loading ? "Loading auctions..." : `Showing ${auctions.length} of ${pagination?.totalAuctions || 0} auctions`}
                                 </p>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-gray-600 text-sm">Sort by:</span>
-                                    <select
-                                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        value={`${uiFilters.sortBy}-${uiFilters.sortOrder}`}
-                                        onChange={handleSortChange}
-                                    >
-                                        {sortOptions.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
+
+                                <div className="flex items-center gap-3">
+                                    {/* Add view mode toggle */}
+                                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                                        <button
+                                            onClick={() => setViewMode("grid")}
+                                            className={`p-2 rounded transition-colors ${viewMode === "grid" ? "bg-white shadow-sm" : "hover:bg-gray-200"}`}
+                                            title="Grid View"
+                                        >
+                                            <Grid size={18} className={viewMode === "grid" ? "text-blue-600" : "text-gray-500"} />
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode("list")}
+                                            className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-white shadow-sm" : "hover:bg-gray-200"}`}
+                                            title="List View"
+                                        >
+                                            <List size={18} className={viewMode === "list" ? "text-blue-600" : "text-gray-500"} />
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600 text-sm">Sort by:</span>
+                                        <select
+                                            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            value={`${uiFilters.sortBy}-${uiFilters.sortOrder}`}
+                                            onChange={handleSortChange}
+                                        >
+                                            {sortOptions.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Auction Grid */}
                             {loading && auctions.length === 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8 md:gap-y-12">
-                                    {[...Array(6)].map((_, i) => (
-                                        <div key={i} className="border border-gray-200 p-4 bg-white rounded-xl shadow-sm h-96 animate-pulse">
-                                            <div className="bg-gray-200 h-56 rounded-tr-3xl rounded-bl-3xl"></div>
-                                            <div className="my-3 h-4 bg-gray-200 rounded w-3/4"></div>
-                                            <div className="my-2 h-3 bg-gray-200 rounded w-1/2"></div>
-                                            <div className="my-2 h-3 bg-gray-200 rounded w-2/3"></div>
-                                            <div className="flex gap-3 items-center mt-4">
-                                                <div className="h-10 bg-gray-200 rounded-lg flex-grow"></div>
-                                                <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : auctions.length > 0 ? (
-                                <>
+                                // Loading Skeleton based on view mode
+                                viewMode === "grid" ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8 md:gap-y-12">
-                                        {auctions.map(auction => (
-                                            <AuctionCard
-                                                key={auction._id}
-                                                auction={auction}
-                                            />
+                                        {[...Array(6)].map((_, i) => (
+                                            <div key={i} className="border border-gray-200 p-4 bg-white rounded-xl shadow-sm h-96 animate-pulse">
+                                                <div className="bg-gray-200 h-56 rounded-tr-3xl rounded-bl-3xl"></div>
+                                                <div className="my-3 h-4 bg-gray-200 rounded w-3/4"></div>
+                                                <div className="my-2 h-3 bg-gray-200 rounded w-1/2"></div>
+                                                <div className="my-2 h-3 bg-gray-200 rounded w-2/3"></div>
+                                                <div className="flex gap-3 items-center mt-4">
+                                                    <div className="h-10 bg-gray-200 rounded-lg flex-grow"></div>
+                                                    <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
+                                ) : (
+                                    // List View Loading Skeleton
+                                    <div className="space-y-2">
+                                        {Array.from({ length: 3 }).map((_, index) => (
+                                            <div key={index} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+                                                <div className="flex flex-col lg:flex-row gap-5">
+                                                    <div className="lg:w-64">
+                                                        <div className="h-48 bg-gray-200 rounded-lg"></div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                            {Array.from({ length: 4 }).map((_, i) => (
+                                                                <div key={i} className="space-y-2">
+                                                                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                                                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-4">
+                                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            ) : auctions.length > 0 ? (
+                                <>
+                                    {viewMode === "grid" ? (
+                                        // Grid View
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8 md:gap-y-12">
+                                            {auctions.map(auction => (
+                                                <AuctionCard
+                                                    key={auction._id}
+                                                    auction={auction}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        // List View
+                                        <div className="space-y-2">
+                                            {auctions.map((auction) => (
+                                                <AuctionListItem
+                                                    key={auction._id}
+                                                    auction={auction}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {/* Load More Button */}
                                     {pagination?.currentPage < pagination?.totalPages && (

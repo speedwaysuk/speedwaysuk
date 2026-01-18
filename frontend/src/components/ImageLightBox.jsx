@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, LayoutGrid, Shield, Clock } from 'lucide-react';
 
-const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type = 'photos' }) => {
+const ImageLightBox = ({ images = [], captions = [], auctionType = '', isReserveMet = '', type = 'photos' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    
+
     const reversedImages = images;
     const [mainImage, setMainImage] = useState(reversedImages[0]?.url || '');
 
@@ -114,6 +114,14 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
                         className="block object-cover w-full h-48 md:h-80 lg:h-[450px] rounded-2xl shadow-lg cursor-pointer"
                         onClick={() => openLightbox(0)}
                     />
+
+                    {/* Add caption overlay if exists - NEW */}
+                    {captions[0] && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-2xl">
+                            <p className="text-white text-sm font-medium">{captions[0]}</p>
+                        </div>
+                    )}
+
                     <button
                         onClick={() => openLightbox(0)}
                         className="flex items-center gap-2 absolute bottom-3 right-3 md:bottom-5 md:right-5 bg-white py-2 px-3 md:py-3 md:px-5 rounded-md cursor-pointer text-sm md:text-base shadow-lg hover:bg-gray-50 transition-colors"
@@ -121,6 +129,7 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
                         <LayoutGrid strokeWidth={1.5} className="w-4 h-4 md:w-5 md:h-5" />
                         <span>See all photos ({reversedImages.length})</span>
                     </button>
+
                     {/* Status Badges - Only for photos */}
                     <div className="absolute top-3 right-3 flex flex-wrap gap-2">
                         {statusBadges.map((badge, index) => {
@@ -143,19 +152,25 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
             {isPhotos && reversedImages.length > 1 && (
                 <div className="hidden md:grid w-full grid-cols-3 gap-3">
                     {reversedImages.slice(0, 2).map((image, index) => (
-                        <img
-                            loading='lazy'
-                            key={index}
-                            src={image.url}
-                            alt={`Thumbnail ${index + 1}`}
-                            onClick={() => {
-                                setMainImage(image.url);
-                                setCurrentIndex(index);
-                            }}
-                            className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${
-                                mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
-                            }`}
-                        />
+                        <div key={index} className="relative">
+                            <img
+                                loading='lazy'
+                                src={image.url}
+                                alt={`Thumbnail ${index + 1}`}
+                                onClick={() => {
+                                    setMainImage(image.url);
+                                    setCurrentIndex(index);
+                                }}
+                                className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
+                                    }`}
+                            />
+                            {/* Add caption overlay for thumbnails - NEW */}
+                            {captions[index] && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 rounded-b-xl">
+                                    <p className="text-white text-xs truncate">{captions[index]}</p>
+                                </div>
+                            )}
+                        </div>
                     ))}
                     {reversedImages.length > 3 && (
                         <div
@@ -187,6 +202,12 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
                                 className="w-full h-28 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => openLightbox(index)}
                             />
+                            {/* Add caption overlay for service record thumbnails */}
+                            {captions[index] && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 rounded-b-lg">
+                                    <p className="text-white text-xs truncate">{captions[index]}</p>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -221,13 +242,20 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
                         </>
                     )}
 
-                    {/* Main Image */}
+                    {/* Main Image in Lightbox */}
                     <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
                         <img
                             src={mainImage}
                             alt={`${type.slice(0, -1)} image ${currentIndex + 1}`}
                             className="max-w-full max-h-full object-contain rounded-lg"
                         />
+
+                        {/* Add caption in lightbox - Update this section */}
+                        {captions[currentIndex] && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 rounded-b-lg">
+                                <p className="text-white text-lg font-medium text-center">{captions[currentIndex]}</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Image Counter */}
@@ -239,20 +267,24 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type 
                     {reversedImages.length > 1 && (
                         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-4 py-2">
                             {reversedImages.map((image, index) => (
-                                <img
-                                    key={index}
-                                    src={image.url}
-                                    alt={`Thumb ${index + 1}`}
-                                    onClick={() => {
-                                        setCurrentIndex(index);
-                                        setMainImage(image.url);
-                                    }}
-                                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${
-                                        currentIndex === index
+                                <div key={index} className="relative">
+                                    <img
+                                        src={image.url}
+                                        alt={`Thumb ${index + 1}`}
+                                        onClick={() => {
+                                            setCurrentIndex(index);
+                                            setMainImage(image.url);
+                                        }}
+                                        className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${currentIndex === index
                                             ? 'border-white border-3'
                                             : 'border-transparent opacity-60 hover:opacity-100'
-                                    }`}
-                                />
+                                            }`}
+                                    />
+                                    {/* Add caption indicator for thumbnails with caption - NEW */}
+                                    {captions[index] && (
+                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     )}

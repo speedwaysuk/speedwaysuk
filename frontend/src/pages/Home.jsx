@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
-import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, AuctionCard } from "../components";
+import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, AuctionCard, AuctionListItem } from "../components";
 import Marquee from "react-fast-marquee";
-import { BadgeCheck, Gavel, Tag, Upload, Filter, UserCog2, LucideVerified, UserPlus, Clock, PhoneCall, Target, Users, ArrowRight, User, CarFront, Hand } from "lucide-react";
+import { BadgeCheck, Gavel, Grid, List, Tag, Upload, Filter, UserCog2, LucideVerified, UserPlus, Clock, PhoneCall, Target, Users, ArrowRight, User, CarFront, Hand } from "lucide-react";
 import { volkswagen, ford, bmw, hyundai, kia, engineCategoryIcon, mercedes, skoda, volvo, audi, renault, tesla, lamborghini, convertible, electric, hatchback, luxury, pickup, sedan, sports, suv, truck, van } from "../assets";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -273,6 +273,7 @@ function Home() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('approved'); // 'sold', 'active', 'approved'
+    const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
 
     // Map tab values to API status values
     const tabStatusMap = {
@@ -426,15 +427,76 @@ function Home() {
                                 </label>
                             </div>
                         </div>
+
+                        {/* Add this view mode toggle */}
+                        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                            <button
+                                onClick={() => setViewMode("grid")}
+                                className={`p-2 rounded transition-colors ${viewMode === "grid" ? "bg-white shadow-sm" : "hover:bg-gray-200"}`}
+                                title="Grid View"
+                            >
+                                <Grid size={18} className={viewMode === "grid" ? "text-blue-600" : "text-gray-500"} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode("list")}
+                                className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-white shadow-sm" : "hover:bg-gray-200"}`}
+                                title="List View"
+                            >
+                                <List size={18} className={viewMode === "list" ? "text-blue-600" : "text-gray-500"} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center py-16">
-                        <LoadingSpinner />
-                    </div>
-                ) : (
-                    <>
+                    // Loading Skeleton based on view mode
+                    viewMode === "grid" ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 mt-8">
+                            {Array.from({ length: 4 }).map((_, index) => (
+                                <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                                    <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                                    <div className="flex justify-between">
+                                        <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                        <div className="h-6 bg-gray-200 rounded w-16"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        // List View Loading Skeleton
+                        <div className="space-y-2 mt-8">
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+                                    <div className="flex flex-col lg:flex-row gap-5">
+                                        <div className="lg:w-64">
+                                            <div className="h-48 bg-gray-200 rounded-lg"></div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                {Array.from({ length: 4 }).map((_, i) => (
+                                                    <div key={i} className="space-y-2">
+                                                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                                        <div className="h-5 bg-gray-200 rounded w-16"></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
+                ) : auctions.length > 0 ? (
+                    viewMode === "grid" ? (
+                        // Grid View
                         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10 mt-8">
                             {auctions.map((auction) => (
                                 <AuctionCard
@@ -443,24 +505,23 @@ function Home() {
                                 />
                             ))}
                         </section>
-
-                        {auctions.length > 0 && (
-                            <button
-                                onClick={handleLoadByStatus}
-                                className="px-8 py-3 bg-[#edcd1f] text-black rounded-lg hover:bg-[#edcd1f]/90 focus:outline-none focus:ring-2 focus:ring-[#edcd1f] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 mt-10 mx-auto"
-                            >
-                                View More
-                            </button>
-                        )}
-
-                        {auctions.length === 0 && !loading && (
-                            <div className="text-center py-16 text-gray-500">
-                                <Filter size={48} className="mx-auto mb-4 text-gray-300" />
-                                <p className="text-lg font-medium">No auctions found</p>
-                                <p className="text-sm">Try adjusting your filters or search terms</p>
-                            </div>
-                        )}
-                    </>
+                    ) : (
+                        // List View using AuctionListItem component
+                        <div className="space-y-2 mt-8">
+                            {auctions.map((auction) => (
+                                <AuctionListItem
+                                    key={auction._id}
+                                    auction={auction}
+                                />
+                            ))}
+                        </div>
+                    )
+                ) : (
+                    <div className="text-center py-16 text-gray-500">
+                        <Filter size={48} className="mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium">No auctions found</p>
+                        <p className="text-sm">Try adjusting your filters or search terms</p>
+                    </div>
                 )}
             </Container>
 
@@ -556,7 +617,7 @@ function Home() {
                 </div>
             </Container>
 
-            <Container className="my-14">
+            {/* <Container className="my-14">
                 <section>
                     <h2 className="text-3xl md:text-4xl font-bold text-primary">
                         What Our Customers Say
@@ -596,7 +657,7 @@ function Home() {
                         </div>
                     </Marquee>
                 </section>
-            </Container>
+            </Container> */}
 
             {/* <Container className="my-14">
                 <Suspense fallback={<LoadingSpinner />}>
