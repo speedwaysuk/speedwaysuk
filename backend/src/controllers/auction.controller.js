@@ -352,14 +352,6 @@ export const getAuctions = async (req, res) => {
       location,
     } = req.query;
 
-    // Debug log to see what's received
-    console.log("📥 Received category params:", {
-      category,
-      categories,
-      isCategoriesArray: Array.isArray(categories),
-      categoriesType: typeof categories,
-    });
-
     // Build filter object
     const filter = {};
 
@@ -514,9 +506,6 @@ export const getAuctions = async (req, res) => {
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Debug log the final filter
-    console.log("🔍 Final MongoDB filter:", JSON.stringify(filter, null, 2));
 
     // Get auctions with pagination
     const auctions = await Auction.find(filter)
