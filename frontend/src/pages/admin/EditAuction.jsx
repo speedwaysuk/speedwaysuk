@@ -497,7 +497,7 @@ const EditAuction = () => {
                     const formData = {
                         title: auction.title,
                         subTitle: auction.subTitle || '',
-                        category: auction.category,
+                        categories: auction.categories || auction.category || [],
                         features: auction.features || '',
                         description: auction.description,
                         location: auction.location,
@@ -1287,7 +1287,7 @@ const EditAuction = () => {
                                         </div>
 
                                         {/* Category-specific fields */}
-                                        {selectedCategory && renderCategoryFields()}
+                                        {renderCategoryFields()}
 
                                         {/* Avionics Section - Only for Aircraft */}
                                         {/* {selectedCategory && (

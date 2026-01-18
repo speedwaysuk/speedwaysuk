@@ -494,34 +494,48 @@ function Home() {
                             ))}
                         </div>
                     )
-                ) : auctions.length > 0 ? (
-                    viewMode === "grid" ? (
-                        // Grid View
-                        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10 mt-8">
-                            {auctions.map((auction) => (
-                                <AuctionCard
-                                    key={auction._id}
-                                    auction={auction}
-                                />
-                            ))}
-                        </section>
-                    ) : (
-                        // List View using AuctionListItem component
-                        <div className="space-y-2 mt-8">
-                            {auctions.map((auction) => (
-                                <AuctionListItem
-                                    key={auction._id}
-                                    auction={auction}
-                                />
-                            ))}
-                        </div>
-                    )
                 ) : (
-                    <div className="text-center py-16 text-gray-500">
-                        <Filter size={48} className="mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium">No auctions found</p>
-                        <p className="text-sm">Try adjusting your filters or search terms</p>
-                    </div>
+                    <>
+                        {auctions.length > 0 ? (
+                            viewMode === "grid" ? (
+                                // Grid View
+                                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10 mt-8">
+                                    {auctions.map((auction) => (
+                                        <AuctionCard
+                                            key={auction._id}
+                                            auction={auction}
+                                        />
+                                    ))}
+                                </section>
+                            ) : (
+                                // List View using AuctionListItem component
+                                <div className="space-y-2 mt-8">
+                                    {auctions.map((auction) => (
+                                        <AuctionListItem
+                                            key={auction._id}
+                                            auction={auction}
+                                        />
+                                    ))}
+                                </div>
+                            )
+                        ) : (
+                            <div className="text-center py-16 text-gray-500">
+                                <Filter size={48} className="mx-auto mb-4 text-gray-300" />
+                                <p className="text-lg font-medium">No auctions found</p>
+                                <p className="text-sm">Try adjusting your filters or search terms</p>
+                            </div>
+                        )}
+
+                        {/* Add this View More button section */}
+                        {auctions.length > 0 && (
+                            <button
+                                onClick={handleLoadByStatus}
+                                className="px-8 py-3 bg-[#edcd1f] text-black font-medium rounded-lg hover:bg-[#edcd1f]/90 focus:outline-none focus:ring-2 focus:ring-[#edcd1f] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 mt-10 mx-auto"
+                            >
+                                View More
+                            </button>
+                        )}
+                    </>
                 )}
             </Container>
 

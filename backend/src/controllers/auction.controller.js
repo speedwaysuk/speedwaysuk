@@ -2052,6 +2052,14 @@ export const placeBid = async (req, res) => {
     const { amount } = req.body;
     const bidder = req.user;
 
+    // Validate auction status
+    if (!bidder?.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `Account is inactive. Can't place a bid.`,
+      });
+    }
+
     // Check if user is a bidder
     // if (bidder.userType !== 'bidder') {
     //     return res.status(403).json({
