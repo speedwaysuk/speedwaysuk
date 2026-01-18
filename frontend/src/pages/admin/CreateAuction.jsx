@@ -253,7 +253,7 @@ const CreateAuction = () => {
         mode: 'onChange',
         defaultValues: {
             auctionType: 'buy_now',
-            category: '',
+            categories: [],
         }
     });
 
@@ -684,7 +684,19 @@ const CreateAuction = () => {
             // Append all text fields
             formData.append('title', auctionData.title);
             formData.append('subTitle', auctionData.subTitle || '');
-            formData.append('category', auctionData.category);
+            // formData.append('category', auctionData.category);
+            // Append categories as array
+            if (auctionData.categories) {
+                // If it's already an array, send each item
+                if (Array.isArray(auctionData.categories)) {
+                    auctionData.categories.forEach(cat => {
+                        formData.append('categories', cat);
+                    });
+                } else {
+                    // If single value, still send as array
+                    formData.append('categories', auctionData.categories);
+                }
+            }
             formData.append('description', auctionData.description);
             formData.append('location', auctionData.location || '');
             formData.append('videoLink', auctionData.video || '');
@@ -846,30 +858,63 @@ const CreateAuction = () => {
                                             </div>
 
                                             <div>
-                                                <label htmlFor="category" className="block text-sm font-medium text-secondary mb-1">
-                                                    Category *
+                                                <label htmlFor="categories" className="block text-sm font-medium text-secondary mb-1">
+                                                    Categories *
                                                 </label>
                                                 <select
-                                                    {...register('category', {
-                                                        required: 'Category is required',
-                                                        validate: value => value !== '' || 'Please select a category'
+                                                    {...register('categories', {
+                                                        required: 'At least one category is required',
+                                                        validate: value => {
+                                                            if (!value || (Array.isArray(value) && value.length === 0)) {
+                                                                return 'Please select at least one category';
+                                                            }
+                                                            return true;
+                                                        }
                                                     })}
-                                                    id="category"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                    disabled={loadingCategories}
+                                                    id="categories"
+                                                    multiple
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                    size={Math.min(6, categories.length + 1)} // Show up to 6 items
+                                                    onChange={(e) => {
+                                                        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                                                        setValue('categories', selectedOptions, { shouldValidate: true });
+                                                    }}
                                                 >
-                                                    <option value="">{loadingCategories ? 'Loading categories...' : 'Select a category'}</option>
+                                                    <option value="" disabled>Select categories (hold Ctrl/Cmd to select multiple)</option>
                                                     {categories.map(cat => (
-                                                        <option key={cat.slug} value={cat.slug}>
+                                                        <option
+                                                            key={cat.slug}
+                                                            value={cat.slug}
+                                                            selected={watch('categories')?.includes(cat.slug)}
+                                                        >
                                                             {cat.name}
                                                         </option>
                                                     ))}
                                                 </select>
-                                                {errors.category && (
-                                                    <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
-                                                )}
-                                                {loadingCategories && (
-                                                    <p className="text-gray-500 text-sm mt-1">Loading categories...</p>
+                                                {errors.categories && <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>}
+
+                                                {/* Show selected categories as badges */}
+                                                {watch('categories')?.length > 0 && (
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {watch('categories').map((catSlug, index) => {
+                                                            const cat = categories.find(c => c.slug === catSlug);
+                                                            return cat ? (
+                                                                <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                                                    {cat.name}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const updated = watch('categories').filter(c => c !== catSlug);
+                                                                            setValue('categories', updated, { shouldValidate: true });
+                                                                        }}
+                                                                        className="ml-1 text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </span>
+                                                            ) : null;
+                                                        })}
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -900,7 +945,7 @@ const CreateAuction = () => {
                                         </div>
 
                                         {/* Category-specific fields */}
-                                        {selectedCategory && renderCategoryFields()}
+                                        {renderCategoryFields()}
 
                                         {/* Features & Options */}
                                         {/* <div className="mb-6">
@@ -1302,7 +1347,16 @@ const CreateAuction = () => {
                                                             )}
                                                             <div>
                                                                 <p className="text-xs text-secondary">Category</p>
-                                                                <p className="font-medium">{watch('category') || 'Not provided'}</p>
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {watch('categories')?.map((catSlug, index) => {
+                                                                        const cat = categories.find(c => c.slug === catSlug);
+                                                                        return cat ? (
+                                                                            <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                                                                                {cat.name}
+                                                                            </span>
+                                                                        ) : null;
+                                                                    })}
+                                                                </div>
                                                             </div>
                                                             <div>
                                                                 <p className="text-xs text-secondary">Location</p>

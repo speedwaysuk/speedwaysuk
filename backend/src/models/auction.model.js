@@ -65,7 +65,7 @@ const offerSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const auctionSchema = new Schema(
@@ -89,10 +89,12 @@ const auctionSchema = new Schema(
       type: String,
       required: true,
     },
-    category: {
-      type: String,
-      required: true,
-    },
+    categories: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
     location: {
       type: String,
       trim: true,
@@ -324,7 +326,7 @@ const auctionSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for better performance
@@ -387,7 +389,7 @@ auctionSchema.virtual("isBuyNowAvailable").get(function () {
 auctionSchema.methods.placeBid = async function (
   bidderId,
   bidderUsername,
-  amount
+  amount,
 ) {
   const now = new Date();
 
@@ -494,7 +496,7 @@ auctionSchema.methods.makeOffer = async function (
   buyerId,
   buyerUsername,
   amount,
-  message = ""
+  message = "",
 ) {
   const now = new Date();
 
@@ -514,7 +516,7 @@ auctionSchema.methods.makeOffer = async function (
   const existingPendingOffer = this.offers.find(
     (offer) =>
       offer.buyer.toString() === buyerId.toString() &&
-      offer.status === "pending"
+      offer.status === "pending",
   );
 
   if (existingPendingOffer) {
@@ -542,7 +544,7 @@ auctionSchema.methods.respondToOffer = async function (
   offerId,
   response,
   counterAmount = null,
-  counterMessage = ""
+  counterMessage = "",
 ) {
   const offer = this.offers.id(offerId);
 
@@ -675,7 +677,7 @@ auctionSchema.methods.withdrawOffer = async function (offerId, userId) {
 auctionSchema.methods.reactivateAndAcceptOffer = async function (
   offerId,
   userId,
-  isAdmin = false
+  isAdmin = false,
 ) {
   const offer = this.offers.id(offerId);
 
@@ -745,7 +747,7 @@ auctionSchema.methods.markPaymentProcessing = function () {
 
 auctionSchema.methods.markPaymentCompleted = function (
   transactionId,
-  paymentMethod
+  paymentMethod,
 ) {
   this.paymentStatus = "completed";
   this.paymentDate = new Date();
@@ -771,7 +773,7 @@ auctionSchema.methods.attachInvoice = function (
   url,
   publicId,
   filename,
-  uploadedBy
+  uploadedBy,
 ) {
   this.invoice = {
     url,
@@ -920,7 +922,7 @@ auctionSchema.pre("save", function (next) {
   // Validate buy now price is higher than start price
   if (this.buyNowPrice && this.buyNowPrice < this.startPrice) {
     return next(
-      new Error("Buy Now price must be greater than or equal to start price")
+      new Error("Buy Now price must be greater than or equal to start price"),
     );
   }
 
@@ -931,7 +933,7 @@ auctionSchema.pre("save", function (next) {
     this.buyNowPrice < this.reservePrice
   ) {
     return next(
-      new Error("Buy Now price must be greater than or equal to reserve price")
+      new Error("Buy Now price must be greater than or equal to reserve price"),
     );
   }
 

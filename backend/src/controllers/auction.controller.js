@@ -26,7 +26,6 @@ export const createAuction = async (req, res) => {
     const {
       title,
       subTitle,
-      category,
       features,
       description,
       specifications,
@@ -42,15 +41,25 @@ export const createAuction = async (req, res) => {
       endDate,
     } = req.body;
 
+    let categoriesArray = [];
+    if (req.body.categories) {
+      if (Array.isArray(req.body.categories)) {
+        categoriesArray = req.body.categories;
+      } else if (typeof req.body.categories === "string") {
+        categoriesArray = [req.body.categories];
+      }
+    }
+
+    // Validation
+    if (!categoriesArray || categoriesArray.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one category is required",
+      });
+    }
+
     // Basic validation
-    if (
-      !title ||
-      !category ||
-      !description ||
-      !auctionType ||
-      !startDate ||
-      !endDate
-    ) {
+    if (!title || !description || !auctionType || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
         message: "All required fields must be provided",
@@ -133,7 +142,7 @@ export const createAuction = async (req, res) => {
         try {
           const result = await uploadImageToCloudinary(
             photo.buffer,
-            "auction-photos"
+            "auction-photos",
           );
           uploadedPhotos.push({
             url: result.secure_url,
@@ -169,7 +178,7 @@ export const createAuction = async (req, res) => {
           const result = await uploadDocumentToCloudinary(
             doc.buffer,
             doc.originalname,
-            "auction-documents"
+            "auction-documents",
           );
           uploadedDocuments.push({
             url: result.secure_url,
@@ -194,7 +203,7 @@ export const createAuction = async (req, res) => {
       // Get service record captions
       // const serviceRecordCaptions = req.body.serviceRecordCaptions || [];
       const serviceRecordCaptions = Array.isArray(
-        req.body.serviceRecordCaptions
+        req.body.serviceRecordCaptions,
       )
         ? req.body.serviceRecordCaptions
         : [];
@@ -203,7 +212,7 @@ export const createAuction = async (req, res) => {
         try {
           const result = await uploadImageToCloudinary(
             record.buffer,
-            "auction-service-records"
+            "auction-service-records",
           );
           uploadedServiceRecords.push({
             url: result.secure_url,
@@ -234,7 +243,7 @@ export const createAuction = async (req, res) => {
     const auctionData = {
       title,
       subTitle: subTitle || "",
-      category,
+      categories: categoriesArray,
       features: features || "",
       description,
       specifications: new Map(Object.entries(parsedSpecifications)),
@@ -282,7 +291,7 @@ export const createAuction = async (req, res) => {
     // Schedule activation and ending jobs
     await agendaService.scheduleAuctionActivation(
       auction._id,
-      auction.startDate
+      auction.startDate,
     );
     await agendaService.scheduleAuctionEnd(auction._id, auction.endDate);
 
@@ -303,7 +312,7 @@ export const createAuction = async (req, res) => {
       await auctionSubmittedForApprovalEmail(
         admin.email,
         auction,
-        auction.seller
+        auction.seller,
       );
     }
   } catch (error) {
@@ -320,7 +329,8 @@ export const getAuctions = async (req, res) => {
     const {
       page = 1,
       limit = 12,
-      category,
+      category, // OLD - keep for backward compatibility
+      categories, // NEW - array of categories
       status,
       search,
       sortBy = "createdAt",
@@ -342,6 +352,14 @@ export const getAuctions = async (req, res) => {
       location,
     } = req.query;
 
+    // Debug log to see what's received
+    console.log("📥 Received category params:", {
+      category,
+      categories,
+      isCategoriesArray: Array.isArray(categories),
+      categoriesType: typeof categories,
+    });
+
     // Build filter object
     const filter = {};
 
@@ -352,8 +370,33 @@ export const getAuctions = async (req, res) => {
       filter.status = { $ne: "draft" };
     }
 
-    // Category filter (using slug)
-    if (category) filter.category = category;
+    // ========== CATEGORY FILTERING - UPDATED ==========
+    // Handle both single category (for backward compatibility) and multiple categories
+    if (categories || category) {
+      // If categories is sent as array (from multi-select)
+      if (categories) {
+        // Handle both array and string formats
+        let categoriesArray = [];
+
+        if (Array.isArray(categories)) {
+          categoriesArray = categories;
+        } else if (typeof categories === "string") {
+          // If sent as comma-separated string
+          categoriesArray = categories
+            .split(",")
+            .filter((c) => c.trim() !== "");
+        }
+
+        if (categoriesArray.length > 0) {
+          filter.categories = { $in: categoriesArray };
+        }
+      }
+      // Fallback to single category for backward compatibility
+      else if (category) {
+        filter.categories = { $in: [category] };
+      }
+    }
+    // ===================================================
 
     // Price filtering
     if (priceMin || priceMax) {
@@ -396,24 +439,6 @@ export const getAuctions = async (req, res) => {
         $options: "i",
       };
     }
-
-    // // Year range filtering - FIXED for Map type
-    // if (yearMin || yearMax) {
-    //   // For year, we need to ensure it exists and is a number
-    //   const yearConditions = {
-    //     $exists: true,
-    //     $type: "number", // Ensure it's stored as a number
-    //   };
-
-    //   if (yearMin) {
-    //     yearConditions.$gte = parseInt(yearMin);
-    //   }
-    //   if (yearMax) {
-    //     yearConditions.$lte = parseInt(yearMax);
-    //   }
-
-    //   specsFilter["specifications.year"] = yearConditions;
-    // }
 
     if (yearMin || yearMax) {
       // Convert filter values to numbers
@@ -489,6 +514,9 @@ export const getAuctions = async (req, res) => {
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Debug log the final filter
+    console.log("🔍 Final MongoDB filter:", JSON.stringify(filter, null, 2));
 
     // Get auctions with pagination
     const auctions = await Auction.find(filter)
@@ -1268,17 +1296,17 @@ export const updateAuction = async (req, res) => {
     console.log("req.body.photoCaptions type:", typeof req.body.photoCaptions);
     console.log(
       "req.body.photoCaptions is array?",
-      Array.isArray(req.body.photoCaptions)
+      Array.isArray(req.body.photoCaptions),
     );
 
     // Check service record captions
     console.log(
       "req.body.serviceRecordCaptions:",
-      req.body.serviceRecordCaptions
+      req.body.serviceRecordCaptions,
     );
     console.log(
       "req.body.serviceRecordCaptions type:",
-      typeof req.body.serviceRecordCaptions
+      typeof req.body.serviceRecordCaptions,
     );
 
     // Check if files are being received
@@ -1443,7 +1471,7 @@ export const updateAuction = async (req, res) => {
           for (const photoId of removedPhotoIds) {
             const photoIndex = finalPhotos.findIndex(
               (photo) =>
-                photo.publicId === photoId || photo._id?.toString() === photoId
+                photo.publicId === photoId || photo._id?.toString() === photoId,
             );
 
             if (photoIndex > -1) {
@@ -1473,7 +1501,7 @@ export const updateAuction = async (req, res) => {
         if (Array.isArray(removedDocIds)) {
           for (const docId of removedDocIds) {
             const docIndex = finalDocuments.findIndex(
-              (doc) => doc.publicId === docId || doc._id?.toString() === docId
+              (doc) => doc.publicId === docId || doc._id?.toString() === docId,
             );
 
             if (docIndex > -1) {
@@ -1505,7 +1533,7 @@ export const updateAuction = async (req, res) => {
             const recordIndex = finalServiceRecords.findIndex(
               (record) =>
                 record.publicId === recordId ||
-                record._id?.toString() === recordId
+                record._id?.toString() === recordId,
             );
 
             if (recordIndex > -1) {
@@ -1586,20 +1614,20 @@ export const updateAuction = async (req, res) => {
       console.log(
         "DEBUG: photoCaptionsArray has",
         photoCaptionsArray.length,
-        "captions"
+        "captions",
       );
       console.log("DEBUG: photoCaptionsArray:", photoCaptionsArray);
 
       for (const [index, photo] of photos.entries()) {
         console.log(
           `DEBUG: Photo ${index} - caption will be:`,
-          photoCaptionsArray[index] || "(empty)"
+          photoCaptionsArray[index] || "(empty)",
         );
 
         try {
           const result = await uploadImageToCloudinary(
             photo.buffer,
-            "auction-photos"
+            "auction-photos",
           );
           newPhotos.push({
             url: result.secure_url,
@@ -1612,7 +1640,7 @@ export const updateAuction = async (req, res) => {
           console.log(
             `DEBUG: Photo ${index} uploaded with caption: "${
               photoCaptionsArray[index] || ""
-            }"`
+            }"`,
           );
         } catch (uploadError) {
           console.error("Photo upload error:", uploadError);
@@ -1712,7 +1740,7 @@ export const updateAuction = async (req, res) => {
           const result = await uploadDocumentToCloudinary(
             doc.buffer,
             doc.originalname,
-            "auction-documents"
+            "auction-documents",
           );
           finalDocuments.push({
             url: result.secure_url,
@@ -1752,24 +1780,24 @@ export const updateAuction = async (req, res) => {
       console.log(
         "DEBUG: Processing",
         serviceRecords.length,
-        "new service records"
+        "new service records",
       );
       console.log(
         "DEBUG: serviceRecordCaptionsArray has",
         serviceRecordCaptionsArray.length,
-        "captions"
+        "captions",
       );
 
       for (const [index, record] of serviceRecords.entries()) {
         console.log(
           `DEBUG: Service Record ${index} - caption will be:`,
-          serviceRecordCaptionsArray[index] || "(empty)"
+          serviceRecordCaptionsArray[index] || "(empty)",
         );
 
         try {
           const result = await uploadImageToCloudinary(
             record.buffer,
-            "auction-service-records"
+            "auction-service-records",
           );
           newServiceRecords.push({
             url: result.secure_url,
@@ -1783,7 +1811,7 @@ export const updateAuction = async (req, res) => {
           console.log(
             `DEBUG: Service Record ${index} uploaded with caption: "${
               serviceRecordCaptionsArray[index] || ""
-            }"`
+            }"`,
           );
         } catch (uploadError) {
           console.error("Service record upload error:", uploadError);
@@ -1821,7 +1849,7 @@ export const updateAuction = async (req, res) => {
             if (orderItem.isExisting) {
               // Find existing service record by ID
               const existingRecord = existingServiceRecordsMap.get(
-                orderItem.id
+                orderItem.id,
               );
               if (existingRecord) {
                 reorderedServiceRecords.push(existingRecord);
@@ -1847,7 +1875,7 @@ export const updateAuction = async (req, res) => {
 
           // Add any remaining existing service records that weren't in the order
           existingServiceRecordsMap.forEach((record) =>
-            reorderedServiceRecords.push(record)
+            reorderedServiceRecords.push(record),
           );
 
           // Add any remaining new service records that weren't used
@@ -1946,14 +1974,14 @@ export const updateAuction = async (req, res) => {
     console.log("Total photos:", finalPhotos.length);
     finalPhotos.forEach((photo, index) => {
       console.log(
-        `Photo ${index}: ${photo.filename} - Caption: "${photo.caption}"`
+        `Photo ${index}: ${photo.filename} - Caption: "${photo.caption}"`,
       );
     });
 
     console.log("Total service records:", finalServiceRecords.length);
     finalServiceRecords.forEach((record, index) => {
       console.log(
-        `Service Record ${index}: ${record.filename} - Caption: "${record.caption}"`
+        `Service Record ${index}: ${record.filename} - Caption: "${record.caption}"`,
       );
     });
 
@@ -2078,14 +2106,14 @@ export const placeBid = async (req, res) => {
       auction.title,
       amount,
       auction.currentPrice,
-      auction.endDate
+      auction.endDate,
     );
 
     await newBidNotificationEmail(
       auction.seller,
       auction,
       parseFloat(amount),
-      bidder
+      bidder,
     );
 
     // Send outbid notifications to previous bidders (except current bidder)
@@ -2098,7 +2126,7 @@ export const placeBid = async (req, res) => {
         previousHighestBidder,
         previousBidders,
         bidder._id.toString(),
-        amount
+        amount,
       );
     }
   } catch (error) {
@@ -2126,7 +2154,7 @@ export const getUserAuctions = async (req, res) => {
       .populate("winner", "username firstName lastName image")
       .populate(
         "bids.bidder",
-        "username firstName lastName email image company"
+        "username firstName lastName email image company",
       )
       .sort({ createdAt: -1 });
     // .limit(limit * 1)
@@ -2446,7 +2474,7 @@ export const getWonAuctions = async (req, res) => {
     const totalWon = total;
     const totalSpent = auctions.reduce(
       (sum, auction) => sum + (auction.finalPrice || auction.currentPrice),
-      0
+      0,
     );
     const averageSavings =
       auctions.length > 0
@@ -2454,13 +2482,13 @@ export const getWonAuctions = async (req, res) => {
             (sum, auction) =>
               sum +
               auction.startPrice / (auction.finalPrice || auction.currentPrice),
-            0
+            0,
           ) / auctions.length
         : 0;
 
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentWins = auctions.filter(
-      (auction) => new Date(auction.endDate) > weekAgo
+      (auction) => new Date(auction.endDate) > weekAgo,
     ).length;
 
     res.status(200).json({
@@ -2492,7 +2520,7 @@ export const getWonAuctions = async (req, res) => {
 // Helper function to get user's max bid
 const getMaxBidForUser = (bids, userId) => {
   const userBids = bids.filter(
-    (bid) => bid.bidder.toString() === userId.toString()
+    (bid) => bid.bidder.toString() === userId.toString(),
   );
   if (userBids.length === 0) return 0;
   return Math.max(...userBids.map((bid) => bid.amount));
@@ -2548,12 +2576,12 @@ export const getSoldAuctions = async (req, res) => {
       .populate("seller", "username firstName lastName email phone createdAt")
       .populate(
         "winner",
-        "username firstName lastName email phone image company address"
+        "username firstName lastName email phone image company address",
       )
       .populate("currentBidder", "username firstName")
       .populate(
         "bids.bidder",
-        "username firstName lastName email phone company"
+        "username firstName lastName email phone company",
       )
       .sort({ endDate: -1 });
     // .limit(limit * 1)
@@ -2597,7 +2625,7 @@ export const getSoldAuctions = async (req, res) => {
 
       // Sort bidders by final bid (highest first)
       const sortedBidders = uniqueBidders.sort(
-        (a, b) => b.finalBid - a.finalBid
+        (a, b) => b.finalBid - a.finalBid,
       );
 
       return {
@@ -2633,7 +2661,7 @@ export const getSoldAuctions = async (req, res) => {
                 .filter(
                   (bid) =>
                     bid.bidder?._id?.toString() ===
-                    auction.winner?._id?.toString()
+                    auction.winner?._id?.toString(),
                 )
                 .map((bid) => ({
                   amount: bid.amount,
@@ -2644,7 +2672,7 @@ export const getSoldAuctions = async (req, res) => {
           : null,
         bidders: sortedBidders.filter(
           (bidder) =>
-            !auction.winner || bidder.id !== auction.winner._id?.toString()
+            !auction.winner || bidder.id !== auction.winner._id?.toString(),
         ),
       };
     });
@@ -2653,13 +2681,13 @@ export const getSoldAuctions = async (req, res) => {
     const totalSold = total;
     const totalRevenue = auctions.reduce(
       (sum, auction) => sum + (auction.finalPrice || auction.currentPrice || 0),
-      0
+      0,
     );
     const averageSalePrice = totalSold > 0 ? totalRevenue / totalSold : 0;
 
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentSales = auctions.filter(
-      (auction) => new Date(auction.endDate) > weekAgo
+      (auction) => new Date(auction.endDate) > weekAgo,
     ).length;
 
     res.status(200).json({
@@ -2809,7 +2837,7 @@ export const buyNow = async (req, res) => {
       .populate("seller", "username firstName lastName email phone address")
       .populate(
         "currentBidder",
-        "username firstName lastName email phone address"
+        "username firstName lastName email phone address",
       )
       .populate("winner", "username firstName lastName email phone address");
 
@@ -2876,17 +2904,17 @@ export const buyNow = async (req, res) => {
 
     // Send emails (in background)
     sendAuctionEndedSellerEmail(updatedAuction).catch((error) =>
-      console.error("Failed to send seller ended auction email:", error)
+      console.error("Failed to send seller ended auction email:", error),
     );
 
     sendAuctionWonEmail(updatedAuction).catch((error) =>
-      console.error("Failed to send buyer won auction email:", error)
+      console.error("Failed to send buyer won auction email:", error),
     );
 
     // Send admin emails to all admin users
     try {
       const adminUsers = await User.find({ userType: "admin" }).select(
-        "email firstName"
+        "email firstName",
       );
 
       if (adminUsers.length === 0) {
@@ -2896,22 +2924,22 @@ export const buyNow = async (req, res) => {
           await auctionWonAdminEmail(
             admin.email,
             updatedAuction,
-            buyer.email
+            buyer.email,
           ).catch((error) =>
             console.error(
               `Failed to send admin email to ${admin.email}:`,
-              error
-            )
+              error,
+            ),
           );
         }
         console.log(
-          `✅ Sent admin notifications to ${adminUsers.length} admin(s)`
+          `✅ Sent admin notifications to ${adminUsers.length} admin(s)`,
         );
       }
     } catch (adminEmailError) {
       console.error(
         "Error fetching admin users or sending admin emails:",
-        adminEmailError
+        adminEmailError,
       );
     }
   } catch (error) {

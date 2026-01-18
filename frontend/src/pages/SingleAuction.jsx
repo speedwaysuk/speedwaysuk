@@ -323,9 +323,17 @@ function SingleAuction() {
             <section className="col-span-1 lg:col-span-2">
                 {/* Title and top section */}
                 <div className="flex flex-wrap gap-2 capitalize justify-between items-center text-secondary">
-                    <Link to={`/auctions?category=${auction.category}`} className="underline">
-                        Category: {auction.category}
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        Category: {auction.categories?.map((category, index) => (
+                            <Link
+                                key={index}
+                                to={`/auctions?category=${category}`}
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors"
+                            >
+                                {category}
+                            </Link>
+                        ))}
+                    </div>
                     <div className="flex items-center gap-3">
                         <p onClick={toggleWatchlist}
                             className={`flex items-center gap-2 py-1 px-3 border border-gray-200 rounded-full transition-colors ${isWatchlisted

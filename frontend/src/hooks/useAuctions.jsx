@@ -10,7 +10,7 @@ export const useAuctions = () => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [pagination, setPagination] = useState(null);
     const [filters, setFilters] = useState({
-        category: '',
+        categories: [],
         status: 'active',
         search: '',
         priceMin: '',
@@ -33,9 +33,14 @@ export const useAuctions = () => {
     // Clean filters - remove empty values
     const cleanFilters = (currentFilters) => {
         return Object.fromEntries(
-            Object.entries(currentFilters).filter(([_, value]) => 
-                value !== '' && value !== null && value !== undefined
-            )
+            Object.entries(currentFilters).filter(([key, value]) => {
+                // Special handling for categories array
+                if (key === 'categories') {
+                    return Array.isArray(value) && value.length > 0;
+                }
+                // For other fields
+                return value !== '' && value !== null && value !== undefined && value !== false;
+            })
         );
     };
 
@@ -47,15 +52,26 @@ export const useAuctions = () => {
         try {
             // Clean up filters
             const clean = cleanFilters(currentFilters);
-            
+
             // Build query string with all filters
-            const queryParams = new URLSearchParams({
+            const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                ...clean
-            }).toString();
+                // Copy all filters except categories
+                ...Object.fromEntries(
+                    Object.entries(clean).filter(([key]) => key !== 'categories')
+                )
+            });
 
-            const { data } = await axiosInstance.get(`/api/v1/auctions?${queryParams}`);
+            // Handle categories array separately - append each category
+            if (clean.categories && Array.isArray(clean.categories) && clean.categories.length > 0) {
+                clean.categories.forEach(cat => {
+                    params.append('categories', cat);
+                });
+            }
+
+            const queryString = params.toString();
+            const { data } = await axiosInstance.get(`/api/v1/auctions?${queryString}`);
 
             if (data.success) {
                 if (page > 1) {
@@ -93,10 +109,17 @@ export const useAuctions = () => {
     // Handle URL parameters on initial load
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
-        
+
+        // Handle categories from URL (can be comma-separated string)
+        let categories = [];
+        const categoriesParam = searchParams.get('categories');
+        if (categoriesParam) {
+            categories = categoriesParam.split(',').filter(cat => cat.trim() !== '');
+        }
+
         // Extract ALL URL parameters including new ones
         const urlFilters = {
-            category: searchParams.get('category') || '',
+            categories: categories, // Now an array
             status: searchParams.get('status') || 'active',
             search: searchParams.get('search') || '',
             priceMin: searchParams.get('priceMin') || '',

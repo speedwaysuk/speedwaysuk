@@ -49,7 +49,7 @@ function CategoryImagesSection({ closePopup }) {
 
     const handleSearchByCategory = (title) => {
         const params = new URLSearchParams();
-        params.append('category', title);
+        params.append('categories', title);
 
         navigate(`/auctions?${params.toString()}`);
         closePopup('category');

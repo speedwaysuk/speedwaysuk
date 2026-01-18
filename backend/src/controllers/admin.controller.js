@@ -348,7 +348,7 @@ export const getAllUsers = async (req, res) => {
     // Get users with pagination
     const users = await User.find(searchQuery)
       .select(
-        "-password -refreshToken -resetPasswordToken -emailVerificationToken"
+        "-password -refreshToken -resetPasswordToken -emailVerificationToken",
       )
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -404,7 +404,7 @@ export const getUserDetails = async (req, res) => {
     const { userId } = req.params;
 
     const user = await User.findById(userId).select(
-      "-password -refreshToken -resetPasswordToken -emailVerificationToken"
+      "-password -refreshToken -resetPasswordToken -emailVerificationToken",
     );
 
     if (!user) {
@@ -514,7 +514,7 @@ export const updateUserStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { isActive },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).select("-password -refreshToken");
 
     if (!user) {
@@ -582,7 +582,7 @@ export const deleteUser = async (req, res) => {
     for (const auction of auctionsWithUserBids) {
       // Remove all bids by this user
       auction.bids = auction.bids.filter(
-        (bid) => bid.bidder.toString() !== userId.toString()
+        (bid) => bid.bidder.toString() !== userId.toString(),
       );
 
       // Update bid count
@@ -613,7 +613,7 @@ export const deleteUser = async (req, res) => {
         deletedAt: new Date(),
         deletedBy: req.user._id,
         adminDeleteReason: "User account deleted by admin",
-      }
+      },
     );
 
     // 4. Remove user's watchlist items
@@ -657,7 +657,7 @@ export const updateUserType = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { userType },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).select("-password -refreshToken");
 
     if (!user) {
@@ -798,7 +798,7 @@ export const getAuctionDetails = async (req, res) => {
       auctionObject.specifications instanceof Map
     ) {
       auctionObject.specifications = Object.fromEntries(
-        auctionObject.specifications
+        auctionObject.specifications,
       );
     } else if (
       auction.specifications &&
@@ -905,7 +905,7 @@ export const approveAuction = async (req, res) => {
       // Schedule activation for start date - keep as draft for now
       await agendaService.scheduleAuctionActivation(
         auction._id,
-        auction.startDate
+        auction.startDate,
       );
       await auctionApprovedEmail(auction.seller, auction);
     } else {
@@ -1751,7 +1751,6 @@ export const updateAuction = async (req, res) => {
     const {
       title,
       subTitle,
-      category,
       features,
       description,
       specifications,
@@ -1772,15 +1771,25 @@ export const updateAuction = async (req, res) => {
       serviceRecordOrder,
     } = req.body;
 
+    let categoriesArray = [];
+    if (req.body.categories) {
+      if (Array.isArray(req.body.categories)) {
+        categoriesArray = req.body.categories;
+      } else if (typeof req.body.categories === "string") {
+        categoriesArray = [req.body.categories];
+      }
+    }
+
+    // Validation
+    if (!categoriesArray || categoriesArray.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one category is required",
+      });
+    }
+
     // Basic validation - check if fields exist in req.body
-    if (
-      !title ||
-      !category ||
-      !description ||
-      !auctionType ||
-      !startDate ||
-      !endDate
-    ) {
+    if (!title || !description || !auctionType || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
         message: "All required fields must be provided",
@@ -1951,7 +1960,7 @@ export const updateAuction = async (req, res) => {
           for (const photoId of removedPhotoIds) {
             const photoIndex = finalPhotos.findIndex(
               (photo) =>
-                photo.publicId === photoId || photo._id?.toString() === photoId
+                photo.publicId === photoId || photo._id?.toString() === photoId,
             );
 
             if (photoIndex > -1) {
@@ -1981,7 +1990,7 @@ export const updateAuction = async (req, res) => {
         if (Array.isArray(removedDocIds)) {
           for (const docId of removedDocIds) {
             const docIndex = finalDocuments.findIndex(
-              (doc) => doc.publicId === docId || doc._id?.toString() === docId
+              (doc) => doc.publicId === docId || doc._id?.toString() === docId,
             );
 
             if (docIndex > -1) {
@@ -2059,7 +2068,7 @@ export const updateAuction = async (req, res) => {
             const recordIndex = finalServiceRecords.findIndex(
               (record) =>
                 record.publicId === recordId ||
-                record._id?.toString() === recordId
+                record._id?.toString() === recordId,
             );
 
             if (recordIndex > -1) {
@@ -2090,7 +2099,7 @@ export const updateAuction = async (req, res) => {
         try {
           const result = await uploadImageToCloudinary(
             photo.buffer,
-            "auction-photos"
+            "auction-photos",
           );
           newPhotos.push({
             url: result.secure_url,
@@ -2209,7 +2218,7 @@ export const updateAuction = async (req, res) => {
           const result = await uploadDocumentToCloudinary(
             doc.buffer,
             doc.originalname,
-            "auction-documents"
+            "auction-documents",
           );
           finalDocuments.push({
             url: result.secure_url,
@@ -2242,7 +2251,7 @@ export const updateAuction = async (req, res) => {
         try {
           const result = await uploadImageToCloudinary(
             record.buffer,
-            "auction-service-records"
+            "auction-service-records",
           );
           newServiceRecords.push({
             url: result.secure_url,
@@ -2288,7 +2297,7 @@ export const updateAuction = async (req, res) => {
             if (orderItem.isExisting) {
               // Find existing service record by ID
               const existingRecord = existingServiceRecordsMap.get(
-                orderItem.id
+                orderItem.id,
               );
               if (existingRecord) {
                 reorderedServiceRecords.push(existingRecord);
@@ -2314,7 +2323,7 @@ export const updateAuction = async (req, res) => {
 
           // Add any remaining existing service records that weren't in the order
           existingServiceRecordsMap.forEach((record) =>
-            reorderedServiceRecords.push(record)
+            reorderedServiceRecords.push(record),
           );
 
           // Add any remaining new service records that weren't used
@@ -2367,7 +2376,7 @@ export const updateAuction = async (req, res) => {
     const updateData = {
       title,
       subTitle: subTitle || "",
-      category,
+      categories: categoriesArray,
       features: features || "",
       description,
       specifications: finalSpecifications,
@@ -2581,7 +2590,7 @@ export const updatePaymentStatus = async (req, res) => {
         const result = await uploadDocumentToCloudinary(
           invoiceFile.buffer,
           invoiceFile.originalname,
-          "auction-invoices"
+          "auction-invoices",
         );
 
         invoiceData = {
@@ -2646,9 +2655,9 @@ export const updatePaymentStatus = async (req, res) => {
       paymentCompletedEmail(
         updatedAuction?.winner,
         updatedAuction,
-        updatedAuction?.finalPrice
+        updatedAuction?.finalPrice,
       ).catch((error) =>
-        console.error("Failed to send payment success email:", error)
+        console.error("Failed to send payment success email:", error),
       );
     }
   } catch (error) {
@@ -2754,7 +2763,7 @@ export const fetchDVLAData = async (req, res) => {
     const response = await axios.post(
       process.env.DVLA_WORKER_URL,
       { registrationNumber },
-      { timeout: 10000 }
+      { timeout: 10000 },
     );
 
     res.status(200).json({

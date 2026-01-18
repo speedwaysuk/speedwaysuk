@@ -283,7 +283,7 @@ function Auctions() {
     } = useAuctions();
 
     const [uiFilters, setUiFilters] = useState({
-        category: "",
+        categories: [],
         status: "",
         search: "",
         priceMin: "",
@@ -384,7 +384,7 @@ function Auctions() {
 
     const resetFilters = () => {
         const resetFilters = {
-            category: "",
+            categories: [],
             status: "",
             search: "",
             priceMin: "",
